@@ -194,7 +194,7 @@ export default function HomePage() {
       <div className="text-center py-8">
         <div className="inline-flex items-center px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-full text-blue-700 dark:text-blue-300 text-sm font-medium mb-6">
           <Sparkles className="w-4 h-4 mr-2" />
-          Welcome to Municipal Systems - Free Plan
+          Welcome to Scan Street Pro - Free Plan
         </div>
         <h1 className="text-4xl lg:text-5xl font-bold text-slate-800 dark:text-white mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
           Infrastructure Management Hub
@@ -248,7 +248,7 @@ export default function HomePage() {
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
-                New to Municipal Systems?
+                New to Scan Street Pro?
               </h3>
               <p className="text-slate-600 dark:text-slate-300 mb-4">
                 Get started with our guided tour to learn how each module works together 

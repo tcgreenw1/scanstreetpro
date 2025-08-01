@@ -388,7 +388,7 @@ function DesktopSidebar({ navSections, isActive }: { navSections: NavSection[], 
             <Building2 className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-800 dark:text-white">Municipal Systems</h1>
+            <h1 className="text-xl font-bold text-slate-800 dark:text-white">Scan Street Pro</h1>
             <div className="flex items-center space-x-2">
               <p className="text-sm text-slate-500 dark:text-slate-400">Infrastructure Management</p>
               <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300">
@@ -473,7 +473,7 @@ function MobileSidebar({ navSections, isActive, onClose }: { navSections: NavSec
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-800 dark:text-white">Municipal Systems</h1>
+              <h1 className="text-lg font-bold text-slate-800 dark:text-white">Scan Street Pro</h1>
               <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">FREE</Badge>
             </div>
           </Link>
