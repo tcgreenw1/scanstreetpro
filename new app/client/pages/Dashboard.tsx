@@ -150,10 +150,16 @@ export default function Dashboard() {
             <Download className="w-4 h-4 mr-2" />
             Export
           </Button>
-          <Button size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-            <Crown className="w-4 h-4 mr-2" />
-            Upgrade for Advanced Analytics
-          </Button>
+          <Link to="/pricing">
+            <Button
+              size="sm"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+              title="See pricing and included features"
+            >
+              <Crown className="w-4 h-4 mr-2" />
+              Upgrade for Advanced Analytics
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -500,9 +506,14 @@ export default function Dashboard() {
                   Upgrade to access advanced deadline tracking, automated alerts, team collaboration, and project timeline integration.
                 </p>
               </div>
-              <Button className="bg-amber-600 hover:bg-amber-700 text-white">
-                Upgrade Now
-              </Button>
+              <Link to="/pricing">
+                <Button
+                  className="bg-amber-600 hover:bg-amber-700 text-white"
+                  title="See pricing and included features"
+                >
+                  Upgrade Now
+                </Button>
+              </Link>
             </div>
           </div>
         </CardContent>
