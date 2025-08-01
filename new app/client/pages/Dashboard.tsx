@@ -166,10 +166,10 @@ export default function Dashboard() {
 
       {/* Overview Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="glass-card border-white/20 hover:shadow-xl transition-all duration-300 border-l-4 border-l-blue-500 group">
+        <Card className="glass-card border-white/20 hover:shadow-xl transition-all duration-300 border-l-4 border-l-blue-500 group animate-fadeInUp" style={{ animationDelay: '0ms' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Budget</CardTitle>
-            <Wallet className="h-5 w-5 text-blue-600 group-hover:scale-110 transition-transform" />
+            <Wallet className="h-5 w-5 text-blue-600 group-hover:scale-110 transition-transform animate-pulse-glow" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-slate-800 dark:text-white">
@@ -182,10 +182,10 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="glass-card border-white/20 hover:shadow-xl transition-all duration-300 border-l-4 border-l-green-500 group">
+        <Card className="glass-card border-white/20 hover:shadow-xl transition-all duration-300 border-l-4 border-l-green-500 group animate-fadeInUp" style={{ animationDelay: '200ms' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">Available Funds</CardTitle>
-            <DollarSign className="h-5 w-5 text-green-600 group-hover:scale-110 transition-transform" />
+            <DollarSign className="h-5 w-5 text-green-600 group-hover:scale-110 transition-transform animate-pulse-glow" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-slate-800 dark:text-white">
