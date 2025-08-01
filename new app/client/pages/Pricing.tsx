@@ -372,8 +372,8 @@ export default function Pricing() {
                   <div className="font-medium text-slate-600 dark:text-slate-300 text-center">Enterprise</div>
                   
                   {category.features.map((feature, featureIndex) => (
-                    <>
-                      <div key={`feature-${featureIndex}`} className="text-sm text-slate-700 dark:text-slate-300 py-2">
+                    <React.Fragment key={`feature-${categoryIndex}-${featureIndex}`}>
+                      <div className="text-sm text-slate-700 dark:text-slate-300 py-2">
                         {feature.name}
                       </div>
                       <div className="text-center py-2">
@@ -388,7 +388,7 @@ export default function Pricing() {
                       <div className="text-center py-2">
                         {feature.enterprise ? <Check className="w-4 h-4 text-green-500 mx-auto" /> : <div className="w-4 h-4"></div>}
                       </div>
-                    </>
+                    </React.Fragment>
                   ))}
                 </div>
               </div>
