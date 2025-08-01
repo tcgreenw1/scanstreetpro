@@ -221,3 +221,92 @@
     }
   }
 }
+
+/* Apple Glass Aesthetic Enhancements */
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+}
+
+.dark .glass-card {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.6);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-up {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-pulse-glow:hover {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+.animate-scale-up {
+  animation: scale-up 0.2s ease-out;
+}
+
+/* Button hover glow effect */
+.btn-glow:hover {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* Chart animations */
+.recharts-wrapper {
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+/* Tooltip animations */
+.tooltip-fade {
+  animation: fadeInUp 0.2s ease-out;
+}
