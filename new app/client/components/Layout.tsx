@@ -128,6 +128,7 @@ const mockNotifications = [
 
 export function Layout({ children }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
@@ -164,12 +165,20 @@ export function Layout({ children }: LayoutProps) {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-72 lg:overflow-y-auto glass-card border-r border-white/20">
-        <DesktopSidebar navSections={navSections} isActive={isActive} />
+      <aside className={cn(
+        "hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:overflow-y-auto glass-card border-r border-white/20 transition-all duration-300",
+        isSidebarCollapsed ? "lg:w-16" : "lg:w-72"
+      )}>
+        <DesktopSidebar
+          navSections={navSections}
+          isActive={isActive}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        />
       </aside>
 
       {/* Main Content */}
-      <div className="lg:ml-72">
+      <div className={cn("transition-all duration-300", isSidebarCollapsed ? "lg:ml-16" : "lg:ml-72")}>
         {/* Top Header */}
         <header className="sticky top-0 z-30 glass-card border-b border-white/20 backdrop-blur-xl">
           <div className="flex items-center justify-between px-4 py-3">
