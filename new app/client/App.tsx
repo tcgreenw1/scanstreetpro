@@ -11,6 +11,7 @@ import { PlaceholderPage } from "./components/PlaceholderPage";
 import HomePage from "./pages/HomePage";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
+import AssetManager from "./pages/AssetManager";
 import StartGrant from "./pages/StartGrant";
 import Applications from "./pages/Applications";
 import Funding from "./pages/Funding";
