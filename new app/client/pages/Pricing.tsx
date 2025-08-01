@@ -135,7 +135,7 @@ export default function Pricing() {
       {/* Header */}
       <div className="text-center py-12">
         <h1 className="text-4xl lg:text-5xl font-bold text-slate-800 dark:text-white mb-6">
-          Choose Your Municipal Plan
+          Choose Your Scan Street Pro Plan
         </h1>
         <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto mb-8">
           From small towns to large cities, we have a plan that fits your infrastructure management needs.
@@ -404,7 +404,7 @@ export default function Pricing() {
             <CardHeader>
               <CardTitle className="text-slate-800 dark:text-white">Contact Sales</CardTitle>
               <CardDescription>
-                Let's discuss your municipality's needs and create a custom plan.
+                Let's discuss your organization's needs and create a custom plan.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -431,7 +431,7 @@ export default function Pricing() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="organization">Municipality/Organization</Label>
+                  <Label htmlFor="organization">Organization</Label>
                   <Input
                     id="organization"
                     value={contactForm.organization}

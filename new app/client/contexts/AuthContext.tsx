@@ -23,8 +23,8 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>({
     id: '1',
-    name: 'Municipal User',
-    email: 'admin@municipal.gov',
+    name: 'Scan Street Pro User',
+    email: 'admin@scanstreetpro.com',
     role: 'Administrator'
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +35,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     await new Promise(resolve => setTimeout(resolve, 1000));
     setUser({
       id: '1',
-      name: 'Municipal User',
+      name: 'Scan Street Pro User',
       email: email,
       role: 'Administrator'
     });
