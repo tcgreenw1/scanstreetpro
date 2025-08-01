@@ -104,6 +104,7 @@ const navSections: NavSection[] = [
   {
     title: "System",
     items: [
+      { name: 'Pricing', href: '/pricing', icon: Crown, description: 'View plans and upgrade' },
       { name: 'Integrations', href: '/integrations', icon: Settings, description: 'System integrations', isPremium: true },
       { name: 'Settings', href: '/settings', icon: Settings, description: 'Account and billing settings' }
     ]
