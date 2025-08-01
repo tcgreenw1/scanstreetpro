@@ -285,9 +285,15 @@ export function Layout({ children }: LayoutProps) {
                   <div className="p-3 border-b border-white/10">
                     <p className="text-sm font-medium text-slate-800 dark:text-white">Municipal User</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">Infrastructure Admin</p>
-                    <Badge variant="outline" className="mt-1 text-xs bg-blue-50 text-blue-700 border-blue-200">
-                      <Zap className="w-3 h-3 mr-1" />
-                      Free Plan
+                    <Badge variant="outline" className={cn(
+                      "mt-1 text-xs",
+                      currentPlan === 'free' ? "bg-blue-50 text-blue-700 border-blue-200" :
+                      currentPlan === 'standard' ? "bg-green-50 text-green-700 border-green-200" :
+                      currentPlan === 'pro' ? "bg-purple-50 text-purple-700 border-purple-200" :
+                      "bg-amber-50 text-amber-700 border-amber-200"
+                    )}>
+                      {currentPlan === 'enterprise' ? <Crown className="w-3 h-3 mr-1" /> : <Zap className="w-3 h-3 mr-1" />}
+                      {planDetails.name} Plan
                     </Badge>
                   </div>
                   <DropdownMenuItem>
