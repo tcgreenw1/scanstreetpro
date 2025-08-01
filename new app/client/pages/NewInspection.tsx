@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,9 +67,14 @@ export default function NewInspection() {
                 <p className="text-amber-700 dark:text-amber-300">Full inspection management requires a premium subscription</p>
               </div>
             </div>
-            <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
-              Upgrade Now
-            </Button>
+            <Link to="/pricing">
+              <Button
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                title="See pricing and included features"
+              >
+                Upgrade Now
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>
