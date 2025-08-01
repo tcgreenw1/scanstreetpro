@@ -60,26 +60,7 @@ const App = () => (
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
 
             {/* Infrastructure Management */}
-            <Route
-              path="/assets"
-              element={
-                <PlaceholderPage
-                  title="Asset Manager"
-                  description="Manage signs, lights, barriers, and other infrastructure assets with detailed tracking and maintenance schedules."
-                  icon={<Building2 className="w-8 h-8" />}
-                  features={[
-                    "Comprehensive asset inventory with GPS coordinates",
-                    "Maintenance history and scheduling system",
-                    "QR code integration for field asset identification",
-                    "Asset lifecycle management and replacement planning",
-                    "Integration with maintenance scheduling and budgeting",
-                    "Photo documentation and condition assessments",
-                    "Mobile-friendly interface for field workers",
-                    "Automated alerts for maintenance due dates"
-                  ]}
-                />
-              }
-            />
+            <Route path="/assets" element={<AssetManager />} />
             <Route
               path="/maintenance"
               element={
