@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -340,10 +341,15 @@ export default function RoadInspection() {
                 Get mobile forms, GPS tracking, photo capture, and automated reporting
               </p>
             </div>
-            <Button className="bg-amber-600 hover:bg-amber-700 text-white">
-              <Crown className="w-4 h-4 mr-2" />
-              Upgrade Now
-            </Button>
+            <Link to="/pricing">
+              <Button
+                className="bg-amber-600 hover:bg-amber-700 text-white"
+                title="See pricing and included features"
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade Now
+              </Button>
+            </Link>
           </div>
         </UpgradePrompt>
       )}
