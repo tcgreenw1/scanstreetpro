@@ -1,4 +1,4 @@
-import PlaceholderPage from "@/components/PlaceholderPage";
+import { PlaceholderPage } from "@/components/PlaceholderPage";
 import { Calendar } from "lucide-react";
 
 export default function Planning() {
