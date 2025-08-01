@@ -11,6 +11,7 @@ import { PlaceholderPage } from "./components/PlaceholderPage";
 import { PricingProvider } from "./contexts/PricingContext";
 import HomePage from "./pages/HomePage";
 import Index from "./pages/Index";
+import RoadInspection from "./pages/RoadInspection";
 import Dashboard from "./pages/Dashboard";
 import AssetManager from "./pages/AssetManager";
 import NewInspection from "./pages/NewInspection";
