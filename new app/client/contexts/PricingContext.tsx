@@ -35,7 +35,7 @@ const PLAN_CONFIGS: Record<PlanType, PlanDetails> = {
     name: 'Free',
     price: 0,
     period: 'forever',
-    description: 'Perfect for small municipalities getting started',
+    description: 'Perfect for small organizations getting started',
     features: {
       maxAssets: 20,
       maxCitizenSubmissions: 10,
@@ -59,7 +59,7 @@ const PLAN_CONFIGS: Record<PlanType, PlanDetails> = {
     name: 'Standard',
     price: 99,
     period: 'month',
-    description: 'Great for growing municipalities',
+    description: 'Great for growing organizations',
     features: {
       maxAssets: -1, // unlimited
       maxCitizenSubmissions: -1,
@@ -83,7 +83,7 @@ const PLAN_CONFIGS: Record<PlanType, PlanDetails> = {
     name: 'Pro',
     price: 249,
     period: 'month',
-    description: 'Advanced features for larger municipalities',
+    description: 'Advanced features for larger organizations',
     popular: true,
     features: {
       maxAssets: -1,
@@ -108,7 +108,7 @@ const PLAN_CONFIGS: Record<PlanType, PlanDetails> = {
     name: 'Enterprise',
     price: 0, // Contact sales
     period: 'custom',
-    description: 'Complete solution for large municipalities',
+    description: 'Complete solution for large organizations',
     features: {
       maxAssets: -1,
       maxCitizenSubmissions: -1,

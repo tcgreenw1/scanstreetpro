@@ -70,7 +70,7 @@ const navSections: NavSection[] = [
   {
     title: "Dashboard",
     items: [
-      { name: 'Municipal Dashboard', href: '/dashboard', icon: Home, description: 'Main overview and metrics' },
+      { name: 'Dashboard', href: '/dashboard', icon: Home, description: 'Main overview and metrics' },
       { name: 'Road Inspection', href: '/inspection-dashboard', icon: Search, description: 'AI-powered road monitoring' }
     ]
   },
@@ -186,7 +186,7 @@ export function Layout({ children }: LayoutProps) {
               {/* Page title */}
               <div className="hidden sm:block">
                 <h2 className="text-lg font-semibold text-slate-800 dark:text-white">
-                  {navSections.flatMap(s => s.items).find(item => isActive(item.href))?.name || 'Municipal Dashboard'}
+                  {navSections.flatMap(s => s.items).find(item => isActive(item.href))?.name || 'Dashboard'}
                 </h2>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   {navSections.flatMap(s => s.items).find(item => isActive(item.href))?.description || 'Infrastructure management system'}
@@ -283,7 +283,7 @@ export function Layout({ children }: LayoutProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 glass-card border-white/20">
                   <div className="p-3 border-b border-white/10">
-                    <p className="text-sm font-medium text-slate-800 dark:text-white">Municipal User</p>
+                    <p className="text-sm font-medium text-slate-800 dark:text-white">Scan Street Pro User</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">Infrastructure Admin</p>
                     <Badge variant="outline" className={cn(
                       "mt-1 text-xs",
