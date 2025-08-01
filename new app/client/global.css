@@ -301,6 +301,17 @@
   transition: all 0.2s ease;
 }
 
+/* Navigation glow effects */
+.glow-active {
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Hover glow for navigation items */
+.nav-item:hover {
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+  transform: translateY(-1px);
+}
+
 /* Chart animations */
 .recharts-wrapper {
   animation: fadeInUp 0.8s ease-out 0.2s both;
