@@ -1,4 +1,4 @@
-import PlaceholderPage from "@/components/PlaceholderPage";
+import { PlaceholderPage } from "@/components/PlaceholderPage";
 import { Banknote } from "lucide-react";
 
 export default function Funding() {
