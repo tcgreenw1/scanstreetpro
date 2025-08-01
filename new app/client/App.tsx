@@ -103,6 +103,7 @@ const App = () => (
                 />
               }
             />
+            <Route path="/inspections/new" element={<NewInspection />} />
             <Route path="/map" element={<MapPage />} />
             <Route path="/map-view" element={<MapView />} />
             <Route path="/verify" element={<VerifyPage />} />
