@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { PlaceholderPage } from "./components/PlaceholderPage";
+import { PricingProvider } from "./contexts/PricingContext";
 import HomePage from "./pages/HomePage";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
