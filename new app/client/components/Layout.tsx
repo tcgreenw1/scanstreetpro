@@ -35,6 +35,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { usePricing } from '@/contexts/PricingContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
