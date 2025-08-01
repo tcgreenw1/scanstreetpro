@@ -21,11 +21,20 @@ import {
   ChevronDown,
   LogOut,
   Sun,
-  Moon
+  Moon,
+  Crown,
+  Zap,
+  Shield,
+  UserCheck,
+  CreditCard,
+  HelpCircle,
+  Globe
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +42,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 interface LayoutProps {
   children: ReactNode;
@@ -43,6 +57,7 @@ interface NavItem {
   href: string;
   icon: any;
   description?: string;
+  isPremium?: boolean;
 }
 
 interface NavSection {
@@ -61,8 +76,8 @@ const navSections: NavSection[] = [
   {
     title: "Infrastructure",
     items: [
-      { name: 'Asset Manager', href: '/assets', icon: Building2, description: 'Track infrastructure assets' },
-      { name: 'Maintenance', href: '/maintenance', icon: Calendar, description: 'Schedule and track maintenance' },
+      { name: 'Asset Manager', href: '/assets', icon: Building2, description: 'Track infrastructure assets', isPremium: true },
+      { name: 'Maintenance', href: '/maintenance', icon: Calendar, description: 'Schedule and track maintenance', isPremium: true },
       { name: 'Inspections', href: '/inspections', icon: ClipboardCheck, description: 'Inspection workflows' },
       { name: 'Map View', href: '/map', icon: MapPin, description: 'Geographic asset view' }
     ]
@@ -71,7 +86,7 @@ const navSections: NavSection[] = [
     title: "Financial",
     items: [
       { name: 'Budget Planning', href: '/budget', icon: TrendingUp, description: '5-year budget projections' },
-      { name: 'Cost Estimator', href: '/estimates', icon: Calculator, description: 'PCI-based cost projections' },
+      { name: 'Cost Estimator', href: '/estimates', icon: Calculator, description: 'PCI-based cost projections', isPremium: true },
       { name: 'Funding Center', href: '/funding', icon: DollarSign, description: 'Grants and funding sources' },
       { name: 'Expenses', href: '/expenses', icon: FileText, description: 'Track spending and costs' }
     ]
@@ -79,7 +94,7 @@ const navSections: NavSection[] = [
   {
     title: "Operations",
     items: [
-      { name: 'Contractors', href: '/contractors', icon: Users, description: 'Contractor management portal' },
+      { name: 'Contractors', href: '/contractors', icon: Users, description: 'Contractor management portal', isPremium: true },
       { name: 'Citizen Reports', href: '/citizen-reports', icon: MessageSquare, description: 'Fix My Road submissions' },
       { name: 'Verification', href: '/verify', icon: ClipboardCheck, description: 'Issue verification workflow' },
       { name: 'Reports', href: '/reports', icon: FileText, description: 'Generate public reports' }
@@ -88,15 +103,31 @@ const navSections: NavSection[] = [
   {
     title: "System",
     items: [
-      { name: 'Integrations', href: '/integrations', icon: Settings, description: 'System integrations' },
+      { name: 'Integrations', href: '/integrations', icon: Settings, description: 'System integrations', isPremium: true },
       { name: 'Settings', href: '/settings', icon: Settings, description: 'Account and billing settings' }
     ]
   }
 ];
 
+const quickAccessButtons = [
+  { name: 'New Inspection', href: '/inspections/new', icon: ClipboardCheck, color: 'bg-blue-500' },
+  { name: 'View Map', href: '/map', icon: MapPin, color: 'bg-green-500' },
+  { name: 'Contractors', href: '/contractors', icon: Users, color: 'bg-purple-500', isPremium: true },
+  { name: 'Reports', href: '/reports', icon: FileText, color: 'bg-orange-500' }
+];
+
+const mockNotifications = [
+  { id: '1', title: 'Critical pothole detected on Main St', time: '5 min ago', type: 'critical', unread: true },
+  { id: '2', title: 'Monthly budget report ready', time: '1 hour ago', type: 'info', unread: true },
+  { id: '3', title: 'Contractor ABC completed Oak Ave repair', time: '2 hours ago', type: 'success', unread: false },
+  { id: '4', title: 'Inspection scheduled for Bridge #12', time: '1 day ago', type: 'info', unread: false },
+  { id: '5', title: 'Grant application deadline in 3 days', time: '2 days ago', type: 'warning', unread: false }
+];
+
 export function Layout({ children }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
 
   const isActive = (href: string) => {
@@ -109,6 +140,8 @@ export function Layout({ children }: LayoutProps) {
     document.documentElement.classList.toggle('dark');
   };
 
+  const unreadCount = mockNotifications.filter(n => n.unread).length;
+
   return (
     <div className={cn("min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900", isDarkMode && "dark")}>
       {/* Background Pattern */}
@@ -116,133 +149,39 @@ export function Layout({ children }: LayoutProps) {
         <div className={"absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23000000\" fill-opacity=\"0.1\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] bg-repeat"}></div>
       </div>
 
-      {/* Mobile sidebar overlay */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+      {/* Mobile sidebar */}
+      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+        <SheetContent side="left" className="w-72 p-0 glass-card border-white/20">
+          <MobileSidebar 
+            navSections={navSections} 
+            isActive={isActive} 
+            onClose={() => setIsSidebarOpen(false)} 
+          />
+        </SheetContent>
+      </Sheet>
 
-      {/* Sidebar */}
-      <aside className={cn(
-        "fixed top-0 left-0 h-full w-72 glass-card border-r border-white/20 transform transition-transform duration-300 ease-in-out z-50",
-        isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-      )}>
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="p-6 border-b border-white/10">
-            <div className="flex items-center justify-between">
-              <Link to="/" className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Building2 className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-slate-800 dark:text-white">Municipal Systems</h1>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Infrastructure Management</p>
-                </div>
-              </Link>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="lg:hidden"
-                onClick={() => setIsSidebarOpen(false)}
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 p-4 overflow-y-auto">
-            <div className="space-y-6">
-              {navSections.map((section) => (
-                <div key={section.title}>
-                  <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
-                    {section.title}
-                  </h3>
-                  <div className="space-y-1">
-                    {section.items.map((item) => {
-                      const Icon = item.icon;
-                      const active = isActive(item.href);
-                      return (
-                        <Link
-                          key={item.href}
-                          to={item.href}
-                          onClick={() => setIsSidebarOpen(false)}
-                          className={cn(
-                            "flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
-                            active
-                              ? "bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-500/30 shadow-sm"
-                              : "text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
-                          )}
-                          title={item.description}
-                        >
-                          <Icon className={cn("w-5 h-5 transition-colors", active ? "text-blue-600 dark:text-blue-400" : "text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300")} />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{item.name}</p>
-                            {item.description && (
-                              <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{item.description}</p>
-                            )}
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </nav>
-
-          {/* User Profile */}
-          <div className="p-4 border-t border-white/10">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="w-full justify-start p-3 h-auto">
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="/placeholder.svg" />
-                      <AvatarFallback>MU</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 text-left">
-                      <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Municipal User</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Infrastructure Admin</p>
-                    </div>
-                    <ChevronDown className="w-4 h-4 text-slate-500" />
-                  </div>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem onClick={toggleTheme}>
-                  {isDarkMode ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
-                  {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-72 lg:overflow-y-auto glass-card border-r border-white/20">
+        <DesktopSidebar navSections={navSections} isActive={isActive} />
       </aside>
 
       {/* Main Content */}
       <div className="lg:ml-72">
         {/* Top Header */}
-        <header className="sticky top-0 z-30 glass-card border-b border-white/20">
-          <div className="flex items-center justify-between px-6 py-4">
+        <header className="sticky top-0 z-30 glass-card border-b border-white/20 backdrop-blur-xl">
+          <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="lg:hidden"
-                onClick={() => setIsSidebarOpen(true)}
-              >
-                <Menu className="w-5 h-5" />
-              </Button>
-              <div>
+              {/* Mobile menu button */}
+              <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm" className="lg:hidden">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </SheetTrigger>
+              </Sheet>
+
+              {/* Page title */}
+              <div className="hidden sm:block">
                 <h2 className="text-lg font-semibold text-slate-800 dark:text-white">
                   {navSections.flatMap(s => s.items).find(item => isActive(item.href))?.name || 'Municipal Dashboard'}
                 </h2>
@@ -252,23 +191,314 @@ export function Layout({ children }: LayoutProps) {
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-              </Button>
-              <Button variant="ghost" size="sm">
-                <User className="w-5 h-5" />
-              </Button>
+            {/* Search bar */}
+            <div className="hidden md:flex flex-1 max-w-md mx-4">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  placeholder="Search assets, inspections, contractors..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 glass-card border-white/30 bg-white/50 dark:bg-black/20"
+                />
+              </div>
+            </div>
+
+            {/* Right side controls */}
+            <div className="flex items-center space-x-2">
+              {/* Free version badge */}
+              <Badge variant="outline" className="hidden sm:flex bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
+                <Zap className="w-3 h-3 mr-1" />
+                Free Plan
+              </Badge>
+
+              {/* Notifications */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="relative">
+                    <Bell className="w-5 h-5" />
+                    {unreadCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 w-5 h-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center p-0">
+                        {unreadCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80 glass-card border-white/20">
+                  <div className="p-3 border-b border-white/10">
+                    <h3 className="font-semibold text-sm">Notifications</h3>
+                    <p className="text-xs text-slate-500">{unreadCount} unread</p>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {mockNotifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className={cn(
+                          "p-3 border-b border-white/5 hover:bg-white/10 transition-colors cursor-pointer",
+                          notification.unread && "bg-blue-50/50 dark:bg-blue-900/20"
+                        )}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-slate-800 dark:text-white truncate">
+                              {notification.title}
+                            </p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                              {notification.time}
+                            </p>
+                          </div>
+                          {notification.unread && (
+                            <div className="w-2 h-2 bg-blue-500 rounded-full ml-2 mt-1 flex-shrink-0" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="p-2 border-t border-white/10">
+                    <Button variant="ghost" size="sm" className="w-full text-xs">
+                      View All Notifications
+                    </Button>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Account menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="/placeholder.svg" />
+                      <AvatarFallback className="bg-blue-500 text-white">MU</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 glass-card border-white/20">
+                  <div className="p-3 border-b border-white/10">
+                    <p className="text-sm font-medium text-slate-800 dark:text-white">Municipal User</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Infrastructure Admin</p>
+                    <Badge variant="outline" className="mt-1 text-xs bg-blue-50 text-blue-700 border-blue-200">
+                      <Zap className="w-3 h-3 mr-1" />
+                      Free Plan
+                    </Badge>
+                  </div>
+                  <DropdownMenuItem>
+                    <UserCheck className="w-4 h-4 mr-2" />
+                    My Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    <div className="flex items-center justify-between w-full">
+                      <span>Upgrade to Premium</span>
+                      <Crown className="w-4 h-4 text-amber-500" />
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={toggleTheme}>
+                    {isDarkMode ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
+                    {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <HelpCircle className="w-4 h-4 mr-2" />
+                    Help & Support
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </header>
 
+        {/* Quick Access Bar */}
+        <div className="border-b border-white/20 bg-white/30 dark:bg-black/20 backdrop-blur-sm">
+          <div className="px-4 py-3">
+            <div className="flex items-center space-x-3 overflow-x-auto">
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">Quick Access:</span>
+              {quickAccessButtons.map((button) => {
+                const Icon = button.icon;
+                return (
+                  <Link
+                    key={button.href}
+                    to={button.href}
+                    className={cn(
+                      "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap",
+                      "bg-white/50 hover:bg-white/70 dark:bg-white/10 dark:hover:bg-white/20 border border-white/30",
+                      button.isPremium && "opacity-60 cursor-not-allowed"
+                    )}
+                    onClick={(e) => button.isPremium && e.preventDefault()}
+                  >
+                    <div className={cn("w-4 h-4 rounded-full flex items-center justify-center", button.color)}>
+                      <Icon className="w-2.5 h-2.5 text-white" />
+                    </div>
+                    <span>{button.name}</span>
+                    {button.isPremium && <Crown className="w-3 h-3 text-amber-500" />}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
         {/* Page Content */}
-        <main className="p-6">
+        <main className="p-4 lg:p-6">
           {children}
         </main>
       </div>
+    </div>
+  );
+}
+
+// Desktop Sidebar Component
+function DesktopSidebar({ navSections, isActive }: { navSections: NavSection[], isActive: (href: string) => boolean }) {
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="p-6 border-b border-white/10">
+        <Link to="/" className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <Building2 className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-800 dark:text-white">Municipal Systems</h1>
+            <div className="flex items-center space-x-2">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Infrastructure Management</p>
+              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300">
+                FREE
+              </Badge>
+            </div>
+          </div>
+        </Link>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 p-4 overflow-y-auto">
+        <div className="space-y-6">
+          {navSections.map((section) => (
+            <div key={section.title}>
+              <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
+                {section.title}
+              </h3>
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      className={cn(
+                        "flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative",
+                        active
+                          ? "bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-500/30 shadow-sm"
+                          : "text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white",
+                        item.isPremium && !active && "opacity-70"
+                      )}
+                    >
+                      <Icon className={cn("w-5 h-5 transition-colors", active ? "text-blue-600 dark:text-blue-400" : "text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300")} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium truncate">{item.name}</p>
+                          {item.isPremium && <Crown className="w-3 h-3 text-amber-500 ml-2" />}
+                        </div>
+                        {item.description && (
+                          <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{item.description}</p>
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </nav>
+
+      {/* Upgrade CTA */}
+      <div className="p-4 border-t border-white/10">
+        <div className="p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-200/30 dark:border-blue-800/30">
+          <div className="flex items-center space-x-3 mb-3">
+            <Crown className="w-6 h-6 text-amber-500" />
+            <div>
+              <h4 className="font-semibold text-sm text-slate-800 dark:text-white">Upgrade to Premium</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Unlock advanced features</p>
+            </div>
+          </div>
+          <Button size="sm" className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+            <Crown className="w-4 h-4 mr-2" />
+            Upgrade Now
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Mobile Sidebar Component  
+function MobileSidebar({ navSections, isActive, onClose }: { navSections: NavSection[], isActive: (href: string) => boolean, onClose: () => void }) {
+  return (
+    <div className="flex flex-col h-full">
+      <div className="p-6 border-b border-white/10">
+        <div className="flex items-center justify-between">
+          <Link to="/" className="flex items-center space-x-3" onClick={onClose}>
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-slate-800 dark:text-white">Municipal Systems</h1>
+              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">FREE</Badge>
+            </div>
+          </Link>
+        </div>
+      </div>
+
+      <nav className="flex-1 p-4 overflow-y-auto">
+        <div className="space-y-6">
+          {navSections.map((section) => (
+            <div key={section.title}>
+              <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
+                {section.title}
+              </h3>
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      onClick={onClose}
+                      className={cn(
+                        "flex items-center space-x-3 px-3 py-3 rounded-xl transition-all duration-200",
+                        active
+                          ? "bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-500/30"
+                          : "text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-white/10",
+                        item.isPremium && !active && "opacity-70"
+                      )}
+                    >
+                      <Icon className={cn("w-5 h-5", active ? "text-blue-600 dark:text-blue-400" : "text-slate-500")} />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium">{item.name}</p>
+                          {item.isPremium && <Crown className="w-3 h-3 text-amber-500" />}
+                        </div>
+                        {item.description && (
+                          <p className="text-xs text-slate-400 dark:text-slate-500">{item.description}</p>
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 }
