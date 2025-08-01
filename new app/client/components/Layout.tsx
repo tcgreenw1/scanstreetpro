@@ -304,13 +304,21 @@ export function Layout({ children }: LayoutProps) {
                     <Settings className="w-4 h-4 mr-2" />
                     Settings
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    <div className="flex items-center justify-between w-full">
-                      <span>Upgrade to Premium</span>
-                      <Crown className="w-4 h-4 text-amber-500" />
-                    </div>
-                  </DropdownMenuItem>
+                  {currentPlan !== 'enterprise' && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/pricing">
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        <div className="flex items-center justify-between w-full">
+                          <span>
+                            {currentPlan === 'free' ? 'Upgrade Plan' :
+                             currentPlan === 'standard' ? 'Upgrade to Pro' :
+                             'View Pricing'}
+                          </span>
+                          <Crown className="w-4 h-4 text-amber-500" />
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={toggleTheme}>
                     {isDarkMode ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
                     {isDarkMode ? 'Light Mode' : 'Dark Mode'}
