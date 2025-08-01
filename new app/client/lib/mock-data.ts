@@ -198,3 +198,145 @@ export const contractors = [
     phone: '(555) 345-6789'
   }
 ];
+
+// Expense Tracking
+export interface Expense {
+  id: string;
+  description: string;
+  amount: number;
+  category: string;
+  subcategory: string;
+  date: string;
+  vendor: string;
+  status: 'pending' | 'approved' | 'paid' | 'rejected';
+  project?: string;
+  invoiceNumber?: string;
+  approvedBy?: string;
+  notes?: string;
+}
+
+export const expenses: Expense[] = [
+  {
+    id: '1',
+    description: 'Asphalt repair materials - Main Street',
+    amount: 2450.00,
+    category: 'Road Maintenance',
+    subcategory: 'Materials',
+    date: '2024-01-15',
+    vendor: 'ABC Supply Co.',
+    status: 'paid',
+    project: 'Main Street Pothole Repair',
+    invoiceNumber: 'INV-2024-001',
+    approvedBy: 'John Smith',
+    notes: 'Emergency repair materials'
+  },
+  {
+    id: '2',
+    description: 'Snow removal services - December 2023',
+    amount: 8750.00,
+    category: 'Public Works',
+    subcategory: 'Services',
+    date: '2024-01-03',
+    vendor: 'Winter Services LLC',
+    status: 'approved',
+    invoiceNumber: 'WS-DEC-2023',
+    approvedBy: 'Sarah Johnson'
+  },
+  {
+    id: '3',
+    description: 'Traffic signal maintenance contract',
+    amount: 12500.00,
+    category: 'Infrastructure',
+    subcategory: 'Maintenance',
+    date: '2024-01-10',
+    vendor: 'Signal Tech Inc.',
+    status: 'pending',
+    project: 'Traffic Signal Upgrade',
+    invoiceNumber: 'STI-2024-Q1'
+  },
+  {
+    id: '4',
+    description: 'Bridge inspection equipment rental',
+    amount: 850.00,
+    category: 'Infrastructure',
+    subcategory: 'Equipment',
+    date: '2024-01-12',
+    vendor: 'Equipment Rental Pro',
+    status: 'paid',
+    project: 'Riverside Bridge Inspection',
+    invoiceNumber: 'ERP-JAN-045',
+    approvedBy: 'Mike Rodriguez'
+  },
+  {
+    id: '5',
+    description: 'Street sweeping fuel costs',
+    amount: 320.00,
+    category: 'Public Works',
+    subcategory: 'Fuel',
+    date: '2024-01-08',
+    vendor: 'City Fuel Depot',
+    status: 'paid',
+    invoiceNumber: 'CFD-2024-008',
+    approvedBy: 'John Smith'
+  },
+  {
+    id: '6',
+    description: 'Stop sign replacement - Pine & Elm',
+    amount: 185.00,
+    category: 'Road Maintenance',
+    subcategory: 'Signage',
+    date: '2024-01-16',
+    vendor: 'Municipal Supply',
+    status: 'paid',
+    project: 'Pine Road Sign Replacement',
+    invoiceNumber: 'MS-2024-012',
+    approvedBy: 'Sarah Johnson'
+  },
+  {
+    id: '7',
+    description: 'Crack sealing materials - Oak Avenue',
+    amount: 1580.00,
+    category: 'Road Maintenance',
+    subcategory: 'Materials',
+    date: '2024-01-18',
+    vendor: 'Pavement Solutions',
+    status: 'approved',
+    project: 'Oak Avenue Preventive Maintenance',
+    invoiceNumber: 'PS-2024-003'
+  },
+  {
+    id: '8',
+    description: 'Office supplies - Planning Department',
+    amount: 156.00,
+    category: 'Administration',
+    subcategory: 'Supplies',
+    date: '2024-01-20',
+    vendor: 'Office Depot',
+    status: 'pending',
+    invoiceNumber: 'OD-JAN-2024-789'
+  },
+  {
+    id: '9',
+    description: 'Emergency pothole repair - 5th Street',
+    amount: 950.00,
+    category: 'Road Maintenance',
+    subcategory: 'Emergency Repairs',
+    date: '2024-01-22',
+    vendor: 'Quick Fix Paving',
+    status: 'approved',
+    invoiceNumber: 'QFP-EMRG-024',
+    notes: 'After-hours emergency repair'
+  },
+  {
+    id: '10',
+    description: 'Vehicle maintenance - Truck #12',
+    amount: 425.00,
+    category: 'Fleet',
+    subcategory: 'Maintenance',
+    date: '2024-01-14',
+    vendor: 'City Fleet Services',
+    status: 'paid',
+    invoiceNumber: 'CFS-2024-056',
+    approvedBy: 'Mike Rodriguez'
+  }
+];
