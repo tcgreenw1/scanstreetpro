@@ -488,26 +488,38 @@ function DesktopSidebar({
       </nav>
 
       {/* Upgrade CTA */}
-      <div className="p-4 border-t border-white/10">
-        <div className="p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-200/30 dark:border-blue-800/30">
-          <div className="flex items-center space-x-3 mb-3">
-            <Crown className="w-6 h-6 text-amber-500" />
-            <div>
-              <h4 className="font-semibold text-sm text-slate-800 dark:text-white">Upgrade to Premium</h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Unlock advanced features</p>
-            </div>
-          </div>
+      <div className={cn("border-t border-white/10 transition-all duration-300", isCollapsed ? "p-2" : "p-4")}>
+        {isCollapsed ? (
           <Link to="/pricing">
             <Button
               size="sm"
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-              title="See pricing and included features"
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 animate-pulse-glow"
+              title="See pricing and included features - Upgrade to Premium"
             >
-              <Crown className="w-4 h-4 mr-2" />
-              Upgrade Now
+              <Crown className="w-4 h-4" />
             </Button>
           </Link>
-        </div>
+        ) : (
+          <div className="p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-200/30 dark:border-blue-800/30 animate-scale-up">
+            <div className="flex items-center space-x-3 mb-3">
+              <Crown className="w-6 h-6 text-amber-500 animate-pulse-glow" />
+              <div className="animate-slide-in">
+                <h4 className="font-semibold text-sm text-slate-800 dark:text-white">Upgrade to Premium</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Unlock advanced features</p>
+              </div>
+            </div>
+            <Link to="/pricing">
+              <Button
+                size="sm"
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 animate-pulse-glow"
+                title="See pricing and included features"
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade Now
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
