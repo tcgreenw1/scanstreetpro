@@ -262,7 +262,7 @@ export default function MapPage() {
           <Card className="glass-card border-white/20">
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-red-600">{stats.failed}</div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">Failed (<40)</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Failed (&lt;40)</div>
             </CardContent>
           </Card>
           <Card className="glass-card border-white/20">
