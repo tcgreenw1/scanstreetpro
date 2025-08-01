@@ -452,10 +452,16 @@ function DesktopSidebar({ navSections, isActive }: { navSections: NavSection[], 
               <p className="text-xs text-slate-500 dark:text-slate-400">Unlock advanced features</p>
             </div>
           </div>
-          <Button size="sm" className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-            <Crown className="w-4 h-4 mr-2" />
-            Upgrade Now
-          </Button>
+          <Link to="/pricing">
+            <Button
+              size="sm"
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+              title="See pricing and included features"
+            >
+              <Crown className="w-4 h-4 mr-2" />
+              Upgrade Now
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
