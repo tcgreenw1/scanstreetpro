@@ -1,4 +1,4 @@
-import PlaceholderPage from "@/components/PlaceholderPage";
+import { PlaceholderPage } from "@/components/PlaceholderPage";
 import { Users } from "lucide-react";
 
 export default function Contractors() {
