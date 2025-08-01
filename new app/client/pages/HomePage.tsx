@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePricing } from '@/contexts/PricingContext';
+import { ModifySampleDataModal } from '@/components/ModifySampleDataModal';
 
 const pciMethodComparison = [
   {
@@ -365,14 +366,9 @@ export default function HomePage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button 
-              variant="outline" 
-              className="flex-1 border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-300 dark:hover:bg-blue-900/20"
-              title="Modify sample data for preview and testing"
-            >
-              <Edit3 className="w-4 h-4 mr-2" />
-              Modify Sample Data
-            </Button>
+            <div className="flex-1">
+              <ModifySampleDataModal />
+            </div>
             <Link to="/map" className="flex-1">
               <Button className="w-full bg-blue-600 hover:bg-blue-700">
                 <Map className="w-4 h-4 mr-2" />
