@@ -48,7 +48,8 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+    <PricingProvider>
+      <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
@@ -188,6 +189,9 @@ const App = () => (
               }
             />
 
+            {/* Pricing */}
+            <Route path="/pricing" element={<Pricing />} />
+
             {/* Authentication */}
             <Route path="/login" element={<Login />} />
 
@@ -196,7 +200,8 @@ const App = () => (
           </Routes>
         </Layout>
       </BrowserRouter>
-    </TooltipProvider>
+      </TooltipProvider>
+    </PricingProvider>
   </QueryClientProvider>
 );
 
