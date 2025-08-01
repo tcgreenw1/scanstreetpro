@@ -14,6 +14,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import AssetManager from "./pages/AssetManager";
 import NewInspection from "./pages/NewInspection";
+import Pricing from "./pages/Pricing";
 import StartGrant from "./pages/StartGrant";
 import Applications from "./pages/Applications";
 import Funding from "./pages/Funding";
