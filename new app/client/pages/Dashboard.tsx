@@ -200,10 +200,10 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="glass-card border-white/20 hover:shadow-xl transition-all duration-300 border-l-4 border-l-orange-500 group">
+        <Card className="glass-card border-white/20 hover:shadow-xl transition-all duration-300 border-l-4 border-l-orange-500 group animate-fadeInUp" style={{ animationDelay: '400ms' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">Spent This Year</CardTitle>
-            <TrendingUp className="h-5 w-5 text-orange-600 group-hover:scale-110 transition-transform" />
+            <TrendingUp className="h-5 w-5 text-orange-600 group-hover:scale-110 transition-transform animate-pulse-glow" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-slate-800 dark:text-white">{budgetOverview.percentSpent}%</div>
@@ -214,10 +214,10 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="glass-card border-white/20 hover:shadow-xl transition-all duration-300 border-l-4 border-l-purple-500 group">
+        <Card className="glass-card border-white/20 hover:shadow-xl transition-all duration-300 border-l-4 border-l-purple-500 group animate-fadeInUp" style={{ animationDelay: '600ms' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">Active Projects</CardTitle>
-            <Target className="h-5 w-5 text-purple-600 group-hover:scale-110 transition-transform" />
+            <Target className="h-5 w-5 text-purple-600 group-hover:scale-110 transition-transform animate-pulse-glow" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-slate-800 dark:text-white">12</div>
