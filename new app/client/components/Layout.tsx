@@ -130,6 +130,7 @@ export function Layout({ children }: LayoutProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
+  const { currentPlan, planDetails } = usePricing();
 
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/';
