@@ -209,10 +209,16 @@ export function Layout({ children }: LayoutProps) {
 
             {/* Right side controls */}
             <div className="flex items-center space-x-2">
-              {/* Free version badge */}
-              <Badge variant="outline" className="hidden sm:flex bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
-                <Zap className="w-3 h-3 mr-1" />
-                Free Plan
+              {/* Current plan badge */}
+              <Badge variant="outline" className={cn(
+                "hidden sm:flex",
+                currentPlan === 'free' ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800" :
+                currentPlan === 'standard' ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800" :
+                currentPlan === 'pro' ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800" :
+                "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800"
+              )}>
+                {currentPlan === 'enterprise' ? <Crown className="w-3 h-3 mr-1" /> : <Zap className="w-3 h-3 mr-1" />}
+                {planDetails.name} Plan
               </Badge>
 
               {/* Notifications */}
