@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -180,10 +181,15 @@ export default function AssetManager() {
               <p className="text-slate-600 dark:text-slate-300">Premium Feature - Upgrade Required</p>
             </div>
           </div>
-          <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
-            <Crown className="w-4 h-4 mr-2" />
-            Upgrade to Access
-          </Button>
+          <Link to="/pricing">
+            <Button
+              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+              title="See pricing and included features"
+            >
+              <Crown className="w-4 h-4 mr-2" />
+              Upgrade to Access
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -416,10 +422,15 @@ export default function AssetManager() {
                   <p className="text-slate-500 dark:text-slate-400 mb-4">
                     View assets on an interactive map with real-time status updates
                   </p>
-                  <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600" disabled>
-                    <Crown className="w-4 h-4 mr-2" />
-                    Upgrade to Access Map
-                  </Button>
+                  <Link to="/pricing">
+                    <Button
+                      className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                      title="See pricing and included features"
+                    >
+                      <Crown className="w-4 h-4 mr-2" />
+                      Upgrade to Access Map
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </TabsContent>
