@@ -393,12 +393,16 @@ function DesktopSidebar({
   navSections,
   isActive,
   isCollapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  isDarkMode,
+  toggleTheme
 }: {
   navSections: NavSection[],
   isActive: (href: string) => boolean,
   isCollapsed: boolean,
-  onToggleCollapse: () => void
+  onToggleCollapse: () => void,
+  isDarkMode: boolean,
+  toggleTheme: () => void
 }) {
   return (
     <div className="flex flex-col h-full">
