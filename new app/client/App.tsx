@@ -74,26 +74,7 @@ const App = () => (
             <Route path="/assets" element={<AssetManager />} />
             <Route path="/maintenance" element={<MaintenanceScheduler />} />
             <Route path="/contractors" element={<Contractors />} />
-            <Route
-              path="/inspections"
-              element={
-                <PlaceholderPage
-                  title="Inspection Tool"
-                  description="Track submitted inspections, review overdue items, and manage the inspection workflow efficiently."
-                  icon={<ClipboardCheck className="w-8 h-8" />}
-                  features={[
-                    "Mobile inspection forms with offline capability",
-                    "Photo and video documentation integration",
-                    "GPS location tagging for all inspections",
-                    "Automated inspection scheduling based on asset type",
-                    "Digital signature capture for approvals",
-                    "Integration with maintenance task generation",
-                    "Compliance tracking and regulatory reporting",
-                    "Custom inspection templates and checklists"
-                  ]}
-                />
-              }
-            />
+            <Route path="/inspections" element={<Inspections />} />
             <Route path="/inspections/new" element={<NewInspection />} />
             <Route path="/map" element={<MapPage />} />
             <Route path="/map-view" element={<MapView />} />
