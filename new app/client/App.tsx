@@ -28,6 +28,7 @@ import MapPage from "./pages/MapPage";
 import ReportsPage from "./pages/ReportsPage";
 import Reports from "./pages/Reports";
 import CitizenEngagement from "./pages/CitizenEngagement";
+import MaintenanceScheduler from "./pages/MaintenanceScheduler";
 import AdminDashboard from "./pages/AdminDashboard";
 import Integrations from "./pages/Integrations";
 import TaskDetails from "./pages/TaskDetails";
@@ -68,26 +69,7 @@ const App = () => (
 
             {/* Infrastructure Management */}
             <Route path="/assets" element={<AssetManager />} />
-            <Route
-              path="/maintenance"
-              element={
-                <PlaceholderPage
-                  title="Maintenance Scheduler"
-                  description="Schedule, track, and assign maintenance tasks. View upcoming and overdue items with contractor assignments."
-                  icon={<Calendar className="w-8 h-8" />}
-                  features={[
-                    "Drag-and-drop calendar interface for task scheduling",
-                    "Automated task generation based on asset conditions",
-                    "Contractor assignment and communication tools",
-                    "Priority-based task management system",
-                    "Weather-dependent scheduling adjustments",
-                    "Material and equipment requirement tracking",
-                    "Progress tracking with photo updates",
-                    "Integration with budget and cost tracking"
-                  ]}
-                />
-              }
-            />
+            <Route path="/maintenance" element={<MaintenanceScheduler />} />
             <Route path="/contractors" element={<Contractors />} />
             <Route
               path="/inspections"
