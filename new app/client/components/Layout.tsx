@@ -487,6 +487,46 @@ function DesktopSidebar({
         </div>
       </nav>
 
+      {/* Dark/Light Mode Toggle */}
+      <div className={cn("border-t border-white/10 transition-all duration-300", isCollapsed ? "p-2" : "p-4")}>
+        {isCollapsed ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            className="w-full flex items-center justify-center p-2 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 animate-pulse-glow"
+            title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </Button>
+        ) : (
+          <div className="p-3 bg-gradient-to-r from-slate-100/50 to-slate-200/50 dark:from-slate-800/50 dark:to-slate-700/50 rounded-xl border border-slate-200/30 dark:border-slate-700/30 animate-scale-up">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                {isDarkMode ? <Moon className="w-5 h-5 text-slate-600 dark:text-slate-300" /> : <Sun className="w-5 h-5 text-slate-600 dark:text-slate-300" />}
+                <div>
+                  <h4 className="font-semibold text-sm text-slate-800 dark:text-white">Theme</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{isDarkMode ? 'Dark Mode' : 'Light Mode'}</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleTheme}
+                className="rounded-full w-12 h-6 p-0 relative bg-slate-300 dark:bg-slate-600 transition-all duration-300 hover:bg-slate-400 dark:hover:bg-slate-500"
+              >
+                <div className={cn(
+                  "absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-all duration-300 flex items-center justify-center",
+                  isDarkMode ? "left-6" : "left-0.5"
+                )}>
+                  {isDarkMode ? <Moon className="w-3 h-3 text-slate-700" /> : <Sun className="w-3 h-3 text-yellow-500" />}
+                </div>
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Upgrade CTA */}
       <div className={cn("border-t border-white/10 transition-all duration-300", isCollapsed ? "p-2" : "p-4")}>
         {isCollapsed ? (
