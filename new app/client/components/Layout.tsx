@@ -156,10 +156,12 @@ export function Layout({ children }: LayoutProps) {
       {/* Mobile sidebar */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="w-72 p-0 glass-card border-white/20">
-          <MobileSidebar 
-            navSections={navSections} 
-            isActive={isActive} 
-            onClose={() => setIsSidebarOpen(false)} 
+          <MobileSidebar
+            navSections={navSections}
+            isActive={isActive}
+            onClose={() => setIsSidebarOpen(false)}
+            isDarkMode={isDarkMode}
+            toggleTheme={toggleTheme}
           />
         </SheetContent>
       </Sheet>
