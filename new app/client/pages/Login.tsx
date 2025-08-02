@@ -11,16 +11,28 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, isLoading } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    const success = await login(email, password);
-    if (!success) {
-      setError('Invalid email or password');
+    setIsLoading(true);
+
+    // Simulate login process
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Demo login logic
+    if (email && password) {
+      // Store demo auth state
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userRole', email.includes('admin') ? 'admin' : 'contractor');
+      navigate('/dashboard');
+    } else {
+      setError('Please enter email and password');
     }
+
+    setIsLoading(false);
   };
 
   const fillDemo = (role: 'contractor' | 'admin') => {
