@@ -9,8 +9,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { PlaceholderPage } from "./components/PlaceholderPage";
 import { PricingProvider } from "./contexts/PricingContext";
-import HomePage from "./pages/HomePage";
-import Index from "./pages/Index";
 import RoadInspection from "./pages/RoadInspection";
 import Dashboard from "./pages/Dashboard";
 import AssetManager from "./pages/AssetManager";
@@ -25,7 +23,6 @@ import Expenses from "./pages/Expenses";
 import Planning from "./pages/Planning";
 import VerifyPage from "./pages/VerifyPage";
 import MapPage from "./pages/MapPage";
-import ReportsPage from "./pages/ReportsPage";
 import Reports from "./pages/Reports";
 import CitizenEngagement from "./pages/CitizenEngagement";
 import MaintenanceScheduler from "./pages/MaintenanceScheduler";
@@ -38,18 +35,6 @@ import TaskDetails from "./pages/TaskDetails";
 import MapView from "./pages/MapView";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
-import {
-  Building2,
-  Calendar,
-  Users,
-  ClipboardCheck,
-  DollarSign,
-  Calculator,
-  TrendingUp,
-  MessageSquare,
-  FileText,
-  Settings,
-} from "lucide-react";
 
 const queryClient = new QueryClient();
 
