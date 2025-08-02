@@ -230,11 +230,14 @@ export function Layout({ children }: LayoutProps) {
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
-                  placeholder="Search assets, inspections, contractors..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 glass-card border-white/30 bg-white/50 dark:bg-black/20"
+                  placeholder="Search assets, inspections, contractors... (⌘K)"
+                  readOnly
+                  onClick={() => setIsGlobalSearchOpen(true)}
+                  className="pl-10 pr-16 glass-card border-white/30 bg-white/50 dark:bg-black/20 cursor-pointer"
                 />
+                <kbd className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs bg-slate-200 dark:bg-slate-700 px-2 py-1 rounded">
+                  ⌘K
+                </kbd>
               </div>
             </div>
 
