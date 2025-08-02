@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Edit3, Save, RotateCcw, MapPin, BarChart3, Road } from 'lucide-react';
+import { Edit3, Save, RotateCcw, MapPin, BarChart3, Route } from 'lucide-react';
 
 interface SampleDataConfig {
   pciRange: {
