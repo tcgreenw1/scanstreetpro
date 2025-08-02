@@ -99,26 +99,7 @@ const App = () => (
             {/* Administrative */}
             <Route path="/task-details" element={<TaskDetails />} />
             <Route path="/integrations" element={<Integrations />} />
-            <Route
-              path="/settings"
-              element={
-                <PlaceholderPage
-                  title="Settings & Billing"
-                  description="Manage account settings, user permissions, subscription billing, and platform configuration."
-                  icon={<Settings className="w-8 h-8" />}
-                  features={[
-                    "User management and role-based permissions",
-                    "Organization settings and branding customization",
-                    "Subscription management and billing history",
-                    "Data export and backup configuration",
-                    "Integration settings for third-party systems",
-                    "Notification preferences and alert configuration",
-                    "Security settings and audit logs",
-                    "API key management and webhook configuration"
-                  ]}
-                />
-              }
-            />
+            <Route path="/settings" element={<Settings />} />
 
             {/* Pricing */}
             <Route path="/pricing" element={<Pricing />} />
