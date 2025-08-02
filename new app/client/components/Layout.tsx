@@ -132,6 +132,7 @@ export function Layout({ children }: LayoutProps) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
   const location = useLocation();
   const { currentPlan, planDetails } = usePricing();
 
