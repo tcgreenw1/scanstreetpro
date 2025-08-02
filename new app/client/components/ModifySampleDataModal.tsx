@@ -249,7 +249,7 @@ export function ModifySampleDataModal({ trigger, onDataUpdate }: ModifySampleDat
                   }`}
                   onClick={() => handleRoadTypeToggle(roadType)}
                 >
-                  <Road className="w-3 h-3 mr-1" />
+                  <Route className="w-3 h-3 mr-1" />
                   {roadType}
                 </Badge>
               ))}
