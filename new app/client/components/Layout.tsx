@@ -573,8 +573,20 @@ function DesktopSidebar({
   );
 }
 
-// Mobile Sidebar Component  
-function MobileSidebar({ navSections, isActive, onClose }: { navSections: NavSection[], isActive: (href: string) => boolean, onClose: () => void }) {
+// Mobile Sidebar Component
+function MobileSidebar({
+  navSections,
+  isActive,
+  onClose,
+  isDarkMode,
+  toggleTheme
+}: {
+  navSections: NavSection[],
+  isActive: (href: string) => boolean,
+  onClose: () => void,
+  isDarkMode: boolean,
+  toggleTheme: () => void
+}) {
   return (
     <div className="flex flex-col h-full">
       <div className="p-6 border-b border-white/10">
