@@ -100,27 +100,8 @@ const App = () => (
             <Route path="/verify" element={<VerifyPage />} />
 
             {/* Financial Management */}
-            <Route path="/budget" element={<Dashboard />} />
-            <Route
-              path="/estimates"
-              element={
-                <PlaceholderPage
-                  title="Estimate Tool"
-                  description="PCI-based cost projection simulator for infrastructure planning and budget forecasting."
-                  icon={<Calculator className="w-8 h-8" />}
-                  features={[
-                    "PCI-based deterioration modeling and cost projections",
-                    "Multiple treatment option comparisons",
-                    "5-year and 10-year budget scenario planning",
-                    "Integration with actual project cost database",
-                    "Inflation adjustment and regional cost factors",
-                    "Grant funding opportunity matching",
-                    "ROI analysis for different treatment strategies",
-                    "Export capabilities for budget presentations"
-                  ]}
-                />
-              }
-            />
+            <Route path="/budget" element={<Planning />} />
+            <Route path="/estimates" element={<CostEstimator />} />
             <Route path="/funding" element={<Funding />} />
             <Route path="/expenses" element={<Expenses />} />
             <Route path="/planning" element={<Planning />} />
