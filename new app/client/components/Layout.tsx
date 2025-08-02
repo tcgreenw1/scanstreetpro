@@ -148,6 +148,22 @@ export function Layout({ children }: LayoutProps) {
 
   const unreadCount = mockNotifications.filter(n => n.unread).length;
 
+  // Global search keyboard shortcut
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsGlobalSearchOpen(true);
+      }
+      if (e.key === 'Escape') {
+        setIsGlobalSearchOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <div className={cn("min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900", isDarkMode && "dark")}>
       {/* Background Pattern */}
