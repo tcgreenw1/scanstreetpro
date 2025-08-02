@@ -26,6 +26,8 @@ import Planning from "./pages/Planning";
 import VerifyPage from "./pages/VerifyPage";
 import MapPage from "./pages/MapPage";
 import ReportsPage from "./pages/ReportsPage";
+import Reports from "./pages/Reports";
+import CitizenEngagement from "./pages/CitizenEngagement";
 import AdminDashboard from "./pages/AdminDashboard";
 import Integrations from "./pages/Integrations";
 import TaskDetails from "./pages/TaskDetails";
@@ -57,7 +59,7 @@ const App = () => (
         <Layout>
           <Routes>
             {/* Main Dashboard */}
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<Dashboard />} />
 
             {/* Dashboard Routes */}
             <Route path="/dashboard" element={<Dashboard />} />
@@ -143,28 +145,9 @@ const App = () => (
             <Route path="/applications" element={<Applications />} />
 
             {/* Public Services */}
-            <Route
-              path="/citizen-reports"
-              element={
-                <PlaceholderPage
-                  title="Fix My Road Feed"
-                  description="Monitor citizen-submitted issues with map pins, photos, and priority-based workflow management."
-                  icon={<MessageSquare className="w-8 h-8" />}
-                  features={[
-                    "Public submission portal with photo upload",
-                    "GPS location capture and address verification",
-                    "Automated issue categorization and priority assignment",
-                    "Real-time status updates for citizens",
-                    "Integration with work order and scheduling systems",
-                    "Duplicate issue detection and consolidation",
-                    "Analytics dashboard for issue trends and hotspots",
-                    "Email and SMS notifications for status updates"
-                  ]}
-                />
-              }
-            />
+            <Route path="/citizen-reports" element={<CitizenEngagement />} />
             <Route path="/citizen-history" element={<CitizenHistory />} />
-            <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/reports" element={<Reports />} />
 
             {/* Administrative */}
             <Route path="/task-details" element={<TaskDetails />} />
