@@ -497,17 +497,36 @@ class DataService {
     return { data: analytics, error: null };
   }
 
+  // Force refresh method
+  async forceRefresh(): Promise<void> {
+    console.log('🔄 Force refreshing DataService...');
+    this.organizationPlan = null;
+    this.organizationId = null;
+    this.initializationPromise = null;
+    await this.initialize();
+  }
+
   // Utility methods
   getPlanName(): string {
     return this.organizationPlan || 'free';
   }
 
   isPremiumPlan(): boolean {
-    return this.organizationPlan !== 'free';
+    return this.organizationPlan !== 'free' && this.organizationPlan !== null;
   }
 
   getOrganizationId(): string | null {
     return this.organizationId;
+  }
+
+  // Debug method
+  getDebugInfo() {
+    return {
+      organizationPlan: this.organizationPlan,
+      organizationId: this.organizationId,
+      isPremium: this.isPremiumPlan(),
+      willUseSampleData: this.shouldUseSampleData()
+    };
   }
 }
 
