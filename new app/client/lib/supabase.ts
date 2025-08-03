@@ -731,7 +731,8 @@ export const ensureDemoUsersExist = async () => {
             });
 
             if (adminAuthError) {
-              console.error(`Admin create also failed for ${demoUser.email}:`, adminAuthError);
+              const errorMessage = getErrorMessage(adminAuthError);
+              console.error(`Admin create also failed for ${demoUser.email}:`, errorMessage);
               continue;
             }
             authData.user = adminAuthData.user;
