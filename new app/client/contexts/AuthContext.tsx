@@ -45,6 +45,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  console.log('🔍 AuthProvider render - loading:', loading, 'user:', user?.email || 'none');
+
   // Memoize fetchUserData to prevent recreation on every render
   const fetchUserData = React.useCallback(async (userId: string) => {
     // Immediate fallback profile - return this quickly if DB is slow
