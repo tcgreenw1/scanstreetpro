@@ -330,31 +330,104 @@ export const withTimeout = <T>(
   ]);
 };
 
-// Test Supabase connection
+// Test Supabase connection comprehensively
 export const testSupabaseConnection = async () => {
   try {
     console.log('🔍 Testing Supabase connection...');
 
-    // Test basic connectivity with timeout
-    const connectionPromise = supabase.auth.getSession();
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Connection timeout after 10 seconds')), 10000)
-    );
-
-    const { data, error } = await Promise.race([connectionPromise, timeoutPromise]) as any;
-
-    if (error) {
-      const errorMessage = extractErrorMessage(error);
-      console.error('❌ Supabase connection test failed:', errorMessage);
-      return { success: false, error: errorMessage };
+    // First check if configuration is valid
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return {
+        success: false,
+        error: 'Supabase configuration missing. Check environment variables VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY'
+      };
     }
 
-    console.log('✅ Supabase connection successful');
-    return { success: true, data };
+    if (!supabaseUrl.includes('supabase.co')) {
+      return {
+        success: false,
+        error: `Invalid Supabase URL format: ${supabaseUrl}. Should be https://xxx.supabase.co`
+      };
+    }
+
+    if (!supabaseAnonKey.startsWith('eyJ')) {
+      return {
+        success: false,
+        error: 'Invalid Supabase anon key format. Should be a JWT token starting with eyJ'
+      };
+    }
+
+    // Test auth connectivity with timeout
+    console.log('🔍 Testing auth service...');
+    const authPromise = supabase.auth.getSession();
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Auth service timeout after 8 seconds')), 8000)
+    );
+
+    const authResult = await Promise.race([authPromise, timeoutPromise]) as any;
+
+    if (authResult.error) {
+      const errorMessage = extractErrorMessage(authResult.error);
+      console.error('❌ Auth service test failed:', errorMessage);
+      return { success: false, error: `Auth service error: ${errorMessage}` };
+    }
+
+    // Test database connectivity
+    console.log('🔍 Testing database service...');
+    const dbPromise = supabase.from('organizations').select('count').limit(1);
+    const dbTimeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Database service timeout after 8 seconds')), 8000)
+    );
+
+    const dbResult = await Promise.race([dbPromise, dbTimeoutPromise]) as any;
+
+    if (dbResult.error) {
+      const errorMessage = extractErrorMessage(dbResult.error);
+      console.error('❌ Database service test failed:', errorMessage);
+
+      // Provide specific guidance for common database errors
+      if (errorMessage.includes('relation "organizations" does not exist')) {
+        return {
+          success: false,
+          error: 'Database tables not found. Please run database setup: /database-setup'
+        };
+      } else if (errorMessage.includes('JWT')) {
+        return {
+          success: false,
+          error: 'Invalid authentication token. Check your Supabase anon key.'
+        };
+      } else {
+        return {
+          success: false,
+          error: `Database error: ${errorMessage}`
+        };
+      }
+    }
+
+    console.log('✅ Supabase connection and database test successful');
+    return { success: true, data: { auth: authResult.data, db: dbResult.data } };
+
   } catch (error: any) {
     const errorMessage = extractErrorMessage(error);
     console.error('❌ Supabase connection test error:', errorMessage);
-    return { success: false, error: errorMessage };
+
+    // Provide specific guidance for network errors
+    if (errorMessage.includes('fetch')) {
+      return {
+        success: false,
+        error: 'Network connection failed. Please check your internet connection.'
+      };
+    } else if (errorMessage.includes('timeout')) {
+      return {
+        success: false,
+        error: 'Connection timeout. Supabase service may be unavailable.'
+      };
+    } else {
+      return {
+        success: false,
+        error: errorMessage
+      };
+    }
   }
 };
 
