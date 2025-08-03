@@ -219,7 +219,17 @@ const Login = () => {
         }
       }
 
-      setError(error?.message || 'Authentication failed. Please try again.');
+      // Provide better error messages for demo users
+      let errorMessage = error?.message || 'Authentication failed. Please try again.';
+
+      const demoEmails = ['admin@scanstreetpro.com', 'test@springfield.gov', 'premium@springfield.gov'];
+      if (demoEmails.includes(email) && errorMessage.includes('Invalid credentials')) {
+        errorMessage = `Demo user ${email} needs to be created. Please try:
+        1. Click Admin Demo button below, or
+        2. Use the Auth Debug tab in Admin Portal to create the user`;
+      }
+
+      setError(errorMessage);
     } finally {
       clearTimeout(timeoutId);
       setLoading(false);
