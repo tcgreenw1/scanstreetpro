@@ -135,7 +135,7 @@ export default function AdminPortal() {
       const refreshResult = await refreshAdminData();
 
       if (!refreshResult.success) {
-        setError(`Admin portal initialization failed: ${refreshResult.error}`);
+        setError(`Admin portal initialization failed: ${refreshResult.error || 'Unknown error'}`);
         setLoading(false);
         return;
       }
