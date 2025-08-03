@@ -329,20 +329,51 @@ export const testSupabaseConnection = async () => {
   try {
     console.log('🔍 Testing Supabase connection...');
 
-    // Test basic connectivity
-    const { data, error } = await supabase.auth.getSession();
+    // Test basic connectivity with timeout
+    const connectionPromise = supabase.auth.getSession();
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Connection timeout after 10 seconds')), 10000)
+    );
+
+    const { data, error } = await Promise.race([connectionPromise, timeoutPromise]) as any;
 
     if (error) {
-      console.error('❌ Supabase connection test failed:', error);
-      return { success: false, error: error.message };
+      const errorMessage = extractErrorMessage(error);
+      console.error('❌ Supabase connection test failed:', errorMessage);
+      return { success: false, error: errorMessage };
     }
 
     console.log('✅ Supabase connection successful');
     return { success: true, data };
   } catch (error: any) {
-    console.error('❌ Supabase connection test error:', error);
-    return { success: false, error: error.message || 'Unknown connection error' };
+    const errorMessage = extractErrorMessage(error);
+    console.error('❌ Supabase connection test error:', errorMessage);
+    return { success: false, error: errorMessage };
   }
+};
+
+// Helper function to extract meaningful error messages
+const extractErrorMessage = (error: any): string => {
+  if (typeof error === 'string') return error;
+  if (error?.message) return error.message;
+  if (error?.error?.message) return error.error.message;
+  if (error?.details) return error.details;
+  if (error?.hint) return error.hint;
+  if (error?.code) return `Error code: ${error.code}`;
+
+  // Try to stringify if it's a simple object
+  try {
+    if (error && typeof error === 'object') {
+      const keys = Object.keys(error);
+      if (keys.length > 0) {
+        return `${keys[0]}: ${error[keys[0]]}`;
+      }
+    }
+  } catch (e) {
+    // Ignore stringify errors
+  }
+
+  return 'Unknown connection error - please check your internet connection and Supabase configuration';
 };
 
 // Enhanced auth functions with timeout and better error handling
