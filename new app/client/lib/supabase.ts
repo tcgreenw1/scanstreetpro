@@ -796,6 +796,8 @@ export const signInWithTimeout = async (email: string, password: string) => {
     if (demoEmails.includes(email)) {
       console.log('🔧 Demo user detected, ensuring user exists...');
       await ensureDemoUsersExist();
+      // Small delay to allow user creation to propagate
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     // First check if user exists in the database
