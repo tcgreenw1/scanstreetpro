@@ -578,6 +578,32 @@ export const signInWithTimeout = async (email: string, password: string) => {
   try {
     console.log('🔐 Attempting sign in for:', email);
 
+    // First check if user exists in the database
+    try {
+      const { data: userExists, error: userCheckError } = await withFastTimeout(
+        supabase.from('users').select('id, email, is_active').eq('email', email).single(),
+        3000,
+        'User check timed out'
+      );
+
+      if (userCheckError) {
+        if (userCheckError.code === 'PGRST116') {
+          console.log('❌ User does not exist in database:', email);
+          throw new Error(`User ${email} not found in database. Please contact your administrator to create your account.`);
+        }
+        console.warn('User check failed, proceeding with auth attempt:', userCheckError.message);
+      } else if (userExists && !userExists.is_active) {
+        throw new Error('Your account has been deactivated. Please contact your administrator.');
+      } else if (userExists) {
+        console.log('✅ User exists in database:', email);
+      }
+    } catch (userCheckError: any) {
+      if (userCheckError.message.includes('not found in database') || userCheckError.message.includes('deactivated')) {
+        throw userCheckError;
+      }
+      console.warn('User existence check failed, proceeding with auth:', userCheckError.message);
+    }
+
     const result = await withTimeout(
       supabase.auth.signInWithPassword({ email, password }),
       15000,
@@ -590,7 +616,10 @@ export const signInWithTimeout = async (email: string, password: string) => {
 
       // Handle specific error types
       if (errorMessage.includes('Invalid login credentials')) {
-        throw new Error('Invalid email or password. Please check your credentials.');
+        throw new Error(`Invalid credentials for ${email}. The user may exist in the database but not in Supabase Auth. Please check:
+        1. Is the email correct?
+        2. Is the password correct?
+        3. Has the user been created in Supabase Auth (not just the users table)?`);
       } else if (errorMessage.includes('Email not confirmed')) {
         throw new Error('Please check your email and click the confirmation link.');
       } else if (errorMessage.includes('Too many requests')) {
