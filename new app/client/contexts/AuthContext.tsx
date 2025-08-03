@@ -113,10 +113,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    // Get initial session
+    // Get initial session with retry logic
     const getSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session }, error } = await withTimeoutAndRetry(
+          () => supabase.auth.getSession(),
+          3000, // 3 second timeout
+          1,    // 1 retry (2 total attempts)
+          'Session fetch timed out'
+        );
 
         if (error) {
           console.error('Error getting session:', error.message || error);
@@ -125,6 +130,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
 
         if (session?.user) {
+          console.log('📊 Fetching user data for session user:', session.user.id);
           const userData = await fetchUserData(session.user.id);
           setUser({
             ...session.user,
