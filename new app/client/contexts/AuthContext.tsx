@@ -153,7 +153,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         try {
+          console.log('🔄 Auth state changed:', event, session?.user?.id);
+
           if (session?.user) {
+            // Fetch user data with timeout and retry
             const userData = await fetchUserData(session.user.id);
             setUser({
               ...session.user,
@@ -167,6 +170,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setLoading(false);
         } catch (error: any) {
           console.error('Error in auth state change:', error.message || error);
+          // Don't block auth flow on user data errors
+          if (session?.user) {
+            setUser({
+              ...session.user,
+              role: 'viewer', // Default role
+              organization_id: null,
+              organization: null
+            });
+          } else {
+            setUser(null);
+          }
           setLoading(false);
         }
       }
