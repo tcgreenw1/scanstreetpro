@@ -43,6 +43,7 @@ import DatabaseSetup from "./pages/DatabaseSetup";
 import DatabaseTest from "./pages/DatabaseTest";
 import TestOrgCreation from "./pages/TestOrgCreation";
 import PremiumAnalysis from "./pages/PremiumAnalysis";
+import DebugEnv from "./pages/DebugEnv";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
