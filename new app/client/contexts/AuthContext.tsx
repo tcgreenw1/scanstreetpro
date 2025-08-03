@@ -61,20 +61,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .eq('id', userId)
         .single();
 
-      const { data, error } = await withTimeout(
-        query,
-        8000,
-        'Timeout fetching user data'
-      );
+      // Handle timeout properly
+      try {
+        const { data, error } = await withTimeout(
+          query,
+          8000,
+          'Timeout fetching user data'
+        );
 
-      if (error) {
-        logError(error, 'AuthContext.fetchUserData');
+        if (error) {
+          logError(error, 'AuthContext.fetchUserData');
+          return null;
+        }
+
+        return data;
+      } catch (timeoutError: any) {
+        // This catches the timeout error from withTimeout
+        console.warn('User data fetch timed out, user may not have profile yet');
+        logError(timeoutError, 'AuthContext.fetchUserData.timeout');
         return null;
       }
-
-      return data;
     } catch (error: any) {
-      console.error('Error fetching user data:', error.message || 'Unknown error');
+      const errorMessage = logError(error, 'AuthContext.fetchUserData.general');
+      console.error('Error fetching user data:', errorMessage);
       return null;
     }
   };
