@@ -406,14 +406,29 @@ export const testSupabaseConnection = async () => {
       };
     }
 
-    // Test auth connectivity with timeout
+    // Test auth connectivity with longer timeout
     console.log('🔍 Testing auth service...');
-    const authPromise = supabase.auth.getSession();
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Auth service timeout after 8 seconds')), 8000)
-    );
-
-    const authResult = await Promise.race([authPromise, timeoutPromise]) as any;
+    let authResult;
+    try {
+      authResult = await withFastTimeout(
+        supabase.auth.getSession(),
+        5000, // Quick 5-second test
+        'Auth service not responding (5s timeout)'
+      );
+    } catch (quickError: any) {
+      console.warn('Quick auth test failed, trying extended timeout...');
+      try {
+        authResult = await withTimeout(
+          supabase.auth.getSession(),
+          20000, // Extended 20-second timeout
+          'Auth service timeout after extended wait'
+        );
+      } catch (extendedError: any) {
+        const errorMessage = extractErrorMessage(extendedError);
+        console.error('❌ Auth service completely failed:', errorMessage);
+        return { success: false, error: `Auth service unavailable: ${errorMessage}. Using offline mode.` };
+      }
+    }
 
     if (authResult.error) {
       const errorMessage = extractErrorMessage(authResult.error);
@@ -440,7 +455,7 @@ export const testSupabaseConnection = async () => {
 
     if (dbResult.error) {
       const errorMessage = extractErrorMessage(dbResult.error);
-      console.error('❌ Database service test failed:', errorMessage);
+      console.error('�� Database service test failed:', errorMessage);
 
       // Provide specific guidance for common database errors
       if (errorMessage.includes('relation "organizations" does not exist')) {
