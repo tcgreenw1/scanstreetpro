@@ -36,18 +36,24 @@ const Login = () => {
 
   const initializeLogin = async () => {
     try {
+      setConnectionStatus('checking');
+
       // Test Supabase connection first
       const connectionTest = await testSupabaseConnection();
 
       if (!connectionTest.success) {
+        setConnectionStatus('error');
         setError(`Connection failed: ${connectionTest.error}. Please check your internet connection.`);
         return;
       }
+
+      setConnectionStatus('connected');
 
       // Check if user is already logged in
       await checkUser();
     } catch (error: any) {
       console.error('Login initialization error:', error);
+      setConnectionStatus('error');
       setError(`Initialization failed: ${error?.message || 'Unknown error'}`);
     }
   };
