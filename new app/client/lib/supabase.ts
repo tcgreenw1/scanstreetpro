@@ -630,6 +630,43 @@ const extractErrorMessage = (error: any): string => {
   return 'Unknown connection error - please check your internet connection and Supabase configuration';
 };
 
+// Helper function to repair demo users if they're in an inconsistent state
+export const repairDemoUsers = async () => {
+  console.log('🔧 Checking and repairing demo users...');
+
+  const demoUsers = [
+    { email: 'admin@scanstreetpro.com', orgSlug: 'scan-street-admin' },
+    { email: 'test@springfield.gov', orgSlug: 'springfield-free' },
+    { email: 'premium@springfield.gov', orgSlug: 'springfield-premium' }
+  ];
+
+  for (const user of demoUsers) {
+    try {
+      // Check if user exists in database but not in auth (orphaned database user)
+      const { data: dbUser } = await supabase
+        .from('users')
+        .select('id, email')
+        .eq('email', user.email)
+        .maybeSingle();
+
+      if (dbUser) {
+        // Check if auth user exists
+        try {
+          const { data: authUser, error } = await supabase.auth.admin.getUserById(dbUser.id);
+          if (error || !authUser.user) {
+            console.log(`🧹 Removing orphaned database user: ${user.email}`);
+            await supabase.from('users').delete().eq('id', dbUser.id);
+          }
+        } catch (authError) {
+          console.warn(`Cannot verify auth user for ${user.email}`);
+        }
+      }
+    } catch (error) {
+      console.warn(`Error checking user ${user.email}:`, getErrorMessage(error));
+    }
+  }
+};
+
 // Helper function to ensure demo users exist in Supabase Auth
 export const ensureDemoUsersExist = async () => {
   const demoUsers = [
@@ -958,7 +995,7 @@ export const signUpWithTimeout = async (email: string, password: string) => {
 
     if (result.error) {
       const errorMessage = extractErrorMessage(result.error);
-      console.error('�� Sign up failed:', errorMessage);
+      console.error('❌ Sign up failed:', errorMessage);
 
       if (errorMessage.includes('User already registered')) {
         throw new Error('An account with this email already exists. Please sign in instead.');
