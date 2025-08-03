@@ -739,10 +739,34 @@ export const signInWithTimeout = async (email: string, password: string) => {
 
       // Handle specific error types
       if (errorMessage.includes('Invalid login credentials')) {
-        throw new Error(`Invalid credentials for ${email}. The user may exist in the database but not in Supabase Auth. Please check:
-        1. Is the email correct?
-        2. Is the password correct?
-        3. Has the user been created in Supabase Auth (not just the users table)?`);
+        // For demo users, try to create them if they don't exist in Auth
+        if (demoEmails.includes(email)) {
+          console.log('🔧 Demo user auth failed, attempting to create user in Supabase Auth...');
+          try {
+            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+              email,
+              password
+            });
+
+            if (signUpError && !signUpError.message.includes('User already registered')) {
+              throw new Error(`Failed to create demo user: ${signUpError.message}`);
+            }
+
+            if (signUpData.user) {
+              console.log('✅ Demo user created in Auth, retrying login...');
+              // Retry login after creation
+              const retryResult = await supabase.auth.signInWithPassword({ email, password });
+              if (!retryResult.error) {
+                console.log('✅ Retry login successful');
+                return retryResult;
+              }
+            }
+          } catch (createError: any) {
+            console.error('Failed to auto-create demo user:', createError.message);
+          }
+        }
+
+        throw new Error(`Invalid credentials for ${email}. The user may exist in the database but not in Supabase Auth. For demo users, please use the Auth Debug tab in Admin Portal to create missing users.`);
       } else if (errorMessage.includes('Email not confirmed')) {
         throw new Error('Please check your email and click the confirmation link.');
       } else if (errorMessage.includes('Too many requests')) {
