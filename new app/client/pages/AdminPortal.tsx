@@ -989,15 +989,20 @@ export default function AdminPortal() {
                         </TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               variant="outline"
                               onClick={() => updateUserStatus(user.id, !user.is_active)}
                             >
                               {user.is_active ? 'Disable' : 'Enable'}
                             </Button>
-                            <Button size="sm" variant="outline">
-                              <Edit className="w-4 h-4" />
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => deleteUser(user.id)}
+                              title="Delete user"
+                            >
+                              <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
                         </TableCell>
