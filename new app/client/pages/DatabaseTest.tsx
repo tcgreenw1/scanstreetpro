@@ -201,8 +201,22 @@ export default function DatabaseTest() {
 
   const testUserCreation = async (organizationId: string) => {
     addResult('User Test', 'info', 'Testing user creation...');
-    
-    // First try to create a simple user record (not auth user)
+
+    // First verify the organization exists
+    const { data: orgExists, error: orgCheckError } = await supabase
+      .from('organizations')
+      .select('id')
+      .eq('id', organizationId)
+      .single();
+
+    if (orgCheckError || !orgExists) {
+      addResult('User Test', 'error', `Organization ${organizationId} does not exist. Cannot create user.`);
+      return;
+    }
+
+    addResult('User Test', 'info', `Verified organization ${organizationId} exists`);
+
+    // Now try to create a simple user record (not auth user)
     const { data: newUser, error: userError } = await supabase
       .from('users')
       .insert({
@@ -217,6 +231,11 @@ export default function DatabaseTest() {
 
     if (userError) {
       addResult('User Test', 'error', `User creation failed: ${userError.message}`);
+
+      // If foreign key constraint, provide helpful message
+      if (userError.message.includes('foreign key constraint')) {
+        addResult('User Test', 'error', 'Foreign key constraint failed - organization_id does not exist in organizations table');
+      }
     } else {
       addResult('User Test', 'success', `User created: ${newUser.name}`);
     }
