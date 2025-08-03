@@ -584,9 +584,22 @@ const Login = () => {
             </div>
           </div>
 
-          <div className="text-center text-xs text-white/40 space-y-1 animate-fade-in-up animation-delay-600">
+          <div className="text-center text-xs text-white/40 space-y-2 animate-fade-in-up animation-delay-600">
             <div>🚀 Demo Credentials Available</div>
             <div>Admin: admin@scanstreetpro.com • User: test@springfield.gov • Premium: premium@springfield.gov</div>
+
+            <div className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleCreateDemoUsers}
+                disabled={loading}
+                className="glass-card border-white/20 bg-white/10 text-white hover:bg-white/20 text-xs"
+              >
+                {loading ? 'Creating...' : 'Create Demo Users'}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
