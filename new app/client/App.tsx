@@ -40,6 +40,7 @@ import Login from "./pages/Login";
 import DatabaseSetup from "./pages/DatabaseSetup";
 import DatabaseTest from "./pages/DatabaseTest";
 import TestOrgCreation from "./pages/TestOrgCreation";
+import PremiumAnalysis from "./pages/PremiumAnalysis";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
