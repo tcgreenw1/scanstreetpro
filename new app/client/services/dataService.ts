@@ -71,10 +71,15 @@ class DataService {
   // Determine if we should use sample data or real data
   private shouldUseSampleData(options?: DataServiceOptions): boolean {
     if (options?.forceRealData) return false;
-    
-    // For free plan users, always show sample data
-    // For paid plan users, show real data (empty initially)
-    return this.organizationPlan === 'free';
+
+    console.log('🔍 shouldUseSampleData check:', {
+      currentPlan: this.organizationPlan,
+      willUseSampleData: this.organizationPlan === 'free' || !this.organizationPlan
+    });
+
+    // For free plan users or uninitialized users, show sample data
+    // For paid plan users (starter, professional, enterprise), show real data
+    return this.organizationPlan === 'free' || !this.organizationPlan;
   }
 
   // CONTRACTORS
