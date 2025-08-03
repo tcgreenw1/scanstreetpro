@@ -77,9 +77,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return data;
       } catch (timeoutError: any) {
         // This catches the timeout error from withTimeout
-        console.warn('User data fetch timed out, user may not have profile yet');
+        console.warn('User data fetch timed out, creating minimal user profile');
         logError(timeoutError, 'AuthContext.fetchUserData.timeout');
-        return null;
+
+        // Return a minimal user profile to prevent blocking
+        return {
+          id: userId,
+          email: 'unknown@example.com',
+          role: 'viewer',
+          organization_id: null,
+          organizations: null,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          name: null,
+          phone: null,
+          avatar_url: null,
+          last_login: null
+        };
       }
     } catch (error: any) {
       const errorMessage = logError(error, 'AuthContext.fetchUserData.general');
