@@ -19,7 +19,8 @@ class DataService {
         this.organizationId = organization.id;
       }
     } catch (error) {
-      console.error('Failed to initialize DataService:', error);
+      const errorMessage = getErrorMessage(error);
+      console.error('Failed to initialize DataService:', errorMessage);
       // Default to free plan for demo purposes
       this.organizationPlan = 'free';
     }
