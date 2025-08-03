@@ -373,10 +373,197 @@ export default function AdminPortal() {
         .eq('id', orgId);
 
       if (error) throw error;
-      
+
       await loadData();
+      setError('Organization plan updated successfully!');
+      setTimeout(() => setError(''), 3000);
     } catch (error: any) {
       setError(error.message || 'Failed to update organization plan');
+    }
+  };
+
+  const deleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      // First delete from users table
+      const { error: profileError } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', userId);
+
+      if (profileError) throw profileError;
+
+      // Then delete from auth
+      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+      if (authError) {
+        console.warn('Failed to delete auth user:', authError.message);
+      }
+
+      await loadData();
+      setError('User deleted successfully!');
+      setTimeout(() => setError(''), 3000);
+    } catch (error: any) {
+      setError(error.message || 'Failed to delete user');
+    }
+  };
+
+  const deleteOrganization = async (orgId: string) => {
+    if (!confirm('Are you sure you want to delete this organization? This will also delete all users in this organization.')) {
+      return;
+    }
+
+    try {
+      // First get all users in this organization
+      const { data: orgUsers, error: usersError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('organization_id', orgId);
+
+      if (usersError) throw usersError;
+
+      // Delete all users in this organization
+      if (orgUsers && orgUsers.length > 0) {
+        for (const user of orgUsers) {
+          await deleteUser(user.id);
+        }
+      }
+
+      // Then delete the organization
+      const { error: orgError } = await supabase
+        .from('organizations')
+        .delete()
+        .eq('id', orgId);
+
+      if (orgError) throw orgError;
+
+      await loadData();
+      setError('Organization and all associated users deleted successfully!');
+      setTimeout(() => setError(''), 3000);
+    } catch (error: any) {
+      setError(error.message || 'Failed to delete organization');
+    }
+  };
+
+  const updateUserRole = async (userId: string, role: string) => {
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ role })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      await loadUsers();
+      setError('User role updated successfully!');
+      setTimeout(() => setError(''), 3000);
+    } catch (error: any) {
+      setError(error.message || 'Failed to update user role');
+    }
+  };
+
+  const bulkUpdateOrgPlans = async (fromPlan: string, toPlan: string) => {
+    if (!confirm(`Are you sure you want to update all organizations from ${fromPlan} to ${toPlan} plan?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .update({ plan: toPlan })
+        .eq('plan', fromPlan);
+
+      if (error) throw error;
+
+      await loadData();
+      setError(`Successfully updated organizations from ${fromPlan} to ${toPlan} plan!`);
+      setTimeout(() => setError(''), 3000);
+    } catch (error: any) {
+      setError(error.message || 'Failed to bulk update organization plans');
+    }
+  };
+
+  const exportUserData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select(`
+          *,
+          organizations (
+            id,
+            name,
+            plan
+          )
+        `);
+
+      if (error) throw error;
+
+      const csvContent = [
+        'ID,Email,Name,Role,Organization,Plan,Active,Created',
+        ...data.map(user => [
+          user.id,
+          user.email,
+          user.name || 'N/A',
+          user.role,
+          user.organization?.name || 'N/A',
+          user.organization?.plan || 'N/A',
+          user.is_active ? 'Yes' : 'No',
+          new Date(user.created_at).toLocaleDateString()
+        ].join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `users-export-${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      setError('User data exported successfully!');
+      setTimeout(() => setError(''), 3000);
+    } catch (error: any) {
+      setError(error.message || 'Failed to export user data');
+    }
+  };
+
+  const exportOrgData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select(`
+          *,
+          users(count)
+        `);
+
+      if (error) throw error;
+
+      const csvContent = [
+        'ID,Name,Slug,Plan,User Count,Created',
+        ...data.map(org => [
+          org.id,
+          org.name,
+          org.slug,
+          org.plan,
+          org.users?.[0]?.count || 0,
+          new Date(org.created_at).toLocaleDateString()
+        ].join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `organizations-export-${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      setError('Organization data exported successfully!');
+      setTimeout(() => setError(''), 3000);
+    } catch (error: any) {
+      setError(error.message || 'Failed to export organization data');
     }
   };
 
