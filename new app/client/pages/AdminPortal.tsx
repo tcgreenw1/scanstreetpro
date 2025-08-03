@@ -34,6 +34,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Shield,
   Users,
@@ -51,10 +52,14 @@ import {
   CheckCircle,
   AlertTriangle,
   TrendingUp,
-  DollarSign
+  DollarSign,
+  ExternalLink,
+  UserPlus,
+  Building2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import dataService from "@/services/dataService";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Organization {
   id: string;
@@ -64,25 +69,57 @@ interface Organization {
   settings: any;
   created_at: string;
   updated_at: string;
+  user_count?: number;
+}
+
+interface User {
+  id: string;
+  organization_id: string;
+  email: string;
+  name: string | null;
+  role: 'admin' | 'manager' | 'inspector' | 'contractor' | 'viewer';
+  phone: string | null;
+  is_active: boolean;
+  last_login: string | null;
+  created_at: string;
+  organization?: Organization;
 }
 
 interface AdminStats {
   totalOrganizations: number;
   totalUsers: number;
-  totalContractors: number;
+  monthlyRevenue: number;
   totalAssets: number;
-  totalInspections: number;
-  totalRevenue: number;
   planDistribution: Record<string, number>;
 }
 
 export default function AdminPortal() {
   const [selectedTab, setSelectedTab] = useState('overview');
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedOrg, setSelectedOrg] = useState<string>('');
+  const [error, setError] = useState('');
+  
+  // New user form state
+  const [newUserForm, setNewUserForm] = useState({
+    email: '',
+    password: '',
+    name: '',
+    organization_id: '',
+    role: 'viewer' as const,
+    phone: ''
+  });
+  
+  // New organization form state
+  const [newOrgForm, setNewOrgForm] = useState({
+    name: '',
+    slug: '',
+    plan: 'free' as const
+  });
+
+  const { user, switchToOrganization } = useAuth();
 
   useEffect(() => {
     loadData();
@@ -90,631 +127,711 @@ export default function AdminPortal() {
 
   const loadData = async () => {
     setLoading(true);
+    setError('');
     try {
-      // Load admin data
-      const [orgsResult, usersResult] = await Promise.all([
+      await Promise.all([
         loadOrganizations(),
-        loadUsers()
+        loadUsers(),
+        loadStats()
       ]);
-      
-      // Calculate stats
-      const statsData = calculateStats(orgsResult, usersResult);
-      setStats(statsData);
-    } catch (error) {
-      console.error('Failed to load admin data:', error);
+    } catch (error: any) {
+      setError(error.message || 'Failed to load admin data');
+      console.error('Error loading admin data:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const loadOrganizations = async () => {
-    // Mock data for demo - in real app, this would be a Supabase admin query
-    const mockOrgs: Organization[] = [
-      {
-        id: '1',
-        name: 'City of Springfield',
-        slug: 'springfield',
-        plan: 'free',
-        settings: { theme: 'light', notifications: true },
-        created_at: '2024-01-15T00:00:00Z',
-        updated_at: '2024-04-20T00:00:00Z'
-      },
-      {
-        id: '2',
-        name: 'Metro County Public Works',
-        slug: 'metro-county',
-        plan: 'professional',
-        settings: { theme: 'dark', notifications: true },
-        created_at: '2024-02-01T00:00:00Z',
-        updated_at: '2024-04-18T00:00:00Z'
-      },
-      {
-        id: '3',
-        name: 'Riverside Municipal Services',
-        slug: 'riverside',
-        plan: 'starter',
-        settings: { theme: 'light', notifications: false },
-        created_at: '2024-03-10T00:00:00Z',
-        updated_at: '2024-04-19T00:00:00Z'
-      }
-    ];
-    setOrganizations(mockOrgs);
-    return mockOrgs;
+    const { data, error } = await supabase
+      .from('organizations')
+      .select(`
+        *,
+        users(count)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    
+    // Transform data to include user count
+    const orgsWithCounts = data.map(org => ({
+      ...org,
+      user_count: org.users?.[0]?.count || 0
+    }));
+    
+    setOrganizations(orgsWithCounts);
+    return data;
   };
 
   const loadUsers = async () => {
-    // Mock data for demo
-    const mockUsers = [
-      {
-        id: '1',
-        name: 'John Mitchell',
-        email: 'john.mitchell@springfield.gov',
-        organization: 'City of Springfield',
-        role: 'admin',
-        plan: 'free',
-        last_login: '2024-04-20T10:30:00Z',
-        is_active: true
-      },
-      {
-        id: '2',
-        name: 'Sarah Johnson',
-        email: 'sarah@metrocounty.gov',
-        organization: 'Metro County Public Works',
-        role: 'manager',
-        plan: 'professional',
-        last_login: '2024-04-19T14:15:00Z',
-        is_active: true
-      },
-      {
-        id: '3',
-        name: 'Mike Rodriguez',
-        email: 'mike@riverside.gov',
-        organization: 'Riverside Municipal Services',
-        role: 'inspector',
-        plan: 'starter',
-        last_login: '2024-04-18T09:00:00Z',
-        is_active: true
+    const { data, error } = await supabase
+      .from('users')
+      .select(`
+        *,
+        organizations (
+          id,
+          name,
+          plan
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    setUsers(data || []);
+    return data;
+  };
+
+  const loadStats = async () => {
+    try {
+      // Get organization count and plan distribution
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .select('plan');
+
+      if (orgError) throw orgError;
+
+      // Get user count
+      const { count: userCount, error: userError } = await supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true });
+
+      if (userError) throw userError;
+
+      // Calculate plan distribution
+      const planDistribution = orgData.reduce((acc, org) => {
+        acc[org.plan] = (acc[org.plan] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Mock revenue calculation (in real app, would come from billing system)
+      const monthlyRevenue = orgData.reduce((total, org) => {
+        const planPricing = {
+          free: 0,
+          starter: 29,
+          professional: 99,
+          enterprise: 299
+        };
+        return total + (planPricing[org.plan] || 0);
+      }, 0);
+
+      setStats({
+        totalOrganizations: orgData.length,
+        totalUsers: userCount || 0,
+        monthlyRevenue,
+        totalAssets: 156, // Mock data - would come from assets table
+        planDistribution
+      });
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  };
+
+  const createUser = async () => {
+    if (!newUserForm.email || !newUserForm.password || !newUserForm.organization_id) {
+      setError('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      // Create user in auth
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: newUserForm.email,
+        password: newUserForm.password,
+        email_confirm: true
+      });
+
+      if (authError) throw authError;
+
+      if (authData.user) {
+        // Create user profile
+        const { error: profileError } = await supabase
+          .from('users')
+          .insert({
+            id: authData.user.id,
+            organization_id: newUserForm.organization_id,
+            email: newUserForm.email,
+            name: newUserForm.name || null,
+            role: newUserForm.role,
+            phone: newUserForm.phone || null
+          });
+
+        if (profileError) throw profileError;
+
+        // Reset form and reload data
+        setNewUserForm({
+          email: '',
+          password: '',
+          name: '',
+          organization_id: '',
+          role: 'viewer',
+          phone: ''
+        });
+        
+        await loadData();
+        setError('User created successfully!');
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setError(''), 3000);
       }
-    ];
-    setUsers(mockUsers);
-    return mockUsers;
-  };
-
-  const calculateStats = (orgs: Organization[], users: any[]): AdminStats => {
-    const planDistribution = orgs.reduce((acc, org) => {
-      acc[org.plan] = (acc[org.plan] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    return {
-      totalOrganizations: orgs.length,
-      totalUsers: users.length,
-      totalContractors: 48, // Mock data
-      totalAssets: 156, // Mock data
-      totalInspections: 234, // Mock data
-      totalRevenue: 25600, // Mock data - monthly revenue
-      planDistribution
-    };
-  };
-
-  const getPlanBadge = (plan: string) => {
-    const colors = {
-      free: 'bg-gray-100 text-gray-800 border-gray-200',
-      starter: 'bg-blue-100 text-blue-800 border-blue-200',
-      professional: 'bg-purple-100 text-purple-800 border-purple-200',
-      enterprise: 'bg-amber-100 text-amber-800 border-amber-200'
-    };
-    
-    return (
-      <Badge className={cn(colors[plan as keyof typeof colors])}>
-        {plan.charAt(0).toUpperCase() + plan.slice(1)}
-      </Badge>
-    );
-  };
-
-  const handleUpgradePlan = async (orgId: string, newPlan: string) => {
-    try {
-      // In real app, this would update the organization's plan in Supabase
-      setOrganizations(prev => prev.map(org => 
-        org.id === orgId ? { ...org, plan: newPlan as any } : org
-      ));
-      alert(`Plan upgraded to ${newPlan} successfully!`);
-    } catch (error) {
-      console.error('Failed to upgrade plan:', error);
-      alert('Failed to upgrade plan');
+    } catch (error: any) {
+      setError(error.message || 'Failed to create user');
     }
   };
 
-  const handleDeactivateUser = async (userId: string) => {
+  const createOrganization = async () => {
+    if (!newOrgForm.name || !newOrgForm.slug) {
+      setError('Please fill in all required fields');
+      return;
+    }
+
     try {
-      setUsers(prev => prev.map(user => 
-        user.id === userId ? { ...user, is_active: false } : user
-      ));
-      alert('User deactivated successfully!');
-    } catch (error) {
-      console.error('Failed to deactivate user:', error);
-      alert('Failed to deactivate user');
+      const { error } = await supabase
+        .from('organizations')
+        .insert({
+          name: newOrgForm.name,
+          slug: newOrgForm.slug,
+          plan: newOrgForm.plan
+        });
+
+      if (error) throw error;
+
+      // Reset form and reload data
+      setNewOrgForm({
+        name: '',
+        slug: '',
+        plan: 'free'
+      });
+      
+      await loadData();
+      setError('Organization created successfully!');
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setError(''), 3000);
+    } catch (error: any) {
+      setError(error.message || 'Failed to create organization');
     }
   };
 
-  const exportData = async (type: string) => {
-    // Mock export functionality
-    alert(`Exporting ${type} data...`);
+  const switchToOrgView = async (orgId: string) => {
+    try {
+      await switchToOrganization(orgId);
+      // Open the main app in a new tab with the organization context
+      window.open('/dashboard', '_blank');
+    } catch (error: any) {
+      setError(error.message || 'Failed to switch organization');
+    }
+  };
+
+  const updateUserStatus = async (userId: string, isActive: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ is_active: isActive })
+        .eq('id', userId);
+
+      if (error) throw error;
+      
+      await loadUsers();
+    } catch (error: any) {
+      setError(error.message || 'Failed to update user status');
+    }
+  };
+
+  const updateOrgPlan = async (orgId: string, plan: string) => {
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .update({ plan })
+        .eq('id', orgId);
+
+      if (error) throw error;
+      
+      await loadData();
+    } catch (error: any) {
+      setError(error.message || 'Failed to update organization plan');
+    }
   };
 
   if (loading) {
     return (
-      <div className="space-y-8 max-w-7xl mx-auto">
-        <div className="text-center py-20">
-          <div className="animate-shimmer h-8 w-64 bg-slate-200 rounded mx-auto mb-4"></div>
-          <div className="animate-shimmer h-4 w-96 bg-slate-200 rounded mx-auto"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-gray-600">Loading admin portal...</p>
         </div>
       </div>
     );
   }
 
+  const getPlanColor = (plan: string) => {
+    switch (plan) {
+      case 'free': return 'bg-blue-100 text-blue-800';
+      case 'starter': return 'bg-green-100 text-green-800';
+      case 'professional': return 'bg-purple-100 text-purple-800';
+      case 'enterprise': return 'bg-amber-100 text-amber-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'bg-red-100 text-red-800';
+      case 'manager': return 'bg-blue-100 text-blue-800';
+      case 'inspector': return 'bg-green-100 text-green-800';
+      case 'contractor': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="text-center py-8">
-        <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-4">
-          Admin Portal
-        </h1>
-        <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
-          Manage organizations, users, billing, and system-wide settings for the Municipal Infrastructure Management Platform.
-        </p>
-        <div className="flex justify-center space-x-4 mt-4">
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300">
-            <Shield className="w-3 h-3 mr-1" />
-            Super Admin Access
-          </Badge>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center space-x-3 p-4 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg">
+            <Shield className="w-8 h-8 text-red-600" />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Admin Portal</h1>
+              <p className="text-gray-600">Manage organizations, users, billing, and system-wide settings for the Municipal Infrastructure Management Platform.</p>
+            </div>
+          </div>
+          
+          <Alert className={cn(
+            "max-w-md mx-auto",
+            error.includes('successfully') ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"
+          )}>
+            <CheckCircle className="h-4 w-4" />
+            <AlertDescription className="text-sm font-medium text-red-800">
+              🔴 Super Admin Access
+            </AlertDescription>
+          </Alert>
+
+          {error && (
+            <Alert className={cn(
+              "max-w-md mx-auto",
+              error.includes('successfully') ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"
+            )}>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription className={error.includes('successfully') ? "text-green-800" : "text-red-800"}>
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
+
+        <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="organizations">Organizations</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="billing">Billing</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-3 bg-blue-100 rounded-lg">
+                      <Building className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Organizations</p>
+                      <p className="text-2xl font-bold text-gray-900">{stats?.totalOrganizations || 0}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-3 bg-green-100 rounded-lg">
+                      <Users className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Users</p>
+                      <p className="text-2xl font-bold text-gray-900">{stats?.totalUsers || 0}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-3 bg-purple-100 rounded-lg">
+                      <DollarSign className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
+                      <p className="text-2xl font-bold text-gray-900">${stats?.monthlyRevenue?.toLocaleString() || 0}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-3 bg-orange-100 rounded-lg">
+                      <Database className="w-6 h-6 text-orange-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Assets</p>
+                      <p className="text-2xl font-bold text-gray-900">{stats?.totalAssets || 0}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Plan Distribution */}
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <BarChart3 className="w-5 h-5" />
+                  <span>Plan Distribution</span>
+                </CardTitle>
+                <CardDescription>Current subscription plan breakdown</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {Object.entries(stats?.planDistribution || {}).map(([plan, count]) => (
+                    <div key={plan} className="text-center p-4 bg-gray-50 rounded-lg">
+                      <p className="text-sm font-medium text-gray-600 capitalize">{plan}</p>
+                      <p className="text-2xl font-bold text-gray-900">{count}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Organizations Tab */}
+          <TabsContent value="organizations" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Organizations</h3>
+                <p className="text-gray-600">Manage customer organizations and their settings</p>
+              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="bg-blue-600 hover:bg-blue-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Organization
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New Organization</DialogTitle>
+                    <DialogDescription>Add a new customer organization to the platform</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="org-name">Organization Name</Label>
+                      <Input
+                        id="org-name"
+                        value={newOrgForm.name}
+                        onChange={(e) => setNewOrgForm({...newOrgForm, name: e.target.value})}
+                        placeholder="City of Springfield"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="org-slug">Slug</Label>
+                      <Input
+                        id="org-slug"
+                        value={newOrgForm.slug}
+                        onChange={(e) => setNewOrgForm({...newOrgForm, slug: e.target.value})}
+                        placeholder="springfield"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="org-plan">Plan</Label>
+                      <Select value={newOrgForm.plan} onValueChange={(value: any) => setNewOrgForm({...newOrgForm, plan: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select plan" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="free">Free</SelectItem>
+                          <SelectItem value="starter">Starter - $29/month</SelectItem>
+                          <SelectItem value="professional">Professional - $99/month</SelectItem>
+                          <SelectItem value="enterprise">Enterprise - $299/month</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button onClick={createOrganization} className="w-full">
+                      Create Organization
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Organization</TableHead>
+                      <TableHead>Plan</TableHead>
+                      <TableHead>Users</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {organizations.map((org) => (
+                      <TableRow key={org.id}>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{org.name}</p>
+                            <p className="text-sm text-gray-500">/{org.slug}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Select value={org.plan} onValueChange={(value) => updateOrgPlan(org.id, value)}>
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="free">Free</SelectItem>
+                              <SelectItem value="starter">Starter</SelectItem>
+                              <SelectItem value="professional">Professional</SelectItem>
+                              <SelectItem value="enterprise">Enterprise</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>{org.user_count || 0}</TableCell>
+                        <TableCell>{new Date(org.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => switchToOrgView(org.id)}
+                              title="Access this organization's app"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Users Tab */}
+          <TabsContent value="users" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Users</h3>
+                <p className="text-gray-600">Manage user accounts across all organizations</p>
+              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="bg-blue-600 hover:bg-blue-700">
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Add User
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New User</DialogTitle>
+                    <DialogDescription>Add a new user to an organization</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="user-email">Email</Label>
+                      <Input
+                        id="user-email"
+                        type="email"
+                        value={newUserForm.email}
+                        onChange={(e) => setNewUserForm({...newUserForm, email: e.target.value})}
+                        placeholder="user@example.com"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="user-password">Password</Label>
+                      <Input
+                        id="user-password"
+                        type="password"
+                        value={newUserForm.password}
+                        onChange={(e) => setNewUserForm({...newUserForm, password: e.target.value})}
+                        placeholder="Secure password"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="user-name">Name</Label>
+                      <Input
+                        id="user-name"
+                        value={newUserForm.name}
+                        onChange={(e) => setNewUserForm({...newUserForm, name: e.target.value})}
+                        placeholder="Full name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="user-organization">Organization</Label>
+                      <Select value={newUserForm.organization_id} onValueChange={(value) => setNewUserForm({...newUserForm, organization_id: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select organization" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {organizations.map((org) => (
+                            <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="user-role">Role</Label>
+                      <Select value={newUserForm.role} onValueChange={(value: any) => setNewUserForm({...newUserForm, role: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="viewer">Viewer</SelectItem>
+                          <SelectItem value="inspector">Inspector</SelectItem>
+                          <SelectItem value="contractor">Contractor</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button onClick={createUser} className="w-full">
+                      Create User
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Organization</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Last Login</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{user.name || 'Unnamed User'}</p>
+                            <p className="text-sm text-gray-500">{user.email}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{user.organization?.name}</p>
+                            <Badge className={cn("text-xs", getPlanColor(user.organization?.plan || 'free'))}>
+                              {user.organization?.plan || 'free'}
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={cn("text-xs", getRoleColor(user.role))}>
+                            {user.role}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={cn("text-xs", user.is_active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")}>
+                            {user.is_active ? 'Active' : 'Disabled'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => updateUserStatus(user.id, !user.is_active)}
+                            >
+                              {user.is_active ? 'Disable' : 'Enable'}
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Billing Tab */}
+          <TabsContent value="billing" className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>Billing Dashboard</CardTitle>
+                <CardDescription>Revenue and subscription management</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <DollarSign className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900">Billing Integration</h3>
+                  <p className="text-gray-600">Connect to Stripe or other billing provider for real billing data</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>System Analytics</CardTitle>
+                <CardDescription>Platform usage and performance metrics</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900">Analytics Dashboard</h3>
+                  <p className="text-gray-600">Detailed analytics and reporting coming soon</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>System Settings</CardTitle>
+                <CardDescription>Configure platform-wide settings and preferences</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Settings className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900">System Configuration</h3>
+                  <p className="text-gray-600">Global settings and configuration options</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
-
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 glass-card border-white/20">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="organizations">Organizations</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="billing">Billing</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          {/* Stats Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="glass-card border-white/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">Organizations</p>
-                    <p className="text-2xl font-bold text-slate-800 dark:text-white">
-                      {stats?.totalOrganizations || 0}
-                    </p>
-                  </div>
-                  <Building className="w-8 h-8 text-blue-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card border-white/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">Total Users</p>
-                    <p className="text-2xl font-bold text-slate-800 dark:text-white">
-                      {stats?.totalUsers || 0}
-                    </p>
-                  </div>
-                  <Users className="w-8 h-8 text-green-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card border-white/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">Monthly Revenue</p>
-                    <p className="text-2xl font-bold text-slate-800 dark:text-white">
-                      ${stats?.totalRevenue.toLocaleString() || 0}
-                    </p>
-                  </div>
-                  <DollarSign className="w-8 h-8 text-purple-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card border-white/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">Total Assets</p>
-                    <p className="text-2xl font-bold text-slate-800 dark:text-white">
-                      {stats?.totalAssets || 0}
-                    </p>
-                  </div>
-                  <Database className="w-8 h-8 text-orange-600" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Plan Distribution */}
-          <Card className="glass-card border-white/20">
-            <CardHeader>
-              <CardTitle className="text-slate-800 dark:text-white">Plan Distribution</CardTitle>
-              <CardDescription>Current subscription plan breakdown</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {Object.entries(stats?.planDistribution || {}).map(([plan, count]) => (
-                  <div key={plan} className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-slate-800 dark:text-white">{count}</div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400 capitalize">{plan}</div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Activity */}
-          <Card className="glass-card border-white/20">
-            <CardHeader>
-              <CardTitle className="text-slate-800 dark:text-white">Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-start space-x-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-slate-800 dark:text-white">
-                      Metro County upgraded to Professional plan
-                    </p>
-                    <p className="text-xs text-slate-500">2 hours ago</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <Users className="w-5 h-5 text-blue-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-slate-800 dark:text-white">
-                      New organization registered: Riverside Municipal Services
-                    </p>
-                    <p className="text-xs text-slate-500">1 day ago</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-slate-800 dark:text-white">
-                      Payment failed for City of Westfield - plan downgraded
-                    </p>
-                    <p className="text-xs text-slate-500">3 days ago</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="organizations" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Organizations</h2>
-            <div className="flex space-x-2">
-              <Button variant="outline" onClick={() => exportData('organizations')}>
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Organization
-              </Button>
-            </div>
-          </div>
-
-          <Card className="glass-card border-white/20">
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Organization</TableHead>
-                    <TableHead>Plan</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Last Activity</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {organizations.map((org) => (
-                    <TableRow key={org.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium text-slate-800 dark:text-white">{org.name}</div>
-                          <div className="text-sm text-slate-500">/{org.slug}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getPlanBadge(org.plan)}</TableCell>
-                      <TableCell>{new Date(org.created_at).toLocaleDateString()}</TableCell>
-                      <TableCell>{new Date(org.updated_at).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button variant="outline" size="sm">
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm">
-                                <Crown className="w-4 h-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Upgrade Plan</DialogTitle>
-                                <DialogDescription>
-                                  Change the subscription plan for {org.name}
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <Select>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select new plan" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="starter">Starter ($29/month)</SelectItem>
-                                    <SelectItem value="professional">Professional ($89/month)</SelectItem>
-                                    <SelectItem value="enterprise">Enterprise ($299/month)</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <div className="flex space-x-2">
-                                  <Button 
-                                    onClick={() => handleUpgradePlan(org.id, 'professional')}
-                                    className="flex-1"
-                                  >
-                                    Upgrade Plan
-                                  </Button>
-                                  <Button variant="outline" className="flex-1">
-                                    Cancel
-                                  </Button>
-                                </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="users" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Users</h2>
-            <div className="flex space-x-2">
-              <Button variant="outline" onClick={() => exportData('users')}>
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
-            </div>
-          </div>
-
-          <Card className="glass-card border-white/20">
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Organization</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Plan</TableHead>
-                    <TableHead>Last Login</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium text-slate-800 dark:text-white">{user.name}</div>
-                          <div className="text-sm text-slate-500">{user.email}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{user.organization}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="capitalize">
-                          {user.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{getPlanBadge(user.plan)}</TableCell>
-                      <TableCell>{new Date(user.last_login).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <Badge className={user.is_active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
-                          {user.is_active ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleDeactivateUser(user.id)}
-                            disabled={!user.is_active}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="billing" className="space-y-6">
-          <div className="text-center py-8">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">Billing Dashboard</h2>
-            <p className="text-slate-600 dark:text-slate-300">
-              Revenue tracking, subscription management, and payment processing
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="glass-card border-white/20">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <TrendingUp className="w-12 h-12 mx-auto mb-4 text-green-600" />
-                  <h3 className="text-lg font-semibold text-slate-800 dark:text-white">Monthly Revenue</h3>
-                  <p className="text-2xl font-bold text-green-600">$25,600</p>
-                  <p className="text-sm text-slate-500">+12% from last month</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card border-white/20">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <Users className="w-12 h-12 mx-auto mb-4 text-blue-600" />
-                  <h3 className="text-lg font-semibold text-slate-800 dark:text-white">Paying Customers</h3>
-                  <p className="text-2xl font-bold text-blue-600">12</p>
-                  <p className="text-sm text-slate-500">+3 new this month</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card border-white/20">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <DollarSign className="w-12 h-12 mx-auto mb-4 text-purple-600" />
-                  <h3 className="text-lg font-semibold text-slate-800 dark:text-white">Average Revenue</h3>
-                  <p className="text-2xl font-bold text-purple-600">$2,133</p>
-                  <p className="text-sm text-slate-500">Per customer</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="analytics" className="space-y-6">
-          <div className="text-center py-8">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">System Analytics</h2>
-            <p className="text-slate-600 dark:text-slate-300">
-              Usage patterns, performance metrics, and growth insights
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="glass-card border-white/20">
-              <CardHeader>
-                <CardTitle>Feature Usage</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span>Contractor Management</span>
-                    <span className="font-medium">85%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Inspections</span>
-                    <span className="font-medium">72%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Budget Planning</span>
-                    <span className="font-medium">68%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Citizen Reports</span>
-                    <span className="font-medium">91%</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card border-white/20">
-              <CardHeader>
-                <CardTitle>Growth Metrics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span>New Signups (30d)</span>
-                    <span className="font-medium text-green-600">+24</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Churn Rate</span>
-                    <span className="font-medium">2.1%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Upgrade Rate</span>
-                    <span className="font-medium text-green-600">18.5%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Support Tickets</span>
-                    <span className="font-medium">42</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-6">
-          <div className="text-center py-8">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">System Settings</h2>
-            <p className="text-slate-600 dark:text-slate-300">
-              Global configuration, maintenance, and system administration
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="glass-card border-white/20">
-              <CardHeader>
-                <CardTitle>Data Management</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button className="w-full" onClick={() => exportData('all')}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Export All Data
-                </Button>
-                <Button variant="outline" className="w-full">
-                  <Database className="w-4 h-4 mr-2" />
-                  Backup Database
-                </Button>
-                <Button variant="outline" className="w-full">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Import Sample Data
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card border-white/20">
-              <CardHeader>
-                <CardTitle>System Maintenance</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button variant="outline" className="w-full">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Clear Cache
-                </Button>
-                <Button variant="outline" className="w-full">
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Optimize Database
-                </Button>
-                <Button variant="destructive" className="w-full">
-                  <AlertTriangle className="w-4 h-4 mr-2" />
-                  Maintenance Mode
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
     </div>
   );
 }
