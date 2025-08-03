@@ -89,6 +89,7 @@ const App = () => (
             <Route path="/premium-analysis" element={<PremiumAnalysis />} />
             <Route path="/debug-env" element={<DebugEnv />} />
             <Route path="/connection-test" element={<ConnectionTest />} />
+            <Route path="/error-test" element={<ErrorTest />} />
 
             {/* Protected Routes */}
             <Route path="/*" element={
