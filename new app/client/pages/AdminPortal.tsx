@@ -244,21 +244,33 @@ export default function AdminPortal() {
   };
 
   const loadUsers = async () => {
-    const { data, error } = await supabase
-      .from('users')
-      .select(`
-        *,
-        organizations (
-          id,
-          name,
-          plan
-        )
-      `)
-      .order('created_at', { ascending: false });
+    try {
+      console.log('👥 Loading users...');
+      const { data, error } = await supabase
+        .from('users')
+        .select(`
+          *,
+          organizations (
+            id,
+            name,
+            plan
+          )
+        `)
+        .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    setUsers(data || []);
-    return data;
+      if (error) {
+        console.error('Users query error:', error);
+        throw error;
+      }
+
+      console.log('Users data:', data);
+      setUsers(data || []);
+      return data || [];
+    } catch (error) {
+      console.error('loadUsers failed:', error);
+      setUsers([]);
+      throw error;
+    }
   };
 
   const loadStats = async () => {
