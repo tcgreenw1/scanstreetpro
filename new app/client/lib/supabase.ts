@@ -696,6 +696,114 @@ export const signOutWithTimeout = async () => {
   }
 };
 
+// Helper function to create a user in both Supabase Auth and database
+export const createUserInSupabase = async (email: string, password: string, userData: {
+  name?: string;
+  role?: string;
+  organization_id?: string;
+}) => {
+  try {
+    console.log('👥 Creating user in Supabase Auth:', email);
+
+    // First create user in Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // Skip email confirmation
+    });
+
+    if (authError) {
+      console.error('❌ Failed to create user in Auth:', authError);
+      throw new Error(`Failed to create user in Auth: ${authError.message}`);
+    }
+
+    if (!authData.user) {
+      throw new Error('No user data returned from Auth creation');
+    }
+
+    console.log('✅ User created in Auth, now creating in database');
+
+    // Then create user record in database
+    const { data: dbData, error: dbError } = await supabase
+      .from('users')
+      .insert({
+        id: authData.user.id,
+        email: email,
+        name: userData.name || null,
+        role: userData.role || 'viewer',
+        organization_id: userData.organization_id || null,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      console.error('❌ Failed to create user in database:', dbError);
+      // Try to clean up the auth user if database insert failed
+      try {
+        await supabase.auth.admin.deleteUser(authData.user.id);
+        console.log('🧹 Cleaned up Auth user after database failure');
+      } catch (cleanupError) {
+        console.warn('Failed to cleanup Auth user:', cleanupError);
+      }
+      throw new Error(`Failed to create user in database: ${dbError.message}`);
+    }
+
+    console.log('✅ User successfully created in both Auth and database');
+    return { authData, dbData };
+  } catch (error: any) {
+    console.error('❌ User creation error:', error);
+    throw error;
+  }
+};
+
+// Helper function to check if user exists in database and Auth
+export const checkUserExistence = async (email: string) => {
+  try {
+    console.log('🔍 Checking user existence for:', email);
+
+    // Check in database
+    const { data: dbUser, error: dbError } = await supabase
+      .from('users')
+      .select('id, email, is_active, role, organization_id')
+      .eq('email', email)
+      .single();
+
+    const dbExists = !dbError && dbUser;
+
+    // Check in Auth (requires admin access, may not work in client)
+    let authExists = false;
+    try {
+      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      if (!authError && authUsers.users) {
+        authExists = authUsers.users.some(user => user.email === email);
+      }
+    } catch (authCheckError) {
+      console.warn('Cannot check Auth users (admin access required):', authCheckError);
+    }
+
+    return {
+      database: {
+        exists: dbExists,
+        user: dbUser,
+        error: dbError
+      },
+      auth: {
+        exists: authExists,
+        checkable: true
+      }
+    };
+  } catch (error: any) {
+    console.error('Error checking user existence:', error);
+    return {
+      database: { exists: false, user: null, error },
+      auth: { exists: false, checkable: false }
+    };
+  }
+};
+
 // Enhanced database functions with timeout
 export const queryWithTimeout = <T>(
   query: any,
