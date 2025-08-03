@@ -316,7 +316,7 @@ export const getUserOrganization = async () => {
   return data?.organizations;
 };
 
-// Timeout wrapper for Supabase operations
+// Timeout wrapper for Supabase operations with retry logic
 export const withTimeout = <T>(
   promise: Promise<T>,
   timeoutMs: number = 10000,
@@ -328,6 +328,41 @@ export const withTimeout = <T>(
       setTimeout(() => reject(new Error(errorMessage)), timeoutMs)
     ),
   ]);
+};
+
+// Enhanced timeout wrapper with retry logic
+export const withTimeoutAndRetry = <T>(
+  promiseFactory: () => Promise<T>,
+  timeoutMs: number = 5000,
+  maxRetries: number = 2,
+  errorMessage: string = 'Operation timed out after retries'
+): Promise<T> => {
+  return new Promise(async (resolve, reject) => {
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const promise = promiseFactory();
+        const timeoutPromise = new Promise<T>((_, timeoutReject) =>
+          setTimeout(() => timeoutReject(new Error(`${errorMessage} (attempt ${attempt + 1})`)), timeoutMs)
+        );
+
+        const result = await Promise.race([promise, timeoutPromise]);
+        resolve(result);
+        return;
+      } catch (error: any) {
+        lastError = error;
+        console.warn(`Attempt ${attempt + 1} failed:`, error.message);
+
+        // If this isn't the last attempt, wait before retrying
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1))); // Exponential backoff
+        }
+      }
+    }
+
+    reject(lastError || new Error(errorMessage));
+  });
 };
 
 // Test Supabase connection comprehensively
