@@ -41,6 +41,15 @@ export class ErrorHandler {
   }
 
   static extractErrorMessage(error: any): string {
+    // Add debug logging for [object Object] detection
+    const originalToString = error?.toString?.();
+    if (originalToString === '[object Object]') {
+      console.warn('🚨 Extracting message from [object Object] error:', error);
+      console.warn('Error type:', typeof error);
+      console.warn('Error keys:', error ? Object.keys(error) : 'no keys');
+      console.warn('Stack trace for [object Object] error:', new Error().stack);
+    }
+
     // Handle null, undefined, or empty values
     if (!error) return 'Unknown error occurred';
 
@@ -91,6 +100,19 @@ export class ErrorHandler {
       }
     } catch (e) {
       // Ignore extraction errors
+    }
+
+    // Final fallback with debug info
+    if (error && typeof error === 'object') {
+      console.warn('🚨 Could not extract meaningful error message from object:', error);
+      try {
+        const jsonStr = JSON.stringify(error, null, 2);
+        if (jsonStr && jsonStr !== '{}') {
+          return `Error object: ${jsonStr.substring(0, 200)}${jsonStr.length > 200 ? '...' : ''}`;
+        }
+      } catch (e) {
+        return `Non-serializable error object (type: ${typeof error})`;
+      }
     }
 
     return 'Unknown error occurred';
