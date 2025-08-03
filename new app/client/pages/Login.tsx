@@ -30,9 +30,26 @@ const Login = () => {
 
   useEffect(() => {
     setMounted(true);
-    // Check if user is already logged in
-    checkUser();
+    initializeLogin();
   }, []);
+
+  const initializeLogin = async () => {
+    try {
+      // Test Supabase connection first
+      const connectionTest = await testSupabaseConnection();
+
+      if (!connectionTest.success) {
+        setError(`Connection failed: ${connectionTest.error}. Please check your internet connection.`);
+        return;
+      }
+
+      // Check if user is already logged in
+      await checkUser();
+    } catch (error: any) {
+      console.error('Login initialization error:', error);
+      setError(`Initialization failed: ${error?.message || 'Unknown error'}`);
+    }
+  };
 
   const checkUser = async () => {
     try {
@@ -43,15 +60,15 @@ const Login = () => {
           .select('role')
           .eq('id', session.user.id)
           .single();
-          
+
         if (userData?.role === 'admin') {
           navigate('/admin-portal');
         } else {
           navigate('/dashboard');
         }
       }
-    } catch (error) {
-      console.log('No active session');
+    } catch (error: any) {
+      console.log('No active session:', error?.message || error);
     }
   };
 
