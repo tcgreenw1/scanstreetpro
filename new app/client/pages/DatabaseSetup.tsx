@@ -22,7 +22,19 @@ export default function DatabaseSetup() {
     setSuccess(false);
 
     try {
-      logProgress('🔄 Starting database initialization...');
+      logProgress('🔄 Starting database connection test...');
+
+      // Test database connection first
+      const { data: testConnection, error: connectionError } = await supabase
+        .from('organizations')
+        .select('count')
+        .limit(1);
+
+      if (connectionError) {
+        throw new Error(`Database connection failed: ${connectionError.message}`);
+      }
+
+      logProgress('✅ Database connection successful');
 
       // Create admin organization
       logProgress('📁 Creating admin organization...');
@@ -37,10 +49,15 @@ export default function DatabaseSetup() {
         .single();
 
       if (adminOrgError && !adminOrgError.message.includes('duplicate')) {
-        throw new Error(`Failed to create admin organization: ${adminOrgError.message}`);
+        if (adminOrgError.message.includes('violates row-level security')) {
+          logProgress('⚠️  Admin organization creation requires service role key');
+          logProgress('📋 Manual setup instructions will be provided');
+        } else {
+          throw new Error(`Failed to create admin organization: ${adminOrgError.message}`);
+        }
+      } else {
+        logProgress('✅ Admin organization created');
       }
-
-      logProgress('✅ Admin organization created');
 
       // Create test organization
       logProgress('📁 Creating test organization...');
@@ -55,120 +72,42 @@ export default function DatabaseSetup() {
         .single();
 
       if (testOrgError && !testOrgError.message.includes('duplicate')) {
-        throw new Error(`Failed to create test organization: ${testOrgError.message}`);
-      }
-
-      logProgress('✅ Test organization created');
-
-      // Create admin user
-      logProgress('👤 Creating admin user...');
-      const adminOrgId = adminOrg?.id || (await supabase.from('organizations').select('id').eq('slug', 'admin').single()).data?.id;
-      
-      const { data: adminAuth, error: adminAuthError } = await supabase.auth.admin.createUser({
-        email: 'admin@scanstreetpro.com',
-        password: 'AdminPass123!',
-        email_confirm: true
-      });
-
-      if (adminAuthError && !adminAuthError.message.includes('already')) {
-        throw new Error(`Failed to create admin auth: ${adminAuthError.message}`);
-      }
-
-      if (adminAuth.user && adminOrgId) {
-        const { error: adminProfileError } = await supabase
-          .from('users')
-          .insert({
-            id: adminAuth.user.id,
-            organization_id: adminOrgId,
-            email: 'admin@scanstreetpro.com',
-            name: 'System Administrator',
-            role: 'admin'
-          });
-
-        if (adminProfileError && !adminProfileError.message.includes('duplicate')) {
-          throw new Error(`Failed to create admin profile: ${adminProfileError.message}`);
+        if (testOrgError.message.includes('violates row-level security')) {
+          logProgress('⚠️  Test organization creation requires service role key');
+        } else {
+          throw new Error(`Failed to create test organization: ${testOrgError.message}`);
         }
-
-        logProgress('✅ Admin user created (admin@scanstreetpro.com / AdminPass123!)');
+      } else {
+        logProgress('✅ Test organization created');
       }
 
-      // Create test user
-      logProgress('👤 Creating test user...');
-      const testOrgId = testOrg?.id || (await supabase.from('organizations').select('id').eq('slug', 'springfield').single()).data?.id;
-      
-      const { data: testAuth, error: testAuthError } = await supabase.auth.admin.createUser({
-        email: 'test@springfield.gov',
-        password: 'TestUser123!',
-        email_confirm: true
-      });
+      // Try to check existing organizations
+      logProgress('🔍 Checking existing organizations...');
+      const { data: existingOrgs, error: orgCheckError } = await supabase
+        .from('organizations')
+        .select('*');
 
-      if (testAuthError && !testAuthError.message.includes('already')) {
-        throw new Error(`Failed to create test auth: ${testAuthError.message}`);
+      if (orgCheckError) {
+        logProgress(`⚠️  Could not check organizations: ${orgCheckError.message}`);
+        logProgress('📋 This is expected with current permissions');
+      } else {
+        logProgress(`✅ Found ${existingOrgs?.length || 0} existing organizations`);
       }
 
-      if (testAuth.user && testOrgId) {
-        const { error: testProfileError } = await supabase
-          .from('users')
-          .insert({
-            id: testAuth.user.id,
-            organization_id: testOrgId,
-            email: 'test@springfield.gov',
-            name: 'Test User',
-            role: 'manager'
-          });
+      // Note about user creation
+      logProgress('📋 User creation requires service role key or manual setup in Supabase dashboard');
+      logProgress('🔗 Go to Supabase Dashboard → Authentication → Users to create:');
+      logProgress('   • admin@scanstreetpro.com (password: AdminPass123!)');
+      logProgress('   • test@springfield.gov (password: TestUser123!)');
+      logProgress('💡 After creating users, add them to the users table with organization_id');
 
-        if (testProfileError && !testProfileError.message.includes('duplicate')) {
-          throw new Error(`Failed to create test profile: ${testProfileError.message}`);
-        }
+      logProgress('🎉 Database connection test completed!');
+      logProgress('📋 Next steps:');
+      logProgress('   1. Create organizations in Supabase Dashboard → Database → organizations table');
+      logProgress('   2. Create auth users in Supabase Dashboard → Authentication → Users');
+      logProgress('   3. Link users to organizations in the users table');
+      logProgress('   4. Test the login flow');
 
-        logProgress('✅ Test user created (test@springfield.gov / TestUser123!)');
-      }
-
-      // Add some sample contractors for Springfield
-      if (testOrgId) {
-        logProgress('🚧 Adding sample contractors...');
-        const contractors = [
-          {
-            organization_id: testOrgId,
-            contractor_id: 'CONT-001',
-            name: 'Springfield Road Works',
-            company: 'Springfield Construction LLC',
-            email: 'contact@springfieldroads.com',
-            phone: '(555) 123-4567',
-            specialties: ['Road Repair', 'Pothole Filling', 'Asphalt Overlay'],
-            rating: 4.8,
-            status: 'certified',
-            active_projects: 3,
-            completed_projects: 24,
-            total_value: 125000
-          },
-          {
-            organization_id: testOrgId,
-            contractor_id: 'CONT-002',
-            name: 'Elite Infrastructure Solutions',
-            company: 'Elite Contractors Inc',
-            email: 'info@eliteinfra.com',
-            phone: '(555) 987-6543',
-            specialties: ['Bridge Maintenance', 'Drainage Systems', 'Street Lighting'],
-            rating: 4.6,
-            status: 'certified',
-            active_projects: 2,
-            completed_projects: 18,
-            total_value: 89000
-          }
-        ];
-
-        for (const contractor of contractors) {
-          const { error } = await supabase.from('contractors').insert(contractor);
-          if (error && !error.message.includes('duplicate')) {
-            console.warn(`Warning: Could not create contractor ${contractor.name}:`, error.message);
-          }
-        }
-
-        logProgress('✅ Sample contractors added');
-      }
-
-      logProgress('🎉 Database initialization completed successfully!');
       setSuccess(true);
 
     } catch (err: any) {
