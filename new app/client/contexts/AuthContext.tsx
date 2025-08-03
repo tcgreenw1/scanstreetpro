@@ -68,7 +68,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       );
 
       if (error) {
-        console.error('Error fetching user data:', error.message || error);
+        logError(error, 'AuthContext.fetchUserData');
         return null;
       }
 
