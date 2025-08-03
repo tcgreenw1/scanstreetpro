@@ -784,49 +784,7 @@ export default function Contractors() {
       </div>
 
       {/* Premium Features Notice */}
-      {currentPlan === 'free' && (
-        <Card className="glass-card border-amber-200/50 bg-gradient-to-r from-amber-50/50 to-orange-50/50 dark:from-amber-900/20 dark:to-orange-900/20">
-          <CardContent className="p-8">
-            <div className="text-center">
-              <Crown className="w-16 h-16 text-amber-500 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">
-                Unlock Advanced Contractor Management
-              </h3>
-              <p className="text-slate-600 dark:text-slate-300 mb-6 max-w-2xl mx-auto">
-                Upgrade to manage unlimited contractors, advanced project tracking, automated payments, 
-                comprehensive reporting, and enterprise-grade contractor performance analytics.
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div className="p-4 bg-white/50 dark:bg-black/20 rounded-lg border border-white/30">
-                  <Users className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                  <h4 className="font-semibold text-slate-800 dark:text-white">Unlimited Contractors</h4>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">No limits on contractor database</p>
-                </div>
-                <div className="p-4 bg-white/50 dark:bg-black/20 rounded-lg border border-white/30">
-                  <BarChart3 className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                  <h4 className="font-semibold text-slate-800 dark:text-white">Advanced Analytics</h4>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Performance insights & reports</p>
-                </div>
-                <div className="p-4 bg-white/50 dark:bg-black/20 rounded-lg border border-white/30">
-                  <DollarSign className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-                  <h4 className="font-semibold text-slate-800 dark:text-white">Payment Automation</h4>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Automated invoicing & payments</p>
-                </div>
-              </div>
-              
-              <Button 
-                onClick={() => window.location.href = '/pricing'}
-                size="lg"
-                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg"
-              >
-                <Crown className="w-5 h-5 mr-2" />
-                Upgrade for Advanced Management
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <ContractorUpgradeCard />
     </div>
   );
 }
