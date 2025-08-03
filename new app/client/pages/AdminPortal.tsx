@@ -205,24 +205,42 @@ export default function AdminPortal() {
   };
 
   const loadOrganizations = async () => {
-    const { data, error } = await supabase
-      .from('organizations')
-      .select(`
-        *,
-        users(count)
-      `)
-      .order('created_at', { ascending: false });
+    try {
+      console.log('📊 Loading organizations...');
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    
-    // Transform data to include user count
-    const orgsWithCounts = data.map(org => ({
-      ...org,
-      user_count: org.users?.[0]?.count || 0
-    }));
-    
-    setOrganizations(orgsWithCounts);
-    return data;
+      if (error) {
+        console.error('Organizations query error:', error);
+        throw error;
+      }
+
+      console.log('Organizations data:', data);
+
+      // Get user counts separately to avoid complex joins
+      const orgsWithCounts = await Promise.all(
+        (data || []).map(async (org) => {
+          const { count } = await supabase
+            .from('users')
+            .select('*', { count: 'exact', head: true })
+            .eq('organization_id', org.id);
+
+          return {
+            ...org,
+            user_count: count || 0
+          };
+        })
+      );
+
+      setOrganizations(orgsWithCounts);
+      return orgsWithCounts;
+    } catch (error) {
+      console.error('loadOrganizations failed:', error);
+      setOrganizations([]);
+      throw error;
+    }
   };
 
   const loadUsers = async () => {
