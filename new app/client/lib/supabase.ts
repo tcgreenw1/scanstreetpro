@@ -463,8 +463,9 @@ export const signOutWithTimeout = async () => {
     );
 
     if (result.error) {
-      console.error('❌ Sign out failed:', result.error);
-      throw new Error(result.error.message || 'Sign out failed');
+      const errorMessage = extractErrorMessage(result.error);
+      console.error('❌ Sign out failed:', errorMessage);
+      throw new Error(errorMessage || 'Sign out failed');
     }
 
     console.log('✅ Sign out successful');
