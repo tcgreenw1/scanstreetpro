@@ -41,13 +41,58 @@ export class ErrorHandler {
   }
 
   static extractErrorMessage(error: any): string {
+    // Handle null, undefined, or empty values
+    if (!error) return 'Unknown error occurred';
+
+    // Handle string errors
     if (typeof error === 'string') return error;
+
+    // Handle Error objects and similar
     if (error?.message) return error.message;
     if (error?.error?.message) return error.error.message;
+
+    // Handle various error properties
+    if (error?.details) return error.details;
+    if (error?.hint) return error.hint;
+    if (error?.code) return `Error code: ${error.code}`;
+
+    // Handle nested error structures
+    if (error?.data?.error?.message) return error.data.error.message;
+    if (error?.response?.data?.message) return error.response.data.message;
+
+    // Try to find any message-like property
+    const messageKeys = ['msg', 'description', 'reason', 'statusText', 'detail'];
+    for (const key of messageKeys) {
+      if (error[key] && typeof error[key] === 'string') {
+        return error[key];
+      }
+    }
+
+    // Try toString if it returns something meaningful
     if (error?.toString && typeof error.toString === 'function') {
       const str = error.toString();
-      if (str !== '[object Object]') return str;
+      if (str && str !== '[object Object]' && str !== 'Error') {
+        return str;
+      }
     }
+
+    // Try to extract from object properties
+    try {
+      if (error && typeof error === 'object') {
+        const keys = Object.keys(error);
+        if (keys.length > 0) {
+          const firstKey = keys[0];
+          const firstValue = error[firstKey];
+
+          if (typeof firstValue === 'string' && firstValue.length > 0) {
+            return `${firstKey}: ${firstValue}`;
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore extraction errors
+    }
+
     return 'Unknown error occurred';
   }
 
