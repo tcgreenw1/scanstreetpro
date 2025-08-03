@@ -36,6 +36,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { usePricing } from '@/contexts/PricingContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { GlobalSearch } from './GlobalSearch';
 import {
   DropdownMenu,
@@ -135,6 +136,7 @@ export function Layout({ children }: LayoutProps) {
   const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
   const location = useLocation();
   const { currentPlan, planDetails } = usePricing();
+  const { user, signOut, isAdmin } = useAuth();
 
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/';
@@ -317,27 +319,49 @@ export function Layout({ children }: LayoutProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 glass-card border-white/20">
                   <div className="p-3 border-b border-white/10">
-                    <p className="text-sm font-medium text-slate-800 dark:text-white">Scan Street Pro User</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Infrastructure Admin</p>
+                    <p className="text-sm font-medium text-slate-800 dark:text-white">
+                      {user?.name || user?.email || 'User'}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {user?.role === 'admin' ? 'System Administrator' :
+                       user?.role === 'manager' ? 'Infrastructure Manager' :
+                       user?.role === 'inspector' ? 'Inspector' :
+                       user?.role === 'contractor' ? 'Contractor' : 'User'}
+                    </p>
+                    {user?.organization && (
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        {user.organization.name}
+                      </p>
+                    )}
                     <Badge variant="outline" className={cn(
                       "mt-1 text-xs",
-                      currentPlan === 'free' ? "bg-blue-50 text-blue-700 border-blue-200" :
-                      currentPlan === 'standard' ? "bg-green-50 text-green-700 border-green-200" :
-                      currentPlan === 'pro' ? "bg-purple-50 text-purple-700 border-purple-200" :
+                      (user?.organization?.plan || currentPlan) === 'free' ? "bg-blue-50 text-blue-700 border-blue-200" :
+                      (user?.organization?.plan || currentPlan) === 'starter' ? "bg-green-50 text-green-700 border-green-200" :
+                      (user?.organization?.plan || currentPlan) === 'professional' ? "bg-purple-50 text-purple-700 border-purple-200" :
                       "bg-amber-50 text-amber-700 border-amber-200"
                     )}>
-                      {currentPlan === 'enterprise' ? <Crown className="w-3 h-3 mr-1" /> : <Zap className="w-3 h-3 mr-1" />}
-                      {planDetails.name} Plan
+                      {(user?.organization?.plan || currentPlan) === 'enterprise' ? <Crown className="w-3 h-3 mr-1" /> : <Zap className="w-3 h-3 mr-1" />}
+                      {user?.organization?.plan || planDetails.name} Plan
                     </Badge>
                   </div>
                   <DropdownMenuItem>
                     <UserCheck className="w-4 h-4 mr-2" />
                     My Profile
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="w-4 h-4 mr-2" />
-                    Settings
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Settings
+                    </Link>
                   </DropdownMenuItem>
+                  {isAdmin() && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin-portal">
+                        <Shield className="w-4 h-4 mr-2" />
+                        Admin Portal
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   {currentPlan !== 'enterprise' && (
                     <DropdownMenuItem asChild>
                       <Link to="/pricing">
@@ -362,7 +386,13 @@ export function Layout({ children }: LayoutProps) {
                     Help & Support
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">
+                  <DropdownMenuItem
+                    className="text-red-600"
+                    onClick={async () => {
+                      await signOut();
+                      window.location.href = '/login';
+                    }}
+                  >
                     <LogOut className="w-4 h-4 mr-2" />
                     Sign Out
                   </DropdownMenuItem>
