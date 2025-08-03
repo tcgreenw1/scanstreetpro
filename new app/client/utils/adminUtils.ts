@@ -23,8 +23,10 @@ export const refreshAdminData = async () => {
       .limit(1);
     
     if (connectionError) {
-      console.error('Database connection test failed:', connectionError);
-      return { success: false, error: getErrorMessage(connectionError) };
+      const errorMessage = getErrorMessage(connectionError);
+      console.error('Database connection test failed:', errorMessage);
+      console.debug('Raw error object:', connectionError);
+      return { success: false, error: errorMessage };
     }
 
     console.log('✅ Database connection successful');
