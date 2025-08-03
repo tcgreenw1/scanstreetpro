@@ -195,11 +195,70 @@ const payments: Payment[] = [
 ];
 
 export default function Contractors() {
+  const [contractors, setContractors] = useState<Contractor[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedContractor, setSelectedContractor] = useState<string>('');
   const [selectedProject, setSelectedProject] = useState<string>('');
   const { currentPlan } = usePricing();
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [contractorsResult, projectsResult] = await Promise.all([
+        dataService.getContractors(),
+        dataService.getProjects()
+      ]);
+
+      if (contractorsResult.data) {
+        // Transform data to match existing interface
+        const transformedContractors = contractorsResult.data.map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          contact: {
+            email: c.email || '',
+            phone: c.phone || '',
+            address: c.address || ''
+          },
+          rating: c.rating || 0,
+          certifications: c.certifications || [],
+          status: c.status,
+          activeProjects: c.active_projects || 0,
+          completedProjects: c.completed_projects || 0,
+          totalValue: c.total_value || 0,
+          joinDate: c.join_date || c.created_at?.split('T')[0],
+          specialties: c.specialties || []
+        }));
+        setContractors(transformedContractors);
+      }
+
+      if (projectsResult.data) {
+        setProjects(projectsResult.data);
+      }
+
+      // Mock payment data for demo
+      setPayments([
+        { date: '2024-03-15', amount: 170000, description: 'Main Street - Milestone 2', status: 'paid' },
+        { date: '2024-04-01', amount: 96000, description: 'Sidewalk Project - Progress Payment', status: 'pending' },
+        { date: '2024-04-15', amount: 255000, description: 'Main Street - Milestone 3', status: 'pending' },
+        { date: '2024-02-28', amount: 45000, description: 'Emergency Repairs - Final Payment', status: 'paid' }
+      ]);
+
+    } catch (error) {
+      console.error('Failed to load contractors data:', error);
+      setContractors([]);
+      setProjects([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredContractors = contractors.filter(contractor => {
     const matchesStatus = statusFilter === 'all' || contractor.status === statusFilter;
