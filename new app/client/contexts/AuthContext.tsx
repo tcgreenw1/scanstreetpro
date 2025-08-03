@@ -47,26 +47,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const fetchUserData = async (userId: string) => {
     try {
-      // Use retry logic for better reliability
-      const { data, error } = await withTimeoutAndRetry(
-        () => supabase
-          .from('users')
-          .select(`
-            *,
-            organizations (
-              id,
-              name,
-              slug,
-              plan,
-              settings
-            )
-          `)
-          .eq('id', userId)
-          .single(),
-        3000, // 3 second timeout per attempt
-        2,    // 2 retries (3 total attempts)
-        'User data fetch failed after retries'
-      );
+      // Use circuit breaker to prevent repeated failures
+      const { data, error } = await userDataCircuitBreaker.execute(async () => {
+        return await withTimeoutAndRetry(
+          () => supabase
+            .from('users')
+            .select(`
+              *,
+              organizations (
+                id,
+                name,
+                slug,
+                plan,
+                settings
+              )
+            `)
+            .eq('id', userId)
+            .single(),
+          3000, // 3 second timeout per attempt
+          1,    // 1 retry (2 total attempts) - reduced since circuit breaker handles failures
+          'User data fetch failed after retries'
+        );
+      });
 
       if (error) {
         console.warn('User data fetch error:', error);
