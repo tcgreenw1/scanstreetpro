@@ -227,7 +227,7 @@ export default function DatabaseSetup() {
                     id="schema-sql"
                     className="bg-gray-900 text-green-400 p-4 rounded-lg text-xs font-mono max-h-80 overflow-y-auto"
                   >
-{`-- Municipal Infrastructure Management System Database Schema
+                    <pre>{`-- Municipal Infrastructure Management System Database Schema
 -- Complete 15-Table Schema for Supabase Integration
 
 -- Enable UUID extension
@@ -606,7 +606,7 @@ CREATE TRIGGER update_citizen_reports_updated_at BEFORE UPDATE ON citizen_report
 CREATE TRIGGER update_scan_issues_updated_at BEFORE UPDATE ON scan_issues FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_inspector_notes_updated_at BEFORE UPDATE ON inspector_notes FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_inspection_templates_updated_at BEFORE UPDATE ON inspection_templates FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();`}
+CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();`}</pre>
                   </div>
                 </div>
               </div>
