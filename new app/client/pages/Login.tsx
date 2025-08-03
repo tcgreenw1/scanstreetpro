@@ -86,25 +86,17 @@ const Login = () => {
     try {
       if (isSignUp) {
         // Sign up flow
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        
+        const result = await signUpWithTimeout(email, password);
+
         clearTimeout(timeoutId);
-        
-        if (error) throw error;
-        
+
         setError('✅ Check your email for verification link!');
       } else {
         // Sign in flow
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        
+        const { data, error } = await signInWithTimeout(email, password);
+
         clearTimeout(timeoutId);
-        
+
         if (error) throw error;
         
         if (data.user) {
