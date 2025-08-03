@@ -27,7 +27,8 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error'>('checking');
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | 'fallback'>('checking');
+  const [fallbackMode, setFallbackMode] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
