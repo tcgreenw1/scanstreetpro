@@ -721,7 +721,7 @@ CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW
               <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                 <h4 className="font-semibold text-green-800 mb-2">Add New Table Template:</h4>
                 <div className="text-xs bg-green-100 p-2 rounded font-mono">
-{`CREATE TABLE new_table_name (
+                  <pre>{`CREATE TABLE new_table_name (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     organization_id UUID REFERENCES organizations(id),
     name VARCHAR(255) NOT NULL,
@@ -744,14 +744,14 @@ ON new_table_name(organization_id);
 -- Add trigger
 CREATE TRIGGER update_new_table_updated_at
 BEFORE UPDATE ON new_table_name
-FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();`}
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();`}</pre>
                 </div>
               </div>
 
               <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
                 <h4 className="font-semibold text-purple-800 mb-2">Add New Column Template:</h4>
                 <div className="text-xs bg-purple-100 p-2 rounded font-mono">
-{`-- Add new column to existing table
+                  <pre>{`-- Add new column to existing table
 ALTER TABLE existing_table_name
 ADD COLUMN new_column_name VARCHAR(255);
 
@@ -767,7 +767,7 @@ SET DEFAULT 'default_value';
 
 -- Create index if needed
 CREATE INDEX idx_table_new_column
-ON existing_table_name(new_column_name);`}
+ON existing_table_name(new_column_name);`}</pre>
                 </div>
               </div>
             </div>
