@@ -332,31 +332,7 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-black to-slate-800">
-      {/* Animated Background */}
-      <div className="absolute inset-0">
-        {/* Gradient mesh */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 animate-gradient-shift"></div>
-        
-        {/* Floating particles */}
-        <div className="absolute inset-0">
-          {Array.from({ length: 50 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-white/30 rounded-full animate-float"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 20}s`,
-                animationDuration: `${10 + Math.random() * 20}s`
-              }}
-            />
-          ))}
-        </div>
-        
-        {/* Glass morphism overlay */}
-        <div className="absolute inset-0 backdrop-blur-3xl bg-gradient-to-br from-white/5 via-transparent to-black/20"></div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
 
       {/* Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
