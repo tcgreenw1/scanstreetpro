@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User } from '@supabase/supabase-js';
-import { supabase, withTimeout, withTimeoutAndRetry, signInWithTimeout, signUpWithTimeout, signOutWithTimeout } from '@/lib/supabase';
+import { supabase, withTimeout, withTimeoutAndRetry, withFastTimeout, signInWithTimeout, signUpWithTimeout, signOutWithTimeout } from '@/lib/supabase';
 import { logError } from '@/utils/errorHandler';
 import { userDataCircuitBreaker } from '@/utils/circuitBreaker';
 
