@@ -59,7 +59,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         // Check if Supabase client is available
         if (!supabase) {
-          throw new Error('Supabase client not initialized');
+          console.warn('Supabase client not available - starting in logged out state');
+          if (mounted.current) setLoading(false);
+          return;
+        }
+
+        // Quick connectivity test first
+        try {
+          const quickTest = await Promise.race([
+            fetch(import.meta.env.VITE_SUPABASE_URL + '/rest/v1/', {
+              method: 'HEAD',
+              headers: { 'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY }
+            }),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Quick connectivity test timeout')), 2000)
+            )
+          ]);
+          console.log('✅ Supabase connectivity confirmed');
+        } catch (connectivityError) {
+          console.warn('⚠️ Supabase connectivity issues detected - using offline mode');
+          if (mounted.current) setLoading(false);
+          return;
         }
 
         // Get session with more generous timeout
