@@ -106,11 +106,7 @@ const App = () => (
                     <Route path="/admin-dashboard" element={<AdminDashboard />} />
 
                     {/* Admin Only Routes */}
-                    <Route path="/admin-portal" element={
-                      <ProtectedRoute requireAdmin={true}>
-                        <AdminPortal />
-                      </ProtectedRoute>
-                    } />
+                    <Route path="/admin-portal" element={<AdminPortal />} />
 
                     {/* Infrastructure Management */}
                     <Route path="/assets" element={<AssetManager />} />
