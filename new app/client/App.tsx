@@ -56,6 +56,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/inspection-dashboard" element={<RoadInspection />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route path="/admin-portal" element={<AdminPortal />} />
 
             {/* Infrastructure Management */}
             <Route path="/assets" element={<AssetManager />} />
