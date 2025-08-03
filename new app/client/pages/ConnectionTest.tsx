@@ -102,13 +102,22 @@ export default function ConnectionTest() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-lg font-medium">{getStatusText()}</span>
-                <Button 
-                  onClick={runConnectionTest} 
-                  disabled={testing}
-                  variant="outline"
-                >
-                  {testing ? 'Testing...' : 'Test Again'}
-                </Button>
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={runConnectionTest}
+                    disabled={testing}
+                    variant="outline"
+                  >
+                    {testing ? 'Testing...' : 'Test Again'}
+                  </Button>
+                  <Button
+                    onClick={runFullDiagnostics}
+                    disabled={runningDiagnostics}
+                    variant="outline"
+                  >
+                    {runningDiagnostics ? 'Running...' : 'Full Diagnostics'}
+                  </Button>
+                </div>
               </div>
 
               {testResult && (
