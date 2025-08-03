@@ -58,7 +58,7 @@ import {
   Building2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase";
+import { supabase, testSupabaseConnection, queryWithTimeout, checkUserExistence, createUserInSupabase, signInWithTimeout } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { refreshAdminData } from "@/utils/adminUtils";
 import { getErrorMessage } from "@/utils/errorHandler";
