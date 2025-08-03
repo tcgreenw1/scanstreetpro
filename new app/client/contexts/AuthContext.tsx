@@ -107,36 +107,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    // Get initial session with retry logic
+    // Get initial session with fast-fail approach
     const getSession = async () => {
       try {
-        const { data: { session }, error } = await withTimeoutAndRetry(
-          () => supabase.auth.getSession(),
-          3000, // 3 second timeout
-          1,    // 1 retry (2 total attempts)
-          'Session fetch timed out'
-        );
+        // Try a very quick session check first
+        let sessionData;
+        try {
+          sessionData = await withFastTimeout(
+            supabase.auth.getSession(),
+            2000, // 2 second quick timeout
+            'Quick session fetch timed out'
+          );
+        } catch (quickError: any) {
+          console.warn('Quick session fetch failed, app will start in logged-out state');
+          setLoading(false);
+          return;
+        }
+
+        const { data: { session }, error } = sessionData;
 
         if (error) {
-          console.error('Error getting session:', error.message || error);
+          console.warn('Session error, starting logged out:', error.message || error);
           setLoading(false);
           return;
         }
 
         if (session?.user) {
-          console.log('📊 Fetching user data for session user:', session.user.id);
+          console.log('📊 Session found, fetching user data:', session.user.id);
           const userData = await fetchUserData(session.user.id);
           setUser({
             ...session.user,
-            role: userData?.role,
-            organization_id: userData?.organization_id,
-            organization: userData?.organizations
+            role: userData?.role || 'viewer',
+            organization_id: userData?.organization_id || null,
+            organization: userData?.organizations || null
           });
         }
 
         setLoading(false);
       } catch (error: any) {
-        console.error('Error in getSession:', error.message || error);
+        console.warn('Session handling failed, starting in logged-out state:', error.message || error);
         setLoading(false);
       }
     };
