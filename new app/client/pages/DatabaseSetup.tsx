@@ -48,10 +48,11 @@ export default function DatabaseSetup() {
         logProgress('❌ Database schema not found - tables need to be created');
         logProgress('📋 You need to run the schema.sql file in Supabase');
         logProgress('🔗 Go to Supabase Dashboard → SQL Editor');
-        logProgress('📄 Copy and paste the schema from database/schema.sql');
-
+        logProgress('📄 Copy and paste the schema from the box below');
+        
         // Show the schema creation instructions
         setError('Database schema not found. Please create the tables first using the SQL schema.');
+        setSuccess(true); // Show success section for schema display
         return;
       }
 
@@ -119,20 +120,13 @@ export default function DatabaseSetup() {
         logProgress(`✅ Found ${existingOrgs?.length || 0} existing organizations`);
       }
 
-      // Note about user creation
-      logProgress('📋 User creation requires service role key or manual setup in Supabase dashboard');
-      logProgress('🔗 Go to Supabase Dashboard → Authentication → Users to create:');
-      logProgress('   • admin@scanstreetpro.com (password: AdminPass123!)');
-      logProgress('   • test@springfield.gov (password: TestUser123!)');
-      logProgress('💡 After creating users, add them to the users table with organization_id');
-
       logProgress('🎉 Database connection test completed!');
       logProgress('📋 Next steps:');
       logProgress('   1. Create organizations in Supabase Dashboard → Database → organizations table');
       logProgress('   2. Create auth users in Supabase Dashboard → Authentication → Users');
       logProgress('   3. Link users to organizations in the users table');
       logProgress('   4. Test the login flow');
-
+      
       setSuccess(true);
 
     } catch (err: any) {
@@ -140,6 +134,15 @@ export default function DatabaseSetup() {
       logProgress(`❌ Error: ${err.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const copySchema = () => {
+    const schemaElement = document.getElementById('schema-sql');
+    const schemaText = schemaElement?.textContent;
+    if (schemaText) {
+      navigator.clipboard.writeText(schemaText);
+      alert('Schema copied to clipboard!');
     }
   };
 
@@ -162,17 +165,10 @@ export default function DatabaseSetup() {
           </CardHeader>
           <CardContent className="space-y-4">
             {error && (
-              <Alert className="border-red-200 bg-red-50">
+              <Alert className={error.includes('successfully') ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
                 <AlertTriangle className="h-4 w-4" />
-                <AlertDescription className="text-red-800">{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {success && (
-              <Alert className="border-green-200 bg-green-50">
-                <CheckCircle className="h-4 w-4" />
-                <AlertDescription className="text-green-800">
-                  🎉 Database initialized successfully! You can now login with the created accounts.
+                <AlertDescription className={error.includes('successfully') ? "text-green-800" : "text-red-800"}>
+                  {error}
                 </AlertDescription>
               </Alert>
             )}
@@ -187,48 +183,63 @@ export default function DatabaseSetup() {
               </ul>
             </div>
 
-            {error && error.includes('schema not found') && (
-              <div className="space-y-4">
-                <Alert className="border-orange-200 bg-orange-50">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription className="text-orange-800">
-                    <strong>Database tables not found!</strong> You need to create the schema first.
-                  </AlertDescription>
-                </Alert>
+            <Button 
+              onClick={initializeDatabase} 
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Testing Connection...
+                </>
+              ) : (
+                <>
+                  <Database className="w-4 h-4 mr-2" />
+                  Test Database Connection
+                </>
+              )}
+            </Button>
 
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h4 className="font-semibold text-blue-800 mb-2">Step 1: Create Database Schema</h4>
-                  <ol className="text-sm text-blue-700 space-y-2">
-                    <li>1. Go to <a href="https://supabase.com/dashboard/project/nwoeeejaxmwvxggcpchw/sql" target="_blank" className="underline font-medium">Supabase SQL Editor</a></li>
-                    <li>2. Copy the schema below and paste it into the SQL Editor</li>
-                    <li>3. Click "Run" to create all the tables</li>
-                    <li>4. Come back here and try "Test Connection" again</li>
-                  </ol>
+            {progress.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-medium">Progress:</h4>
+                <div className="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto">
+                  {progress.map((item, index) => (
+                    <div key={index} className="text-sm font-mono">
+                      {item}
+                    </div>
+                  ))}
                 </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-semibold">Database Schema (Copy this):</h4>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        const schemaElement = document.getElementById('schema-sql')?.querySelector('pre');
-                        const schemaText = schemaElement?.textContent;
-                        if (schemaText) {
-                          navigator.clipboard.writeText(schemaText);
-                          alert('Schema copied to clipboard!');
-                        }
-                      }}
-                    >
-                      Copy Schema
-                    </Button>
-                  </div>
-                  <div
-                    id="schema-sql"
-                    className="bg-gray-900 text-green-400 p-4 rounded-lg text-xs font-mono max-h-80 overflow-y-auto"
+        {(success || error.includes('schema not found')) && (
+          <div className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>Complete SQL Schema</CardTitle>
+                <CardDescription>Copy this entire schema and run it in Supabase SQL Editor</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="font-semibold">15-Table Schema for Municipal Infrastructure App:</h4>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={copySchema}
                   >
-                    <pre>{`-- Municipal Infrastructure Management System Database Schema
+                    Copy Schema
+                  </Button>
+                </div>
+                
+                <div 
+                  id="schema-sql"
+                  className="bg-gray-900 text-green-400 p-4 rounded-lg text-xs font-mono max-h-80 overflow-y-auto"
+                >
+                  <pre>{`-- Municipal Infrastructure Management System Database Schema
 -- Complete 15-Table Schema for Supabase Integration
 
 -- Enable UUID extension
@@ -566,7 +577,6 @@ ALTER TABLE inspection_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 
 -- Basic RLS Policies - Allow all operations for authenticated users
--- (You can make these more restrictive later)
 CREATE POLICY "Enable all for authenticated users" ON organizations FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Enable all for authenticated users" ON users FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Enable all for authenticated users" ON contractors FOR ALL USING (auth.role() = 'authenticated');
@@ -608,184 +618,58 @@ CREATE TRIGGER update_scan_issues_updated_at BEFORE UPDATE ON scan_issues FOR EA
 CREATE TRIGGER update_inspector_notes_updated_at BEFORE UPDATE ON inspector_notes FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_inspection_templates_updated_at BEFORE UPDATE ON inspection_templates FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();`}</pre>
+                </div>
+
+                <Alert className="border-blue-200 bg-blue-50">
+                  <Database className="h-4 w-4" />
+                  <AlertDescription className="text-blue-800">
+                    <strong>Instructions:</strong> Copy the SQL above and paste it into Supabase Dashboard → SQL Editor → Run
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>Next Steps</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <h3 className="font-semibold text-yellow-800 mb-2">1. Run SQL Schema</h3>
+                    <p className="text-sm text-yellow-700">Copy the schema above and run it in Supabase SQL Editor</p>
+                  </div>
+                  
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <h3 className="font-semibold text-green-800 mb-2">2. Create Users</h3>
+                    <p className="text-sm text-green-700">Go to Authentication → Users and create test accounts</p>
+                  </div>
+
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h3 className="font-semibold text-blue-800 mb-2">3. Add Organizations</h3>
+                    <p className="text-sm text-blue-700">Insert organizations into the organizations table</p>
+                  </div>
+
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <h3 className="font-semibold text-purple-800 mb-2">4. Test App</h3>
+                    <p className="text-sm text-purple-700">Use database-test page to verify everything works</p>
                   </div>
                 </div>
-              </div>
-            )}
-
-            <Button
-              onClick={initializeDatabase}
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Testing Connection...
-                </>
-              ) : (
-                <>
-                  <Database className="w-4 h-4 mr-2" />
-                  Test Database Connection
-                </>
-              )}
-            </Button>
-
-            {progress.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-medium">Progress:</h4>
-                <div className="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto">
-                  {progress.map((item, index) => (
-                    <div key={index} className="text-sm font-mono">
-                      {item}
-                    </div>
-                  ))}
+                
+                <div className="text-center">
+                  <Button asChild className="mr-2">
+                    <a href="/database-test">Test Database</a>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <a href="https://supabase.com/dashboard/project/nwoeeejaxmwvxggcpchw" target="_blank">
+                      Open Supabase Dashboard
+                    </a>
+                  </Button>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {success && (
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle>Database Setup Complete</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Alert className="border-blue-200 bg-blue-50">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription className="text-blue-800">
-                  ✅ Database connection successful! Manual setup is required for full initialization.
-                </AlertDescription>
-              </Alert>
-
-              <div className="space-y-4">
-                <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                  <h3 className="font-semibold text-yellow-800 mb-2">Step 1: Create Organizations</h3>
-                  <p className="text-sm text-yellow-700 mb-2">Go to Supabase Dashboard → Database → organizations table</p>
-                  <div className="text-xs bg-yellow-100 p-2 rounded font-mono">
-                    INSERT INTO organizations (name, slug, plan) VALUES<br/>
-                    ('Scan Street Pro Admin', 'admin', 'enterprise'),<br/>
-                    ('City of Springfield', 'springfield', 'free');
-                  </div>
-                </div>
-
-                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                  <h3 className="font-semibold text-green-800 mb-2">Step 2: Create Auth Users</h3>
-                  <p className="text-sm text-green-700 mb-2">Go to Supabase Dashboard → Authentication → Users</p>
-                  <ul className="text-sm text-green-700 space-y-1">
-                    <li>• Email: admin@scanstreetpro.com | Password: AdminPass123!</li>
-                    <li>• Email: test@springfield.gov | Password: TestUser123!</li>
-                  </ul>
-                </div>
-
-                <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                  <h3 className="font-semibold text-purple-800 mb-2">Step 3: Link Users to Organizations</h3>
-                  <p className="text-sm text-purple-700 mb-2">After creating users, add records to the users table:</p>
-                  <div className="text-xs bg-purple-100 p-2 rounded font-mono">
-                    INSERT INTO users (id, organization_id, email, name, role) VALUES<br/>
-                    ('&lt;admin_user_id&gt;', '&lt;admin_org_id&gt;', 'admin@scanstreetpro.com', 'Admin', 'admin'),<br/>
-                    ('&lt;test_user_id&gt;', '&lt;test_org_id&gt;', 'test@springfield.gov', 'Test User', 'manager');
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <Button asChild className="mr-2">
-                  <a href="/login">Go to Login Page</a>
-                </Button>
-                <Button variant="outline" asChild>
-                  <a href="https://supabase.com/dashboard/project/nwoeeejaxmwvxggcpchw" target="_blank">
-                    Open Supabase Dashboard
-                  </a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         )}
-
-        {/* Quick Schema Sync for Future Updates */}
-        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-          <CardHeader>
-            <CardTitle>🚀 Quick Schema Sync</CardTitle>
-            <CardDescription>For adding new tables/columns in the future</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert className="border-blue-200 bg-blue-50">
-              <Database className="h-4 w-4" />
-              <AlertDescription className="text-blue-800">
-                <strong>Future Updates:</strong> When you need new tables/columns, paste the SQL here and I'll update the app accordingly.
-              </AlertDescription>
-            </Alert>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                <h4 className="font-semibold text-green-800 mb-2">Add New Table Template:</h4>
-                <div className="text-xs bg-green-100 p-2 rounded font-mono">
-                  <pre>{`CREATE TABLE new_table_name (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    organization_id UUID REFERENCES organizations(id),
-    name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Enable RLS
-ALTER TABLE new_table_name ENABLE ROW LEVEL SECURITY;
-
--- Create policy
-CREATE POLICY "Enable all for authenticated users"
-ON new_table_name FOR ALL
-USING (auth.role() = 'authenticated');
-
--- Add index
-CREATE INDEX idx_new_table_organization
-ON new_table_name(organization_id);
-
--- Add trigger
-CREATE TRIGGER update_new_table_updated_at
-BEFORE UPDATE ON new_table_name
-FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();`}</pre>
-                </div>
-              </div>
-
-              <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                <h4 className="font-semibold text-purple-800 mb-2">Add New Column Template:</h4>
-                <div className="text-xs bg-purple-100 p-2 rounded font-mono">
-                  <pre>{`-- Add new column to existing table
-ALTER TABLE existing_table_name
-ADD COLUMN new_column_name VARCHAR(255);
-
--- Add constraint if needed
-ALTER TABLE existing_table_name
-ADD CONSTRAINT check_constraint_name
-CHECK (new_column_name IN ('value1', 'value2'));
-
--- Add default value
-ALTER TABLE existing_table_name
-ALTER COLUMN new_column_name
-SET DEFAULT 'default_value';
-
--- Create index if needed
-CREATE INDEX idx_table_new_column
-ON existing_table_name(new_column_name);`}</pre>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-              <h4 className="font-semibold text-yellow-800 mb-2">🔄 Sync Process:</h4>
-              <ol className="text-sm text-yellow-700 space-y-1">
-                <li>1. Run your SQL in Supabase Dashboard → SQL Editor</li>
-                <li>2. Copy the SQL and send it to me in Builder.io</li>
-                <li>3. I'll update the TypeScript interfaces in lib/supabase.ts</li>
-                <li>4. I'll update the dataService.ts to handle the new table</li>
-                <li>5. I'll update relevant pages to use the new data</li>
-                <li>6. I'll update sampleData.ts with mock data for freemium users</li>
-              </ol>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
