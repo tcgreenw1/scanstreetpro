@@ -295,11 +295,18 @@ export default function Contractors() {
     }
   };
 
-  const addContractor = () => {
+  const addContractor = async () => {
     if (currentPlan === 'free' && contractors.length >= 3) {
       alert('Free plan allows only 3 contractors. Upgrade to add unlimited contractors.');
       return;
     }
+
+    // For demo purposes, show upgrade message for free users
+    if (currentPlan === 'free') {
+      alert('This is sample data. Upgrade to add real contractors.');
+      return;
+    }
+
     alert('Add contractor functionality would be implemented here.');
   };
 
