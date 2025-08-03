@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase, testSupabaseConnection, signInWithTimeout, signUpWithTimeout } from '@/lib/supabase';
 import { tryFallbackLogin, getFallbackSession, isFallbackMode } from '@/utils/authFallback';
 import { getErrorMessage } from '@/utils/errorHandler';
+import { shouldUseOfflineMode, reportConnectionFailure, reportConnectionSuccess } from '@/utils/offlineManager';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
