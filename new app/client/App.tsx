@@ -44,6 +44,7 @@ import DatabaseTest from "./pages/DatabaseTest";
 import TestOrgCreation from "./pages/TestOrgCreation";
 import PremiumAnalysis from "./pages/PremiumAnalysis";
 import DebugEnv from "./pages/DebugEnv";
+import ConnectionTest from "./pages/ConnectionTest";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
