@@ -87,6 +87,7 @@ const App = () => (
             <Route path="/test-org-creation" element={<TestOrgCreation />} />
             <Route path="/premium-analysis" element={<PremiumAnalysis />} />
             <Route path="/debug-env" element={<DebugEnv />} />
+            <Route path="/connection-test" element={<ConnectionTest />} />
 
             {/* Protected Routes */}
             <Route path="/*" element={
