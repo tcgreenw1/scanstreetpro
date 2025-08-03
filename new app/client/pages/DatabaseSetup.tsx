@@ -50,9 +50,8 @@ export default function DatabaseSetup() {
         logProgress('🔗 Go to Supabase Dashboard → SQL Editor');
         logProgress('📄 Copy and paste the schema from the box below');
         
-        // Show the schema creation instructions
         setError('Database schema not found. Please create the tables first using the SQL schema.');
-        setSuccess(true); // Show success section for schema display
+        setSuccess(true);
         return;
       }
 
@@ -61,72 +60,7 @@ export default function DatabaseSetup() {
       }
 
       logProgress('✅ Database schema exists');
-
-      // Create admin organization
-      logProgress('📁 Creating admin organization...');
-      const { data: adminOrg, error: adminOrgError } = await supabase
-        .from('organizations')
-        .insert({
-          name: 'Scan Street Pro Admin',
-          slug: 'admin',
-          plan: 'enterprise'
-        })
-        .select()
-        .single();
-
-      if (adminOrgError && !adminOrgError.message.includes('duplicate')) {
-        if (adminOrgError.message.includes('violates row-level security')) {
-          logProgress('⚠️  Admin organization creation requires service role key');
-          logProgress('📋 Manual setup instructions will be provided');
-        } else {
-          throw new Error(`Failed to create admin organization: ${adminOrgError.message}`);
-        }
-      } else {
-        logProgress('✅ Admin organization created');
-      }
-
-      // Create test organization
-      logProgress('📁 Creating test organization...');
-      const { data: testOrg, error: testOrgError } = await supabase
-        .from('organizations')
-        .insert({
-          name: 'City of Springfield',
-          slug: 'springfield',
-          plan: 'free'
-        })
-        .select()
-        .single();
-
-      if (testOrgError && !testOrgError.message.includes('duplicate')) {
-        if (testOrgError.message.includes('violates row-level security')) {
-          logProgress('⚠️  Test organization creation requires service role key');
-        } else {
-          throw new Error(`Failed to create test organization: ${testOrgError.message}`);
-        }
-      } else {
-        logProgress('✅ Test organization created');
-      }
-
-      // Try to check existing organizations
-      logProgress('🔍 Checking existing organizations...');
-      const { data: existingOrgs, error: orgCheckError } = await supabase
-        .from('organizations')
-        .select('*');
-
-      if (orgCheckError) {
-        logProgress(`⚠️  Could not check organizations: ${orgCheckError.message}`);
-        logProgress('📋 This is expected with current permissions');
-      } else {
-        logProgress(`✅ Found ${existingOrgs?.length || 0} existing organizations`);
-      }
-
       logProgress('🎉 Database connection test completed!');
-      logProgress('📋 Next steps:');
-      logProgress('   1. Create organizations in Supabase Dashboard → Database → organizations table');
-      logProgress('   2. Create auth users in Supabase Dashboard → Authentication → Users');
-      logProgress('   3. Link users to organizations in the users table');
-      logProgress('   4. Test the login flow');
-      
       setSuccess(true);
 
     } catch (err: any) {
@@ -138,115 +72,19 @@ export default function DatabaseSetup() {
   };
 
   const copySchema = () => {
-    const schemaElement = document.getElementById('schema-sql');
-    const schemaText = schemaElement?.textContent;
-    if (schemaText) {
-      navigator.clipboard.writeText(schemaText);
-      alert('Schema copied to clipboard!');
-    }
+    const sqlSchema = getSQLSchema();
+    navigator.clipboard.writeText(sqlSchema);
+    alert('Schema copied to clipboard!');
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center space-x-3 p-4 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg">
-            <Database className="w-8 h-8 text-blue-600" />
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Database Setup</h1>
-              <p className="text-gray-600">Initialize Supabase database with admin users and sample data</p>
-            </div>
-          </div>
-        </div>
-
-        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-          <CardHeader>
-            <CardTitle>Database Initialization</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {error && (
-              <Alert className={error.includes('successfully') ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription className={error.includes('successfully') ? "text-green-800" : "text-red-800"}>
-                  {error}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <div className="space-y-2">
-              <h3 className="font-semibold">Database Schema Setup:</h3>
-              <ul className="space-y-1 text-sm text-gray-600">
-                <li>• Test database connection</li>
-                <li>• Check if tables exist</li>
-                <li>• Provide setup instructions if needed</li>
-                <li>• Guide through manual organization/user creation</li>
-              </ul>
-            </div>
-
-            <Button 
-              onClick={initializeDatabase} 
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Testing Connection...
-                </>
-              ) : (
-                <>
-                  <Database className="w-4 h-4 mr-2" />
-                  Test Database Connection
-                </>
-              )}
-            </Button>
-
-            {progress.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-medium">Progress:</h4>
-                <div className="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto">
-                  {progress.map((item, index) => (
-                    <div key={index} className="text-sm font-mono">
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {(success || error.includes('schema not found')) && (
-          <div className="space-y-6">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle>Complete SQL Schema</CardTitle>
-                <CardDescription>Copy this entire schema and run it in Supabase SQL Editor</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-semibold">15-Table Schema for Municipal Infrastructure App:</h4>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={copySchema}
-                  >
-                    Copy Schema
-                  </Button>
-                </div>
-                
-                <div
-                  id="schema-sql"
-                  className="bg-gray-900 text-green-400 p-4 rounded-lg text-xs font-mono max-h-80 overflow-y-auto"
-                >
-                  <div className="whitespace-pre font-mono">
-{`-- Municipal Infrastructure Management System Database Schema
+  const getSQLSchema = () => {
+    return `-- Municipal Infrastructure Management System Database Schema
 -- Complete 15-Table Schema for Supabase Integration
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Core Tables (Organizations, Users, Contractors)
+-- Core Tables
 CREATE TABLE organizations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
@@ -282,7 +120,6 @@ CREATE TABLE contractors (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Infrastructure Tables
 CREATE TABLE assets (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     organization_id UUID REFERENCES organizations(id),
@@ -333,7 +170,6 @@ CREATE TABLE maintenance_tasks (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Financial Tables
 CREATE TABLE expenses (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     organization_id UUID REFERENCES organizations(id),
@@ -379,7 +215,6 @@ CREATE TABLE budget_scenarios (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Citizen & AI Tables
 CREATE TABLE citizen_reports (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     organization_id UUID REFERENCES organizations(id),
@@ -418,7 +253,6 @@ CREATE TABLE inspector_notes (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Supporting Tables
 CREATE TABLE inspection_templates (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     organization_id UUID REFERENCES organizations(id),
@@ -445,7 +279,7 @@ ALTER TABLE scan_issues ENABLE ROW LEVEL SECURITY;
 ALTER TABLE inspector_notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE inspection_templates ENABLE ROW LEVEL SECURITY;
 
--- Create basic RLS policies (allow all for authenticated users)
+-- Create basic RLS policies
 CREATE POLICY "auth_policy" ON organizations FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "auth_policy" ON users FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "auth_policy" ON contractors FOR ALL USING (auth.role() = 'authenticated');
@@ -468,8 +302,100 @@ CREATE INDEX idx_assets_org ON assets(organization_id);
 CREATE INDEX idx_inspections_org ON inspections(organization_id);
 CREATE INDEX idx_projects_org ON projects(organization_id);
 CREATE INDEX idx_maintenance_org ON maintenance_tasks(organization_id);
-CREATE INDEX idx_expenses_org ON expenses(organization_id);`}
-                  </div>
+CREATE INDEX idx_expenses_org ON expenses(organization_id);`;
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center space-x-3 p-4 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg">
+            <Database className="w-8 h-8 text-blue-600" />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Database Setup</h1>
+              <p className="text-gray-600">Initialize Supabase database with schema and test connection</p>
+            </div>
+          </div>
+        </div>
+
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle>Database Connection Test</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {error && (
+              <Alert className={error.includes('successfully') ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className={error.includes('successfully') ? "text-green-800" : "text-red-800"}>
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="space-y-2">
+              <h3 className="font-semibold">This will:</h3>
+              <ul className="space-y-1 text-sm text-gray-600">
+                <li>• Test database connection</li>
+                <li>• Check if tables exist</li>
+                <li>• Provide setup instructions if needed</li>
+                <li>• Show SQL schema for manual creation</li>
+              </ul>
+            </div>
+
+            <Button 
+              onClick={initializeDatabase} 
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Testing Connection...
+                </>
+              ) : (
+                <>
+                  <Database className="w-4 h-4 mr-2" />
+                  Test Database Connection
+                </>
+              )}
+            </Button>
+
+            {progress.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-medium">Progress:</h4>
+                <div className="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto">
+                  {progress.map((item, index) => (
+                    <div key={index} className="text-sm font-mono">
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {success && (
+          <div className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>Complete SQL Schema</CardTitle>
+                <CardDescription>Copy this entire schema and run it in Supabase SQL Editor</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="font-semibold">15-Table Schema for Municipal Infrastructure App:</h4>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={copySchema}
+                  >
+                    Copy Schema
+                  </Button>
+                </div>
+                
+                <div className="bg-gray-900 text-green-400 p-4 rounded-lg text-xs font-mono max-h-80 overflow-y-auto">
+                  <pre className="whitespace-pre-wrap">{getSQLSchema()}</pre>
                 </div>
 
                 <Alert className="border-blue-200 bg-blue-50">
@@ -508,8 +434,8 @@ CREATE INDEX idx_expenses_org ON expenses(organization_id);`}
                   </div>
                 </div>
                 
-                <div className="text-center">
-                  <Button asChild className="mr-2">
+                <div className="text-center space-x-2">
+                  <Button asChild>
                     <a href="/database-test">Test Database</a>
                   </Button>
                   <Button variant="outline" asChild>
