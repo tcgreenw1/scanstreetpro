@@ -435,6 +435,7 @@ export function Layout({ children }: LayoutProps) {
 
         {/* Page Content */}
         <main className="p-4 lg:p-6">
+          <ConnectionStatus show={false} />
           {children}
         </main>
       </div>
