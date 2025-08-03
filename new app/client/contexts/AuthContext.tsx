@@ -158,10 +158,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         }
 
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+          clearTimeout(loadingTimeout);
+        }
       } catch (error: any) {
         console.warn('Session handling failed, starting in logged-out state:', error.message || error);
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+          clearTimeout(loadingTimeout);
+        }
       }
     };
 
