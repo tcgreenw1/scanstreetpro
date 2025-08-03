@@ -149,7 +149,7 @@ export default function AdminPortal() {
     plan: 'free' as const
   });
 
-  const { user, switchToOrganization } = useAuth();
+  const { switchToOrganization } = useAuth();
 
   useEffect(() => {
     initializeAdminPortal();
