@@ -62,7 +62,7 @@ const Login = () => {
         console.log('⚠️ Supabase connection failed, enabling fallback mode');
         setConnectionStatus('fallback');
         setFallbackMode(true);
-        setError(`Database connection failed. Using offline mode. Demo credentials: admin@scanstreetpro.com / AdminPass123!`);
+        setError(`Database connection failed: ${connectionTest.error || 'Unknown error'}. Using offline mode. Demo credentials: admin@scanstreetpro.com / AdminPass123!`);
         return;
       }
 
