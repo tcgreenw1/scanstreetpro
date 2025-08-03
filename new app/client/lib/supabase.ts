@@ -298,4 +298,51 @@ export const getUserOrganization = async () => {
   return data?.organizations;
 };
 
+// Timeout wrapper for Supabase operations
+export const withTimeout = <T>(
+  promise: Promise<T>,
+  timeoutMs: number = 10000,
+  errorMessage: string = 'Operation timed out'
+): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(errorMessage)), timeoutMs)
+    ),
+  ]);
+};
+
+// Enhanced auth functions with timeout
+export const signInWithTimeout = async (email: string, password: string) => {
+  return withTimeout(
+    supabase.auth.signInWithPassword({ email, password }),
+    15000,
+    'Sign in timed out. Please check your connection.'
+  );
+};
+
+export const signUpWithTimeout = async (email: string, password: string) => {
+  return withTimeout(
+    supabase.auth.signUp({ email, password }),
+    15000,
+    'Sign up timed out. Please check your connection.'
+  );
+};
+
+export const signOutWithTimeout = async () => {
+  return withTimeout(
+    supabase.auth.signOut(),
+    5000,
+    'Sign out timed out.'
+  );
+};
+
+// Enhanced database functions with timeout
+export const queryWithTimeout = <T>(
+  query: any,
+  timeoutMs: number = 8000
+): Promise<T> => {
+  return withTimeout(query, timeoutMs, 'Database query timed out');
+};
+
 export default supabase;
