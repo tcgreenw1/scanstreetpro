@@ -648,7 +648,7 @@ CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW
         {success && (
           <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
             <CardHeader>
-              <CardTitle>Manual Setup Required</CardTitle>
+              <CardTitle>Database Setup Complete</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Alert className="border-blue-200 bg-blue-50">
@@ -702,6 +702,89 @@ CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW
             </CardContent>
           </Card>
         )}
+
+        {/* Quick Schema Sync for Future Updates */}
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle>🚀 Quick Schema Sync</CardTitle>
+            <CardDescription>For adding new tables/columns in the future</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert className="border-blue-200 bg-blue-50">
+              <Database className="h-4 w-4" />
+              <AlertDescription className="text-blue-800">
+                <strong>Future Updates:</strong> When you need new tables/columns, paste the SQL here and I'll update the app accordingly.
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                <h4 className="font-semibold text-green-800 mb-2">Add New Table Template:</h4>
+                <div className="text-xs bg-green-100 p-2 rounded font-mono">
+{`CREATE TABLE new_table_name (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    organization_id UUID REFERENCES organizations(id),
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE new_table_name ENABLE ROW LEVEL SECURITY;
+
+-- Create policy
+CREATE POLICY "Enable all for authenticated users"
+ON new_table_name FOR ALL
+USING (auth.role() = 'authenticated');
+
+-- Add index
+CREATE INDEX idx_new_table_organization
+ON new_table_name(organization_id);
+
+-- Add trigger
+CREATE TRIGGER update_new_table_updated_at
+BEFORE UPDATE ON new_table_name
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();`}
+                </div>
+              </div>
+
+              <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <h4 className="font-semibold text-purple-800 mb-2">Add New Column Template:</h4>
+                <div className="text-xs bg-purple-100 p-2 rounded font-mono">
+{`-- Add new column to existing table
+ALTER TABLE existing_table_name
+ADD COLUMN new_column_name VARCHAR(255);
+
+-- Add constraint if needed
+ALTER TABLE existing_table_name
+ADD CONSTRAINT check_constraint_name
+CHECK (new_column_name IN ('value1', 'value2'));
+
+-- Add default value
+ALTER TABLE existing_table_name
+ALTER COLUMN new_column_name
+SET DEFAULT 'default_value';
+
+-- Create index if needed
+CREATE INDEX idx_table_new_column
+ON existing_table_name(new_column_name);`}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+              <h4 className="font-semibold text-yellow-800 mb-2">🔄 Sync Process:</h4>
+              <ol className="text-sm text-yellow-700 space-y-1">
+                <li>1. Run your SQL in Supabase Dashboard → SQL Editor</li>
+                <li>2. Copy the SQL and send it to me in Builder.io</li>
+                <li>3. I'll update the TypeScript interfaces in lib/supabase.ts</li>
+                <li>4. I'll update the dataService.ts to handle the new table</li>
+                <li>5. I'll update relevant pages to use the new data</li>
+                <li>6. I'll update sampleData.ts with mock data for freemium users</li>
+              </ol>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
