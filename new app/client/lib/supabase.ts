@@ -693,6 +693,13 @@ export const signInWithTimeout = async (email: string, password: string) => {
   try {
     console.log('🔐 Attempting sign in for:', email);
 
+    // Check if this is a demo user and ensure they exist
+    const demoEmails = ['admin@scanstreetpro.com', 'test@springfield.gov', 'premium@springfield.gov'];
+    if (demoEmails.includes(email)) {
+      console.log('🔧 Demo user detected, ensuring user exists...');
+      await ensureDemoUsersExist();
+    }
+
     // First check if user exists in the database
     try {
       const { data: userExists, error: userCheckError } = await withFastTimeout(
