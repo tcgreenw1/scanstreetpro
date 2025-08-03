@@ -380,19 +380,56 @@ export const signInWithTimeout = async (email: string, password: string) => {
 };
 
 export const signUpWithTimeout = async (email: string, password: string) => {
-  return withTimeout(
-    supabase.auth.signUp({ email, password }),
-    15000,
-    'Sign up timed out. Please check your connection.'
-  );
+  try {
+    console.log('📝 Attempting sign up for:', email);
+
+    const result = await withTimeout(
+      supabase.auth.signUp({ email, password }),
+      15000,
+      'Sign up timed out. Please check your connection.'
+    );
+
+    if (result.error) {
+      console.error('❌ Sign up failed:', result.error);
+
+      if (result.error.message?.includes('User already registered')) {
+        throw new Error('An account with this email already exists. Please sign in instead.');
+      } else if (result.error.message?.includes('Password should be')) {
+        throw new Error('Password must be at least 6 characters long.');
+      } else {
+        throw new Error(result.error.message || 'Sign up failed');
+      }
+    }
+
+    console.log('✅ Sign up successful');
+    return result;
+  } catch (error: any) {
+    console.error('❌ Sign up error:', error);
+    throw error;
+  }
 };
 
 export const signOutWithTimeout = async () => {
-  return withTimeout(
-    supabase.auth.signOut(),
-    5000,
-    'Sign out timed out.'
-  );
+  try {
+    console.log('🚪 Signing out...');
+
+    const result = await withTimeout(
+      supabase.auth.signOut(),
+      5000,
+      'Sign out timed out.'
+    );
+
+    if (result.error) {
+      console.error('❌ Sign out failed:', result.error);
+      throw new Error(result.error.message || 'Sign out failed');
+    }
+
+    console.log('✅ Sign out successful');
+    return result;
+  } catch (error: any) {
+    console.error('❌ Sign out error:', error);
+    throw error;
+  }
 };
 
 // Enhanced database functions with timeout
