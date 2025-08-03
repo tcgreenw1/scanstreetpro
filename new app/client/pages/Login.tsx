@@ -76,7 +76,8 @@ const Login = () => {
       console.error('Login initialization error:', error);
       setConnectionStatus('fallback');
       setFallbackMode(true);
-      setError(`Initialization failed: ${error?.message || 'Unknown error'}. Using offline mode.`);
+      const errorMessage = getErrorMessage(error);
+      setError(`Initialization failed: ${errorMessage}. Using offline mode.`);
     }
   };
 
