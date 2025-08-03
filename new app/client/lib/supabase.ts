@@ -718,7 +718,8 @@ export const ensureDemoUsersExist = async () => {
         });
 
         if (authError && !authError.message.includes('User already registered')) {
-          console.error(`Failed to create auth user ${demoUser.email}:`, authError);
+          const errorMessage = getErrorMessage(authError);
+          console.error(`Failed to create auth user ${demoUser.email}:`, errorMessage);
 
           // Try admin create as fallback
           try {
