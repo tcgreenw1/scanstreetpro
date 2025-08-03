@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import { seedDemoUsers } from "./utils/seedUsers";
+import "./utils/errorTracer"; // Import to initialize error tracing
 import { Layout } from "./components/Layout";
 import { PlaceholderPage } from "./components/PlaceholderPage";
 import { PricingProvider } from "./contexts/PricingContext";
