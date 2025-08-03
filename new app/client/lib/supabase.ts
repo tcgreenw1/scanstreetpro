@@ -394,17 +394,20 @@ export const signInWithTimeout = async (email: string, password: string) => {
     );
 
     if (result.error) {
-      console.error('❌ Sign in failed:', result.error);
+      const errorMessage = extractErrorMessage(result.error);
+      console.error('❌ Sign in failed:', errorMessage);
 
       // Handle specific error types
-      if (result.error.message?.includes('Invalid login credentials')) {
+      if (errorMessage.includes('Invalid login credentials')) {
         throw new Error('Invalid email or password. Please check your credentials.');
-      } else if (result.error.message?.includes('Email not confirmed')) {
+      } else if (errorMessage.includes('Email not confirmed')) {
         throw new Error('Please check your email and click the confirmation link.');
-      } else if (result.error.message?.includes('Too many requests')) {
+      } else if (errorMessage.includes('Too many requests')) {
         throw new Error('Too many login attempts. Please wait a few minutes and try again.');
+      } else if (errorMessage.includes('Network request failed')) {
+        throw new Error('Network connection failed. Please check your internet connection.');
       } else {
-        throw new Error(result.error.message || 'Authentication failed');
+        throw new Error(errorMessage || 'Authentication failed');
       }
     }
 
