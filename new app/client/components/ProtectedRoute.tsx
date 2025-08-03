@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
@@ -14,12 +14,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
-  const hasRedirectedRef = useRef(false);
-
-  // Reset redirect flag when location changes
-  useEffect(() => {
-    hasRedirectedRef.current = false;
-  }, [location.pathname]);
+  const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hasCheckedRef = useRef(false);
 
   console.log('🛡️ ProtectedRoute check:', {
     loading,
@@ -27,8 +23,57 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     role: user?.role || 'none',
     requireAdmin,
     pathname: location.pathname,
-    hasRedirected: hasRedirectedRef.current
+    hasChecked: hasCheckedRef.current
   });
+
+  useEffect(() => {
+    // Clear any pending redirects when component mounts/updates
+    if (redirectTimeoutRef.current) {
+      clearTimeout(redirectTimeoutRef.current);
+      redirectTimeoutRef.current = null;
+    }
+
+    // Reset check flag on location change
+    hasCheckedRef.current = false;
+  }, [location.pathname]);
+
+  useEffect(() => {
+    // Only check once per location change and after loading is done
+    if (loading || hasCheckedRef.current) return;
+
+    hasCheckedRef.current = true;
+
+    // Use setTimeout to avoid immediate redirect during render
+    redirectTimeoutRef.current = setTimeout(() => {
+      // Check authentication
+      if (!user) {
+        if (location.pathname !== '/login') {
+          console.log('🔒 No user, redirecting to login via window.location');
+          window.location.replace('/login');
+          return;
+        }
+      }
+
+      // Check admin access
+      if (user && requireAdmin && user.role !== 'admin') {
+        if (location.pathname !== '/dashboard') {
+          console.log('🚫 Non-admin user, redirecting to dashboard via window.location');
+          window.location.replace('/dashboard');
+          return;
+        }
+      }
+
+      // If we get here, user has proper access
+      console.log('✅ User has proper access');
+    }, 100); // Small delay to prevent render loop
+
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+        redirectTimeoutRef.current = null;
+      }
+    };
+  }, [user, loading, requireAdmin, location.pathname]);
 
   // Show loading state
   if (loading) {
@@ -42,36 +87,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // Check authentication
-  if (!user) {
-    if (!hasRedirectedRef.current && location.pathname !== '/login') {
-      console.log('🔒 No user, redirecting to login');
-      hasRedirectedRef.current = true;
-      return <Navigate to="/login" state={{ from: location }} replace />;
-    }
-    // If we're already on login page or have already redirected, don't redirect again
-    if (location.pathname === '/login') {
-      return <>{children}</>;
-    }
-    return null;
+  // Show content if user has access
+  if (user && (!requireAdmin || user.role === 'admin')) {
+    return <>{children}</>;
   }
 
-  // Check admin access
-  if (requireAdmin && user.role !== 'admin') {
-    if (!hasRedirectedRef.current && location.pathname !== '/dashboard') {
-      console.log('🚫 Non-admin user, redirecting to dashboard');
-      hasRedirectedRef.current = true;
-      return <Navigate to="/dashboard" replace />;
-    }
-    // If we're already on dashboard or have already redirected, don't redirect again
-    if (location.pathname === '/dashboard') {
-      return <>{children}</>;
-    }
-    return null;
-  }
-
-  // User is authenticated and has required permissions
-  return <>{children}</>;
+  // Show loading state while redirect is happening
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-600" />
+        <p className="text-gray-600">Redirecting...</p>
+      </div>
+    </div>
+  );
 };
 
 export default ProtectedRoute;
