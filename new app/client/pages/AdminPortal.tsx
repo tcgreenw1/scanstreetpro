@@ -114,6 +114,14 @@ export default function AdminPortal() {
     phone: ''
   });
   
+  // User diagnosis state
+  const [userDiagnosisForm, setUserDiagnosisForm] = useState({
+    email: '',
+    password: '',
+    testResults: null as any,
+    loading: false
+  });
+
   // New organization form state
   const [newOrgForm, setNewOrgForm] = useState({
     name: '',
