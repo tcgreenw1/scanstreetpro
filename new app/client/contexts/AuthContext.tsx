@@ -61,12 +61,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .eq('id', userId)
         .single();
 
-      // Handle timeout properly
+      // Handle timeout properly with shorter timeout
       try {
         const { data, error } = await withTimeout(
           query,
-          8000,
-          'Timeout fetching user data'
+          5000,
+          'User data fetch timed out'
         );
 
         if (error) {
