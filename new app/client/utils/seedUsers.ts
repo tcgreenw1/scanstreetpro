@@ -108,7 +108,7 @@ export const seedDemoUsers = async () => {
             });
 
           if (profileError && !profileError.message.includes('duplicate')) {
-            console.error(`Error creating user profile ${user.email}:`, profileError);
+            console.error(`Error creating user profile ${user.email}:`, profileError.message || profileError);
             // Try to clean up auth user
             await supabase.auth.admin.deleteUser(authData.user.id);
             continue;
