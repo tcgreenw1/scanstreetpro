@@ -57,6 +57,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         console.log('🔄 AuthContext initializing...');
 
+        // Check if Supabase client is available
+        if (!supabase) {
+          throw new Error('Supabase client not initialized');
+        }
+
         // Get session with timeout
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) =>
