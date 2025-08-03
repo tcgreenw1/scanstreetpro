@@ -669,6 +669,9 @@ export const repairDemoUsers = async () => {
 
 // Helper function to ensure demo users exist in Supabase Auth
 export const ensureDemoUsersExist = async () => {
+  // First repair any inconsistent users
+  await repairDemoUsers();
+
   const demoUsers = [
     {
       email: 'admin@scanstreetpro.com',
