@@ -90,26 +90,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return;
         }
 
-        // Get session with more generous timeout
-        const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Session timeout after 15 seconds')), 15000)
-        );
-
+        // Get session with retry logic
         let sessionResult;
-        try {
-          sessionResult = await Promise.race([
-            sessionPromise,
-            timeoutPromise
-          ]) as any;
-        } catch (sessionError: any) {
-          const errorMessage = getErrorMessage(sessionError);
-          console.warn('Session fetch failed:', errorMessage);
+        let retries = 2;
 
-          // Continue with no session instead of blocking the app
-          console.log('Continuing without session - user will need to login');
-          if (mounted.current) setLoading(false);
-          return;
+        while (retries > 0) {
+          try {
+            const sessionPromise = supabase.auth.getSession();
+            const timeoutPromise = new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Session timeout after 10 seconds')), 10000)
+            );
+
+            sessionResult = await Promise.race([
+              sessionPromise,
+              timeoutPromise
+            ]) as any;
+
+            break; // Success, exit retry loop
+
+          } catch (sessionError: any) {
+            retries--;
+            const errorMessage = getErrorMessage(sessionError);
+            console.warn(`Session fetch attempt failed (${2 - retries}/2):`, errorMessage);
+
+            if (retries > 0) {
+              console.log('Retrying session fetch in 1 second...');
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            } else {
+              console.warn('All session fetch attempts failed - continuing without session');
+              if (mounted.current) setLoading(false);
+              return;
+            }
+          }
         }
 
         const { data: { session }, error } = sessionResult;
