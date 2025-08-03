@@ -444,6 +444,162 @@ export default function AdminPortal() {
     }
   };
 
+  // User diagnosis and authentication testing
+  const diagnoseUser = async () => {
+    setUserDiagnosisForm(prev => ({ ...prev, loading: true, testResults: null }));
+
+    try {
+      const email = userDiagnosisForm.email;
+      const password = userDiagnosisForm.password;
+
+      if (!email) {
+        throw new Error('Please enter an email address to diagnose');
+      }
+
+      console.log('🔍 Starting user diagnosis for:', email);
+
+      const results: any = {
+        email,
+        timestamp: new Date().toISOString(),
+        tests: {}
+      };
+
+      // Test 1: Check if user exists in database
+      console.log('Test 1: Checking user in database...');
+      try {
+        const { data: dbUser, error: dbError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', email)
+          .single();
+
+        results.tests.database = {
+          exists: !dbError && !!dbUser,
+          user: dbUser,
+          error: dbError?.message || null,
+          status: dbError ? (dbError.code === 'PGRST116' ? 'not_found' : 'error') : 'found'
+        };
+      } catch (dbErr: any) {
+        results.tests.database = { exists: false, error: dbErr.message, status: 'error' };
+      }
+
+      // Test 2: Test Supabase connection
+      console.log('Test 2: Testing Supabase connection...');
+      try {
+        const connectionTest = await testSupabaseConnection();
+        results.tests.connection = {
+          success: connectionTest.success,
+          error: connectionTest.error || null,
+          data: connectionTest.data || null
+        };
+      } catch (connErr: any) {
+        results.tests.connection = { success: false, error: connErr.message };
+      }
+
+      // Test 3: Try authentication (if password provided)
+      if (password) {
+        console.log('Test 3: Testing authentication...');
+        try {
+          const authResult = await signInWithTimeout(email, password);
+          results.tests.authentication = {
+            success: !authResult.error,
+            error: authResult.error?.message || null,
+            session: authResult.data?.session ? 'valid' : 'invalid'
+          };
+
+          // Sign out immediately to not affect current session
+          if (authResult.data?.session) {
+            await supabase.auth.signOut();
+          }
+        } catch (authErr: any) {
+          results.tests.authentication = {
+            success: false,
+            error: authErr.message,
+            session: 'failed'
+          };
+        }
+      } else {
+        results.tests.authentication = {
+          skipped: true,
+          reason: 'No password provided'
+        };
+      }
+
+      // Test 4: Check if demo user matches expected credentials
+      const demoCredentials = {
+        'admin@scanstreetpro.com': 'AdminPass123!',
+        'test@springfield.gov': 'TestUser123!',
+        'premium@springfield.gov': 'Premium!'
+      };
+
+      if (demoCredentials[email as keyof typeof demoCredentials]) {
+        results.tests.demoCredentials = {
+          isDemo: true,
+          expectedPassword: demoCredentials[email as keyof typeof demoCredentials],
+          passwordMatch: password === demoCredentials[email as keyof typeof demoCredentials]
+        };
+      } else {
+        results.tests.demoCredentials = {
+          isDemo: false,
+          expectedPassword: null,
+          passwordMatch: null
+        };
+      }
+
+      setUserDiagnosisForm(prev => ({ ...prev, testResults: results }));
+
+    } catch (error: any) {
+      setUserDiagnosisForm(prev => ({
+        ...prev,
+        testResults: {
+          error: getErrorMessage(error),
+          timestamp: new Date().toISOString()
+        }
+      }));
+    } finally {
+      setUserDiagnosisForm(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  const createMissingUser = async (email: string, password: string) => {
+    try {
+      setError('');
+
+      // Determine role and organization based on email
+      let role = 'viewer';
+      let organizationId = null;
+
+      // Get the first organization as default
+      if (organizations.length > 0) {
+        organizationId = organizations[0].id;
+      }
+
+      // Set role based on email
+      if (email.includes('admin')) {
+        role = 'admin';
+      } else if (email.includes('premium')) {
+        role = 'manager';
+      }
+
+      console.log('Creating user:', { email, role, organizationId });
+
+      const result = await createUserInSupabase(email, password, {
+        name: email.split('@')[0],
+        role,
+        organization_id: organizationId
+      });
+
+      setError(`✅ User ${email} created successfully in both Auth and database!`);
+      await loadUsers();
+
+      // Re-run diagnosis to verify
+      await diagnoseUser();
+
+    } catch (error: any) {
+      setError(`❌ Failed to create user: ${getErrorMessage(error)}`);
+    }
+  };
+
   const deleteOrganization = async (orgId: string) => {
     if (!confirm('Are you sure you want to delete this organization? This will also delete all users in this organization.')) {
       return;
