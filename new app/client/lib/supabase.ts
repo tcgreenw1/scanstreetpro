@@ -697,11 +697,17 @@ export const ensureDemoUsersExist = async () => {
       }
 
       // Check if user exists in database
-      const { data: dbUser } = await supabase
+      const { data: dbUser, error: dbCheckError } = await supabase
         .from('users')
         .select('id, email')
         .eq('email', demoUser.email)
         .maybeSingle();
+
+      if (dbCheckError) {
+        const errorMessage = getErrorMessage(dbCheckError);
+        console.error(`Error checking if user exists ${demoUser.email}:`, errorMessage);
+        continue;
+      }
 
       if (!dbUser) {
         console.log(`🔧 Creating demo user: ${demoUser.email}`);
