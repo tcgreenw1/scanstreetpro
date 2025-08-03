@@ -288,33 +288,77 @@ export const getCurrentUser = async () => {
   return user;
 };
 
+// Cache to prevent concurrent calls to the same function
+let userOrgCache: { [userId: string]: Promise<any> } = {};
+
 // Helper function to get user's organization
 export const getUserOrganization = async () => {
   const user = await getCurrentUser();
   if (!user) return null;
 
-  const { data, error } = await supabase
-    .from('users')
-    .select(`
-      organization_id,
-      organizations (
-        id,
-        name,
-        slug,
-        plan,
-        settings
-      )
-    `)
-    .eq('id', user.id)
-    .single();
-
-  if (error) {
-    const errorMessage = extractErrorMessage(error);
-    console.error('Error fetching user organization:', errorMessage);
-    return null;
+  // Check if we already have a pending request for this user
+  if (userOrgCache[user.id]) {
+    console.log('🔄 Using cached organization request for user:', user.id);
+    try {
+      return await userOrgCache[user.id];
+    } catch (error) {
+      // If cached request failed, remove it and try again
+      delete userOrgCache[user.id];
+    }
   }
 
-  return data?.organizations;
+  // Create new request and cache it
+  const organizationPromise = (async () => {
+    try {
+      // Use .maybeSingle() instead of .single() to handle 0 or 1 results gracefully
+      const { data, error } = await supabase
+        .from('users')
+        .select(`
+          organization_id,
+          organizations (
+            id,
+            name,
+            slug,
+            plan,
+            settings
+          )
+        `)
+        .eq('id', user.id)
+        .maybeSingle(); // This returns null for 0 results, doesn't error on multiple
+
+      if (error) {
+        const errorMessage = extractErrorMessage(error);
+        console.error('Error fetching user organization:', errorMessage);
+
+        // Handle specific error cases
+        if (errorMessage.includes('Body is disturbed or locked')) {
+          console.warn('🔄 Request body conflict detected, retrying after delay...');
+          await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
+          // Remove from cache and retry once
+          delete userOrgCache[user.id];
+          throw new Error('Request conflict - will retry');
+        }
+
+        return null;
+      }
+
+      // If no user found, return null gracefully
+      if (!data) {
+        console.warn('⚠️ User not found in database:', user.id);
+        return null;
+      }
+
+      return data?.organizations;
+    } finally {
+      // Clean up cache after request completes
+      delete userOrgCache[user.id];
+    }
+  })();
+
+  // Cache the promise
+  userOrgCache[user.id] = organizationPromise;
+
+  return organizationPromise;
 };
 
 // Timeout wrapper for Supabase operations with retry logic
