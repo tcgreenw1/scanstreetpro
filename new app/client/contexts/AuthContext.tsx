@@ -125,49 +125,53 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             organization: null
           });
 
-          // Try to get extended user data (non-blocking)
-          try {
-            const userDataPromise = supabase
-              .from('users')
-              .select(`
-                role,
-                organization_id,
-                organizations (
-                  id,
-                  name,
-                  slug,
-                  plan,
-                  settings
-                )
-              `)
-              .eq('id', session.user.id)
-              .maybeSingle();
+          // Try to get extended user data (with longer timeout, non-blocking)
+          setTimeout(async () => {
+            if (!mounted.current) return;
 
-            const userDataTimeout = new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('User data timeout after 3 seconds')), 3000)
-            );
+            try {
+              const userDataPromise = supabase
+                .from('users')
+                .select(`
+                  role,
+                  organization_id,
+                  organizations (
+                    id,
+                    name,
+                    slug,
+                    plan,
+                    settings
+                  )
+                `)
+                .eq('id', session.user.id)
+                .maybeSingle();
 
-            const { data: userData, error: userDataError } = await Promise.race([
-              userDataPromise,
-              userDataTimeout
-            ]) as any;
+              const userDataTimeout = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('User data timeout after 10 seconds')), 10000)
+              );
 
-            if (userDataError) {
+              const { data: userData, error: userDataError } = await Promise.race([
+                userDataPromise,
+                userDataTimeout
+              ]) as any;
+
+              if (userDataError) {
+                const errorMessage = getErrorMessage(userDataError);
+                console.warn('User data query error:', errorMessage);
+              } else if (userData && mounted.current) {
+                console.log('✅ User data loaded:', userData.role);
+                setUser(prev => prev ? {
+                  ...prev,
+                  role: userData.role || 'viewer',
+                  organization_id: userData.organization_id || null,
+                  organization: userData.organizations || null
+                } : null);
+              }
+            } catch (userDataError: any) {
               const errorMessage = getErrorMessage(userDataError);
-              console.warn('User data query error:', errorMessage);
-            } else if (userData && mounted.current) {
-              console.log('✅ User data loaded:', userData.role);
-              setUser(prev => prev ? {
-                ...prev,
-                role: userData.role || 'viewer',
-                organization_id: userData.organization_id || null,
-                organization: userData.organizations || null
-              } : null);
+              console.warn('User data fetch failed:', errorMessage);
             }
-          } catch (userDataError: any) {
-            const errorMessage = getErrorMessage(userDataError);
-            console.warn('User data fetch failed:', errorMessage);
-          }
+          }, 500); // Delay user data fetch to not block initial auth
         } else {
           console.log('ℹ️ No session found');
         }
