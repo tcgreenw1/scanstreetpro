@@ -3,6 +3,18 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
+// Debug Supabase configuration
+console.log('🔧 Supabase Configuration:', {
+  url: supabaseUrl ? '✅ URL configured' : '❌ URL missing',
+  key: supabaseAnonKey ? '✅ Key configured' : '❌ Key missing',
+  urlValue: supabaseUrl || 'undefined',
+  keyLength: supabaseAnonKey?.length || 0
+});
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('❌ Supabase configuration missing! Check environment variables.');
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
