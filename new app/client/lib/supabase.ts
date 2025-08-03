@@ -665,11 +665,17 @@ export const ensureDemoUsersExist = async () => {
   for (const demoUser of demoUsers) {
     try {
       // First ensure organization exists
-      let { data: org } = await supabase
+      let { data: org, error: orgCheckError } = await supabase
         .from('organizations')
         .select('id')
         .eq('slug', demoUser.orgSlug)
-        .single();
+        .maybeSingle();
+
+      if (orgCheckError) {
+        const errorMessage = getErrorMessage(orgCheckError);
+        console.error(`Error checking organization ${demoUser.orgSlug}:`, errorMessage);
+        continue;
+      }
 
       if (!org) {
         console.log(`🏢 Creating organization: ${demoUser.orgName}`);
