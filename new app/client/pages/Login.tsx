@@ -75,7 +75,8 @@ const Login = () => {
           reportConnectionFailure();
           setConnectionStatus('fallback');
           setFallbackMode(true);
-          setError(`Database connection failed: ${connectionTest.error || 'Unknown error'}. Using offline mode. Demo credentials: admin@scanstreetpro.com / AdminPass123!`);
+          const errorMessage = getErrorMessage(connectionTest.error);
+          setError(`Database connection failed: ${errorMessage}. Using offline mode. Demo credentials: admin@scanstreetpro.com / AdminPass123!`);
           return;
         }
 
