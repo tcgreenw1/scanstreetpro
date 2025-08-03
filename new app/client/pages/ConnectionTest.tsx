@@ -143,6 +143,38 @@ export default function ConnectionTest() {
           </CardContent>
         </Card>
 
+        {diagnostics.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>System Diagnostics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {diagnostics.map((diagnostic, index) => (
+                  <div key={index} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-start space-x-3">
+                      <span className="text-lg">{getStatusIcon(diagnostic.status)}</span>
+                      <div>
+                        <p className="font-medium">{diagnostic.component}</p>
+                        <p className={`text-sm ${getStatusColor(diagnostic.status)}`}>
+                          {diagnostic.message}
+                        </p>
+                        {diagnostic.details && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            {typeof diagnostic.details === 'string'
+                              ? diagnostic.details
+                              : JSON.stringify(diagnostic.details, null, 2)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
