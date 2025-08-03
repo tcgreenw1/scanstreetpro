@@ -112,8 +112,8 @@ const Login = () => {
     }, 15000); // 15 second timeout
 
     try {
-      if (isSignUp) {
-        // Sign up flow
+      if (isSignUp && !fallbackMode) {
+        // Sign up flow (only available when Supabase is connected)
         const result = await signUpWithTimeout(email, password);
 
         clearTimeout(timeoutId);
@@ -121,37 +121,80 @@ const Login = () => {
         setError('✅ Check your email for verification link!');
       } else {
         // Sign in flow
-        const { data, error } = await signInWithTimeout(email, password);
+        let authResult;
 
-        clearTimeout(timeoutId);
+        if (fallbackMode) {
+          // Use fallback authentication
+          authResult = await tryFallbackLogin(email, password);
+          clearTimeout(timeoutId);
 
-        if (error) throw error;
-        
-        if (data.user) {
-          // Check if user is admin with timeout
-          const userPromise = supabase
-            .from('users')
-            .select('role, organizations(plan)')
-            .eq('id', data.user.id)
-            .single();
+          if (!authResult.success) {
+            throw new Error(authResult.error || 'Fallback authentication failed');
+          }
 
-          const { data: userData } = await Promise.race([
-            userPromise,
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Database query timeout')), 5000)
-            )
-          ]) as any;
-            
-          if (userData?.role === 'admin') {
+          // Navigate based on role
+          if (authResult.user?.role === 'admin') {
             navigate('/admin-portal');
           } else {
             navigate('/dashboard');
+          }
+        } else {
+          // Use Supabase authentication
+          const { data, error } = await signInWithTimeout(email, password);
+
+          clearTimeout(timeoutId);
+
+          if (error) throw error;
+
+          if (data.user) {
+            // Check if user is admin with timeout
+            const userPromise = supabase
+              .from('users')
+              .select('role, organizations(plan)')
+              .eq('id', data.user.id)
+              .single();
+
+            const { data: userData } = await Promise.race([
+              userPromise,
+              new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Database query timeout')), 5000)
+              )
+            ]) as any;
+
+            if (userData?.role === 'admin') {
+              navigate('/admin-portal');
+            } else {
+              navigate('/dashboard');
+            }
           }
         }
       }
     } catch (error: any) {
       clearTimeout(timeoutId);
       console.error('Auth error:', error);
+
+      // If Supabase auth fails and we're not in fallback mode yet, try fallback
+      if (!fallbackMode && !isSignUp) {
+        console.log('🔄 Supabase auth failed, trying fallback...');
+        try {
+          const fallbackResult = await tryFallbackLogin(email, password);
+          if (fallbackResult.success) {
+            setFallbackMode(true);
+            setConnectionStatus('fallback');
+            setError('⚠️ Using offline mode - Limited functionality available');
+
+            if (fallbackResult.user?.role === 'admin') {
+              navigate('/admin-portal');
+            } else {
+              navigate('/dashboard');
+            }
+            return;
+          }
+        } catch (fallbackError) {
+          console.error('Fallback auth also failed:', fallbackError);
+        }
+      }
+
       setError(error?.message || 'Authentication failed. Please try again.');
     } finally {
       clearTimeout(timeoutId);
