@@ -183,7 +183,7 @@ const Login = () => {
     } catch (error: any) {
       clearTimeout(timeoutId);
       console.error('Demo login error:', error);
-      setError(error.message || `${demoType} demo login failed. Please try again.`);
+      setError(error?.message || `${demoType} demo login failed. Please try again.`);
     } finally {
       clearTimeout(timeoutId);
       setLoading(false);
