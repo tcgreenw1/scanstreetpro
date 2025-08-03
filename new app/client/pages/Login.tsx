@@ -1,12 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Mail, Lock, Building2, ArrowRight } from 'lucide-react';
+import { 
+  Eye, 
+  EyeOff, 
+  Mail, 
+  Lock, 
+  Building2, 
+  ArrowRight, 
+  Chrome,
+  Sparkles,
+  Shield,
+  Zap
+} from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -15,12 +25,46 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setMounted(true);
+    // Check if user is already logged in
+    checkUser();
+  }, []);
+
+  const checkUser = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+          
+        if (userData?.role === 'admin') {
+          navigate('/admin-portal');
+        } else {
+          navigate('/dashboard');
+        }
+      }
+    } catch (error) {
+      console.log('No active session');
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    // Add timeout to prevent hanging
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+      setError('Request timed out. Please check your connection and try again.');
+    }, 15000); // 15 second timeout
 
     try {
       if (isSignUp) {
@@ -30,9 +74,11 @@ const Login = () => {
           password,
         });
         
+        clearTimeout(timeoutId);
+        
         if (error) throw error;
         
-        setError('Check your email for verification link!');
+        setError('✅ Check your email for verification link!');
       } else {
         // Sign in flow
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -40,15 +86,24 @@ const Login = () => {
           password,
         });
         
+        clearTimeout(timeoutId);
+        
         if (error) throw error;
         
         if (data.user) {
-          // Check if user is admin
-          const { data: userData } = await supabase
+          // Check if user is admin with timeout
+          const userPromise = supabase
             .from('users')
             .select('role, organizations(plan)')
             .eq('id', data.user.id)
             .single();
+
+          const { data: userData } = await Promise.race([
+            userPromise,
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Database query timeout')), 5000)
+            )
+          ]) as any;
             
           if (userData?.role === 'admin') {
             navigate('/admin-portal');
@@ -58,43 +113,63 @@ const Login = () => {
         }
       }
     } catch (error: any) {
-      setError(error.message || 'Authentication failed');
+      clearTimeout(timeoutId);
+      console.error('Auth error:', error);
+      setError(error.message || 'Authentication failed. Please try again.');
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
 
   const handleGoogleAuth = async () => {
+    setLoading(true);
+    setError('');
+    
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
       
       if (error) throw error;
     } catch (error: any) {
-      setError(error.message || 'Google authentication failed');
+      console.error('Google auth error:', error);
+      setError('Google authentication is not configured. Please contact your administrator.');
+      setLoading(false);
     }
   };
 
-  const handleDemoLogin = async (demoType: 'admin' | 'user') => {
+  const handleDemoLogin = async (demoType: 'admin' | 'user' | 'premium') => {
     setLoading(true);
     setError('');
     
     const demoCredentials = {
       admin: { email: 'admin@scanstreetpro.com', password: 'AdminPass123!' },
-      user: { email: 'test@springfield.gov', password: 'TestUser123!' }
+      user: { email: 'test@springfield.gov', password: 'TestUser123!' },
+      premium: { email: 'premium@springfield.gov', password: 'Premium!' }
     };
     
     const { email: demoEmail, password: demoPassword } = demoCredentials[demoType];
+    
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+      setError('Demo login timed out. Please try again.');
+    }, 10000);
     
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: demoEmail,
         password: demoPassword,
       });
+      
+      clearTimeout(timeoutId);
       
       if (error) throw error;
       
@@ -106,184 +181,310 @@ const Login = () => {
         }
       }
     } catch (error: any) {
-      setError(error.message || 'Demo login failed');
+      clearTimeout(timeoutId);
+      console.error('Demo login error:', error);
+      setError(error.message || `${demoType} demo login failed. Please try again.`);
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
-        {/* Logo/Brand */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center space-x-2 p-3 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg">
-            <Building2 className="w-8 h-8 text-blue-600" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Scan Street Pro
-            </span>
-          </div>
-          <p className="text-gray-600">Municipal Infrastructure Management</p>
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-black to-slate-800">
+      {/* Animated Background */}
+      <div className="absolute inset-0">
+        {/* Gradient mesh */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 animate-gradient-shift"></div>
+        
+        {/* Floating particles */}
+        <div className="absolute inset-0">
+          {Array.from({ length: 50 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-white/30 rounded-full animate-float"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 20}s`,
+                animationDuration: `${10 + Math.random() * 20}s`
+              }}
+            />
+          ))}
         </div>
+        
+        {/* Glass morphism overlay */}
+        <div className="absolute inset-0 backdrop-blur-3xl bg-gradient-to-br from-white/5 via-transparent to-black/20"></div>
+      </div>
 
-        {/* Main Login Card */}
-        <Card className="bg-white/80 backdrop-blur-sm shadow-xl border-0">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">
-              {isSignUp ? 'Create Account' : 'Welcome Back'}
-            </CardTitle>
-            <CardDescription className="text-center">
-              {isSignUp 
-                ? 'Sign up to get started with infrastructure management' 
-                : 'Sign in to access your infrastructure dashboard'
-              }
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent className="space-y-4">
-            {error && (
-              <Alert variant={error.includes('Check your email') ? 'default' : 'destructive'}>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <form onSubmit={handleAuth} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+      {/* Content */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-8">
+          {/* Logo/Brand */}
+          <div className="text-center space-y-4 animate-fade-in-up">
+            <div className="relative group">
+              <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl blur-2xl opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+              <div className="relative inline-flex items-center space-x-3 p-6 glass-card rounded-3xl border border-white/20 shadow-2xl">
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="admin@scanstreetpro.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
-                    required
-                  />
+                  <Building2 className="w-10 h-10 text-white" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-50 blur-xl"></div>
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+                    Scan Street Pro
+                  </h1>
+                  <p className="text-sm text-white/70 font-medium">Municipal Infrastructure</p>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+          {/* Main Login Card */}
+          <div className="relative group animate-fade-in-up animation-delay-200">
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/50 to-purple-500/50 rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+            <div className="relative glass-card rounded-3xl border border-white/20 shadow-2xl backdrop-blur-xl">
+              <div className="p-8 space-y-6">
+                <div className="text-center space-y-2">
+                  <h2 className="text-2xl font-bold text-white">
+                    {isSignUp ? 'Join the Future' : 'Welcome Back'}
+                  </h2>
+                  <p className="text-white/60">
+                    {isSignUp 
+                      ? 'Create your account to get started' 
+                      : 'Sign in to your infrastructure dashboard'
+                    }
+                  </p>
+                </div>
+
+                {error && (
+                  <Alert variant={error.includes('✅') ? 'default' : 'destructive'} className="glass-card border-white/20">
+                    <AlertDescription className={error.includes('✅') ? 'text-green-400' : 'text-red-400'}>
+                      {error}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <form onSubmit={handleAuth} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-white/80 font-medium">Email</Label>
+                    <div className="relative group">
+                      <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/40 group-focus-within:text-white/60 transition-colors" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="premium@springfield.gov"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-12 h-12 glass-input border-white/20 bg-white/10 text-white placeholder:text-white/40 focus:border-white/40 focus:bg-white/20 transition-all duration-300"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-white/80 font-medium">Password</Label>
+                    <div className="relative group">
+                      <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/40 group-focus-within:text-white/60 transition-colors" />
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-12 pr-12 h-12 glass-input border-white/20 bg-white/10 text-white placeholder:text-white/40 focus:border-white/40 focus:bg-white/20 transition-all duration-300"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/40 hover:text-white/60 transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:scale-100"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Connecting...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <span>{isSignUp ? 'Create Account' : 'Sign In'}</span>
+                        <ArrowRight className="h-5 w-5" />
+                      </div>
+                    )}
+                  </Button>
+                </form>
+
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10"
-                    required
-                  />
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-white/20" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="bg-black/50 px-4 text-white/60 font-medium">Or continue with</span>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleGoogleAuth}
+                  className="w-full h-12 glass-card border-white/20 bg-white/10 text-white hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+                  disabled={loading}
+                >
+                  <Chrome className="mr-3 h-5 w-5" />
+                  Sign in with Google
+                </Button>
+
+                <div className="text-center">
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                    onClick={() => setIsSignUp(!isSignUp)}
+                    className="text-sm text-white/60 hover:text-white/80 transition-colors font-medium"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <Button 
-                type="submit" 
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                disabled={loading}
+          {/* Demo Login Cards */}
+          <div className="grid grid-cols-3 gap-3 animate-fade-in-up animation-delay-400">
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-red-500/50 to-pink-500/50 rounded-2xl blur-lg opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
+              <div 
+                className="relative glass-card rounded-2xl border border-white/20 p-4 cursor-pointer hover:bg-white/10 transition-all duration-300 transform hover:scale-105"
+                onClick={() => handleDemoLogin('admin')}
               >
-                {loading ? 'Loading...' : (isSignUp ? 'Create Account' : 'Sign In')}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </form>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                <div className="text-center space-y-2">
+                  <div className="w-10 h-10 mx-auto bg-gradient-to-r from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm text-white">Admin</h3>
+                  <p className="text-xs text-white/60">Full System Access</p>
+                </div>
               </div>
             </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleGoogleAuth}
-              className="w-full"
-            >
-              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-              Sign in with Google
-            </Button>
-
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-sm text-blue-600 hover:underline"
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/50 to-cyan-500/50 rounded-2xl blur-lg opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
+              <div 
+                className="relative glass-card rounded-2xl border border-white/20 p-4 cursor-pointer hover:bg-white/10 transition-all duration-300 transform hover:scale-105"
+                onClick={() => handleDemoLogin('user')}
               >
-                {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-              </button>
+                <div className="text-center space-y-2">
+                  <div className="w-10 h-10 mx-auto bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm text-white">User</h3>
+                  <p className="text-xs text-white/60">Standard Access</p>
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Demo Login Cards */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="bg-white/60 backdrop-blur-sm border-0 hover:bg-white/80 transition-all cursor-pointer group">
-            <CardContent className="p-4" onClick={() => handleDemoLogin('admin')}>
-              <div className="text-center space-y-2">
-                <div className="w-8 h-8 mx-auto bg-red-100 rounded-full flex items-center justify-center">
-                  <Building2 className="w-4 h-4 text-red-600" />
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/50 to-pink-500/50 rounded-2xl blur-lg opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
+              <div 
+                className="relative glass-card rounded-2xl border border-white/20 p-4 cursor-pointer hover:bg-white/10 transition-all duration-300 transform hover:scale-105"
+                onClick={() => handleDemoLogin('premium')}
+              >
+                <div className="text-center space-y-2">
+                  <div className="w-10 h-10 mx-auto bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm text-white">Premium</h3>
+                  <p className="text-xs text-white/60">Enhanced Features</p>
                 </div>
-                <h3 className="font-semibold text-sm">Admin Demo</h3>
-                <p className="text-xs text-gray-600">Full access to admin portal</p>
-                <Button size="sm" variant="outline" className="w-full group-hover:bg-red-50">
-                  Try Admin
-                </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="bg-white/60 backdrop-blur-sm border-0 hover:bg-white/80 transition-all cursor-pointer group">
-            <CardContent className="p-4" onClick={() => handleDemoLogin('user')}>
-              <div className="text-center space-y-2">
-                <div className="w-8 h-8 mx-auto bg-blue-100 rounded-full flex items-center justify-center">
-                  <Mail className="w-4 h-4 text-blue-600" />
-                </div>
-                <h3 className="font-semibold text-sm">User Demo</h3>
-                <p className="text-xs text-gray-600">Standard user experience</p>
-                <Button size="sm" variant="outline" className="w-full group-hover:bg-blue-50">
-                  Try User
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="text-center text-xs text-gray-500">
-          Demo Credentials:<br />
-          Admin: admin@scanstreetpro.com / AdminPass123!<br />
-          User: test@springfield.gov / TestUser123!
+          <div className="text-center text-xs text-white/40 space-y-1 animate-fade-in-up animation-delay-600">
+            <div>🚀 Demo Credentials Available</div>
+            <div>Admin: admin@scanstreetpro.com • User: test@springfield.gov • Premium: premium@springfield.gov</div>
+          </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes gradient-shift {
+          0%, 100% { transform: rotate(0deg) scale(1); }
+          50% { transform: rotate(180deg) scale(1.1); }
+        }
+        
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        @keyframes fade-in-up {
+          0% { 
+            opacity: 0; 
+            transform: translateY(30px); 
+          }
+          100% { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+        
+        .animate-gradient-shift {
+          animation: gradient-shift 20s ease-in-out infinite;
+        }
+        
+        .animate-float {
+          animation: float linear infinite;
+        }
+        
+        .animate-fade-in-up {
+          animation: fade-in-up 0.8s ease-out forwards;
+        }
+        
+        .animation-delay-200 {
+          animation-delay: 0.2s;
+        }
+        
+        .animation-delay-400 {
+          animation-delay: 0.4s;
+        }
+        
+        .animation-delay-600 {
+          animation-delay: 0.6s;
+        }
+        
+        .glass-card {
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+        }
+        
+        .glass-input {
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+        }
+        
+        .glass-input:focus {
+          background: rgba(255, 255, 255, 0.2);
+          box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+      `}</style>
     </div>
   );
 };
