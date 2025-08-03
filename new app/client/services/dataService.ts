@@ -26,7 +26,12 @@ class DataService {
         if (organization) {
           this.organizationPlan = organization.plan;
           this.organizationId = organization.id;
-          console.log('✅ DataService initialized with organization:', organization.name);
+          console.log('✅ DataService initialized with organization:', {
+            name: organization.name,
+            plan: organization.plan,
+            id: organization.id
+          });
+          console.log('📊 Plan detected:', this.organizationPlan, 'Will use:', this.organizationPlan === 'free' ? 'sample data' : 'real data');
         } else {
           console.warn('⚠️ No organization found, using free plan');
           this.organizationPlan = 'free';
