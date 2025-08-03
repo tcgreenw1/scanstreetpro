@@ -973,15 +973,17 @@ export const createUserInSupabase = async (email: string, password: string, user
       .single();
 
     if (dbError) {
-      console.error('❌ Failed to create user in database:', dbError);
+      const errorMessage = getErrorMessage(dbError);
+      console.error('❌ Failed to create user in database:', errorMessage);
       // Try to clean up the auth user if database insert failed
       try {
         await supabase.auth.admin.deleteUser(authData.user.id);
         console.log('🧹 Cleaned up Auth user after database failure');
       } catch (cleanupError) {
-        console.warn('Failed to cleanup Auth user:', cleanupError);
+        const cleanupErrorMessage = getErrorMessage(cleanupError);
+        console.warn('Failed to cleanup Auth user:', cleanupErrorMessage);
       }
-      throw new Error(`Failed to create user in database: ${dbError.message}`);
+      throw new Error(`Failed to create user in database: ${errorMessage}`);
     }
 
     console.log('✅ User successfully created in both Auth and database');
