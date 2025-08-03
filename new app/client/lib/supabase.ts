@@ -430,14 +430,17 @@ export const signUpWithTimeout = async (email: string, password: string) => {
     );
 
     if (result.error) {
-      console.error('❌ Sign up failed:', result.error);
+      const errorMessage = extractErrorMessage(result.error);
+      console.error('❌ Sign up failed:', errorMessage);
 
-      if (result.error.message?.includes('User already registered')) {
+      if (errorMessage.includes('User already registered')) {
         throw new Error('An account with this email already exists. Please sign in instead.');
-      } else if (result.error.message?.includes('Password should be')) {
+      } else if (errorMessage.includes('Password should be')) {
         throw new Error('Password must be at least 6 characters long.');
+      } else if (errorMessage.includes('Network request failed')) {
+        throw new Error('Network connection failed. Please check your internet connection.');
       } else {
-        throw new Error(result.error.message || 'Sign up failed');
+        throw new Error(errorMessage || 'Sign up failed');
       }
     }
 
