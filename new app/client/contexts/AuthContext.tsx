@@ -55,16 +55,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const initialize = async () => {
       try {
+        console.log('🔄 AuthContext initializing...');
+
         // Get session with timeout
         const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session timeout')), 5000)
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Session timeout after 5 seconds')), 5000)
         );
 
-        const { data: { session }, error } = await Promise.race([
-          sessionPromise,
-          timeoutPromise
-        ]) as any;
+        let sessionResult;
+        try {
+          sessionResult = await Promise.race([
+            sessionPromise,
+            timeoutPromise
+          ]) as any;
+        } catch (sessionError: any) {
+          const errorMessage = getErrorMessage(sessionError);
+          console.error('Session fetch failed:', errorMessage);
+          if (mounted.current) setLoading(false);
+          return;
+        }
+
+        const { data: { session }, error } = sessionResult;
 
         if (!mounted.current) return;
 
