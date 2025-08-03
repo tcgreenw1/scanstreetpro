@@ -38,6 +38,7 @@ import { Input } from '@/components/ui/input';
 import { usePricing } from '@/contexts/PricingContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { GlobalSearch } from './GlobalSearch';
+import { ConnectionStatus } from './ConnectionStatus';
 import {
   DropdownMenu,
   DropdownMenuContent,
