@@ -62,10 +62,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           throw new Error('Supabase client not initialized');
         }
 
-        // Get session with timeout
+        // Get session with more generous timeout
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Session timeout after 5 seconds')), 5000)
+          setTimeout(() => reject(new Error('Session timeout after 15 seconds')), 15000)
         );
 
         let sessionResult;
@@ -76,7 +76,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           ]) as any;
         } catch (sessionError: any) {
           const errorMessage = getErrorMessage(sessionError);
-          console.error('Session fetch failed:', errorMessage);
+          console.warn('Session fetch failed:', errorMessage);
+
+          // Continue with no session instead of blocking the app
+          console.log('Continuing without session - user will need to login');
           if (mounted.current) setLoading(false);
           return;
         }
