@@ -309,7 +309,8 @@ export const getUserOrganization = async () => {
     .single();
 
   if (error) {
-    console.error('Error fetching user organization:', error);
+    const errorMessage = extractErrorMessage(error);
+    console.error('Error fetching user organization:', errorMessage);
     return null;
   }
 
