@@ -629,6 +629,65 @@ const extractErrorMessage = (error: any): string => {
   return 'Unknown connection error - please check your internet connection and Supabase configuration';
 };
 
+// Helper function to ensure demo users exist in Supabase Auth
+export const ensureDemoUsersExist = async () => {
+  const demoUsers = [
+    { email: 'admin@scanstreetpro.com', password: 'AdminPass123!', role: 'admin' },
+    { email: 'test@springfield.gov', password: 'TestUser123!', role: 'viewer' },
+    { email: 'premium@springfield.gov', password: 'Premium!', role: 'manager' }
+  ];
+
+  for (const demoUser of demoUsers) {
+    try {
+      // First check if user exists in database
+      const { data: dbUser } = await supabase
+        .from('users')
+        .select('id, email')
+        .eq('email', demoUser.email)
+        .single();
+
+      if (!dbUser) {
+        console.log(`🔧 Creating demo user: ${demoUser.email}`);
+
+        // Create in Supabase Auth first
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: demoUser.email,
+          password: demoUser.password
+        });
+
+        if (authError && !authError.message.includes('User already registered')) {
+          console.error(`Failed to create auth user ${demoUser.email}:`, authError);
+          continue;
+        }
+
+        const userId = authData.user?.id;
+        if (userId) {
+          // Create in database
+          const { error: dbError } = await supabase
+            .from('users')
+            .insert({
+              id: userId,
+              email: demoUser.email,
+              name: demoUser.email.split('@')[0],
+              role: demoUser.role,
+              is_active: true,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
+
+          if (dbError) {
+            console.error(`Failed to create db user ${demoUser.email}:`, dbError);
+          } else {
+            console.log(`✅ Created demo user: ${demoUser.email}`);
+          }
+        }
+      }
+    } catch (error) {
+      console.warn(`Error checking/creating demo user ${demoUser.email}:`, getErrorMessage(error));
+    }
+  }
+};
+
 // Enhanced auth functions with timeout and better error handling
 export const signInWithTimeout = async (email: string, password: string) => {
   try {
