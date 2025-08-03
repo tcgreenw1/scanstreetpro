@@ -8,11 +8,17 @@ console.log('🔧 Supabase Configuration:', {
   url: supabaseUrl ? '✅ URL configured' : '❌ URL missing',
   key: supabaseAnonKey ? '✅ Key configured' : '❌ Key missing',
   urlValue: supabaseUrl || 'undefined',
-  keyLength: supabaseAnonKey?.length || 0
+  keyLength: supabaseAnonKey?.length || 0,
+  urlValid: supabaseUrl?.includes('supabase.co') ? '✅ Valid format' : '❌ Invalid format',
+  keyValid: supabaseAnonKey?.startsWith('eyJ') ? '✅ Valid JWT format' : '❌ Invalid JWT format'
 });
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('❌ Supabase configuration missing! Check environment variables.');
+} else if (!supabaseUrl.includes('supabase.co')) {
+  console.error('❌ Invalid Supabase URL format! Should be https://xxx.supabase.co');
+} else if (!supabaseAnonKey.startsWith('eyJ')) {
+  console.error('❌ Invalid Supabase key format! Should be a JWT token starting with eyJ');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
