@@ -39,6 +39,7 @@ import MapView from "./pages/MapView";
 import Login from "./pages/Login";
 import DatabaseSetup from "./pages/DatabaseSetup";
 import DatabaseTest from "./pages/DatabaseTest";
+import TestOrgCreation from "./pages/TestOrgCreation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
