@@ -45,20 +45,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const fetchUserData = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select(`
-          *,
-          organizations (
-            id,
-            name,
-            slug,
-            plan,
-            settings
-          )
-        `)
-        .eq('id', userId)
-        .single();
+      const { data, error } = await withTimeout(
+        supabase
+          .from('users')
+          .select(`
+            *,
+            organizations (
+              id,
+              name,
+              slug,
+              plan,
+              settings
+            )
+          `)
+          .eq('id', userId)
+          .single(),
+        8000,
+        'Timeout fetching user data'
+      );
 
       if (error) {
         console.error('Error fetching user data:', error);
