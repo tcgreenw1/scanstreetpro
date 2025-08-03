@@ -115,7 +115,7 @@ const Login = () => {
     } catch (error: any) {
       clearTimeout(timeoutId);
       console.error('Auth error:', error);
-      setError(error.message || 'Authentication failed. Please try again.');
+      setError(error?.message || 'Authentication failed. Please try again.');
     } finally {
       clearTimeout(timeoutId);
       setLoading(false);
