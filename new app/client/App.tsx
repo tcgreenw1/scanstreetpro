@@ -47,6 +47,27 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AppInitializer = ({ children }: { children: React.ReactNode }) => {
+  useEffect(() => {
+    // Seed demo users on app start (run once)
+    const initializeApp = async () => {
+      const hasInitialized = localStorage.getItem('app-initialized');
+      if (!hasInitialized) {
+        try {
+          await seedDemoUsers();
+          localStorage.setItem('app-initialized', 'true');
+        } catch (error) {
+          console.error('Failed to initialize app:', error);
+        }
+      }
+    };
+
+    initializeApp();
+  }, []);
+
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
