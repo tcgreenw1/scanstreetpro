@@ -66,7 +66,7 @@ export const seedDemoUsers = async () => {
           .single();
 
         if (orgError && !orgError.message.includes('duplicate')) {
-          console.error(`Error creating organization ${user.organizationName}:`, orgError);
+          console.error(`Error creating organization ${user.organizationName}:`, orgError.message || orgError);
           continue;
         }
         organizationId = newOrg?.id;
