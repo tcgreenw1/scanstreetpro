@@ -1,5 +1,6 @@
 import { supabase, getUserOrganization } from '@/lib/supabase';
 import { sampleData } from './sampleData';
+import { getErrorMessage } from '@/utils/errorHandler';
 
 interface DataServiceOptions {
   forceRealData?: boolean;
