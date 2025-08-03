@@ -260,30 +260,46 @@ const Login = () => {
     }
   };
 
+  const handleCreateDemoUsers = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      console.log('🔧 Creating demo users...');
+      await ensureDemoUsersExist();
+      setError('✅ Demo users created successfully! You can now log in with the demo credentials.');
+    } catch (error: any) {
+      console.error('Demo user creation error:', error);
+      setError(`❌ Failed to create demo users: ${error?.message || error}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDemoLogin = async (demoType: 'admin' | 'user' | 'premium') => {
     setLoading(true);
     setError('');
-    
+
     const demoCredentials = {
       admin: { email: 'admin@scanstreetpro.com', password: 'AdminPass123!' },
       user: { email: 'test@springfield.gov', password: 'TestUser123!' },
       premium: { email: 'premium@springfield.gov', password: 'Premium!' }
     };
-    
+
     const { email: demoEmail, password: demoPassword } = demoCredentials[demoType];
-    
+
     const timeoutId = setTimeout(() => {
       setLoading(false);
       setError('Demo login timed out. Please try again.');
     }, 10000);
-    
+
     try {
       const { data, error } = await signInWithTimeout(demoEmail, demoPassword);
 
       clearTimeout(timeoutId);
 
       if (error) throw error;
-      
+
       if (data.user) {
         if (demoType === 'admin') {
           navigate('/admin-portal');
@@ -294,7 +310,13 @@ const Login = () => {
     } catch (error: any) {
       clearTimeout(timeoutId);
       console.error('Demo login error:', error);
-      setError(error?.message || `${demoType} demo login failed. Please try again.`);
+
+      // If demo login fails, suggest creating users
+      if (error?.message?.includes('Invalid credentials')) {
+        setError(`${demoType} demo user may not exist. Click "Create Demo Users" button below to set them up.`);
+      } else {
+        setError(error?.message || `${demoType} demo login failed. Please try again.`);
+      }
     } finally {
       clearTimeout(timeoutId);
       setLoading(false);
