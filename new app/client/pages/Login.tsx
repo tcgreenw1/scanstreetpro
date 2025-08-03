@@ -339,6 +339,12 @@ const Login = () => {
                           <span className="text-red-200">Connection Error</span>
                         </>
                       )}
+                      {connectionStatus === 'fallback' && (
+                        <>
+                          <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                          <span className="text-orange-200">Offline Mode</span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
