@@ -8,7 +8,9 @@ import { CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function ConnectionTest() {
   const [testResult, setTestResult] = useState<any>(null);
+  const [diagnostics, setDiagnostics] = useState<DiagnosticResult[]>([]);
   const [testing, setTesting] = useState(false);
+  const [runningDiagnostics, setRunningDiagnostics] = useState(false);
   const [autoTested, setAutoTested] = useState(false);
 
   useEffect(() => {
