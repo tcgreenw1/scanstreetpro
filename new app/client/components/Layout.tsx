@@ -468,31 +468,45 @@ function DesktopSidebar({
       {/* Header */}
       <div className={cn("border-b border-white/10 transition-all duration-300", isCollapsed ? "p-3" : "p-6")}>
         <div className="flex items-center justify-between">
-          <Link to="/" className={cn("flex items-center transition-all duration-300", isCollapsed ? "space-x-0" : "space-x-3")}>
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg animate-pulse-glow">
-              <Building2 className="w-6 h-6 text-white" />
+          {isCollapsed ? (
+            <div className="flex items-center justify-center w-full">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onToggleCollapse}
+                className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white/20 dark:hover:bg-white/10 animate-pulse-glow"
+                title="Expand sidebar"
+              >
+                <Menu className="w-4 h-4 transition-transform duration-300" />
+              </Button>
             </div>
-            {!isCollapsed && (
-              <div className="animate-slide-in">
-                <h1 className="text-xl font-bold text-slate-800 dark:text-white">Scan Street Pro</h1>
-                <div className="flex items-center space-x-2">
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Infrastructure Management</p>
-                  <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300">
-                    FREE
-                  </Badge>
+          ) : (
+            <>
+              <Link to="/" className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg animate-pulse-glow">
+                  <Building2 className="w-6 h-6 text-white" />
                 </div>
-              </div>
-            )}
-          </Link>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleCollapse}
-            className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white/20 dark:hover:bg-white/10 animate-pulse-glow"
-            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            <Menu className={cn("w-4 h-4 transition-transform duration-300", isCollapsed && "rotate-180")} />
-          </Button>
+                <div className="animate-slide-in">
+                  <h1 className="text-xl font-bold text-slate-800 dark:text-white">Scan Street Pro</h1>
+                  <div className="flex items-center space-x-2">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Infrastructure Management</p>
+                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300">
+                      FREE
+                    </Badge>
+                  </div>
+                </div>
+              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onToggleCollapse}
+                className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white/20 dark:hover:bg-white/10 animate-pulse-glow"
+                title="Collapse sidebar"
+              >
+                <Menu className="w-4 h-4 transition-transform duration-300" />
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
