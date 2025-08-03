@@ -303,20 +303,20 @@ CREATE POLICY "Enable read access for authenticated users" ON contractors
               </div>
             )}
 
-            <Button 
-              onClick={initializeDatabase} 
+            <Button
+              onClick={initializeDatabase}
               disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Initializing Database...
+                  Testing Connection...
                 </>
               ) : (
                 <>
                   <Database className="w-4 h-4 mr-2" />
-                  Initialize Database
+                  Test Database Connection
                 </>
               )}
             </Button>
