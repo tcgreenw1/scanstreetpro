@@ -330,11 +330,11 @@ export const withTimeout = <T>(
   ]);
 };
 
-// Enhanced timeout wrapper with retry logic
+// Enhanced timeout wrapper with retry logic and aggressive fallbacks
 export const withTimeoutAndRetry = <T>(
   promiseFactory: () => Promise<T>,
-  timeoutMs: number = 5000,
-  maxRetries: number = 2,
+  timeoutMs: number = 15000, // Increased from 5000 to 15000
+  maxRetries: number = 1,    // Reduced retries to fail faster
   errorMessage: string = 'Operation timed out after retries'
 ): Promise<T> => {
   return new Promise(async (resolve, reject) => {
@@ -356,13 +356,27 @@ export const withTimeoutAndRetry = <T>(
 
         // If this isn't the last attempt, wait before retrying
         if (attempt < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1))); // Exponential backoff
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Fixed 2-second delay
         }
       }
     }
 
     reject(lastError || new Error(errorMessage));
   });
+};
+
+// Fast-fail wrapper for quick fallback
+export const withFastTimeout = <T>(
+  promise: Promise<T>,
+  timeoutMs: number = 3000,
+  errorMessage: string = 'Operation timed out quickly'
+): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(errorMessage)), timeoutMs)
+    ),
+  ]);
 };
 
 // Test Supabase connection comprehensively
