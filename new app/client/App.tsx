@@ -10,6 +10,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { PlaceholderPage } from "./components/PlaceholderPage";
 import { PricingProvider } from "./contexts/PricingContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import RoadInspection from "./pages/RoadInspection";
 import Dashboard from "./pages/Dashboard";
 import AssetManager from "./pages/AssetManager";
@@ -42,66 +44,81 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <PricingProvider>
-      <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Layout>
+    <AuthProvider>
+      <PricingProvider>
+        <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
           <Routes>
-            {/* Main Dashboard */}
-            <Route path="/" element={<Dashboard />} />
-
-            {/* Dashboard Routes */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/inspection-dashboard" element={<RoadInspection />} />
-            <Route path="/admin-dashboard" element={<AdminDashboard />} />
-            <Route path="/admin-portal" element={<AdminPortal />} />
-
-            {/* Infrastructure Management */}
-            <Route path="/assets" element={<AssetManager />} />
-            <Route path="/maintenance" element={<MaintenanceScheduler />} />
-            <Route path="/contractors" element={<Contractors />} />
-            <Route path="/inspections" element={<Inspections />} />
-            <Route path="/inspections/new" element={<NewInspection />} />
-            <Route path="/map" element={<MapPage />} />
-            <Route path="/map-view" element={<MapView />} />
-            <Route path="/verify" element={<VerifyPage />} />
-
-            {/* Financial Management */}
-            <Route path="/budget" element={<Planning />} />
-            <Route path="/estimates" element={<CostEstimator />} />
-            <Route path="/funding" element={<Funding />} />
-            <Route path="/expenses" element={<Expenses />} />
-            <Route path="/planning" element={<Planning />} />
-
-            {/* Grant Management */}
-            <Route path="/start-grant" element={<StartGrant />} />
-            <Route path="/applications" element={<Applications />} />
-
-            {/* Public Services */}
-            <Route path="/citizen-reports" element={<CitizenEngagement />} />
-            <Route path="/citizen-history" element={<CitizenHistory />} />
-            <Route path="/reports" element={<Reports />} />
-
-            {/* Administrative */}
-            <Route path="/task-details" element={<TaskDetails />} />
-            <Route path="/integrations" element={<Integrations />} />
-            <Route path="/settings" element={<Settings />} />
-
-            {/* Pricing */}
-            <Route path="/pricing" element={<Pricing />} />
-
-            {/* Authentication */}
+            {/* Public Routes */}
             <Route path="/login" element={<Login />} />
 
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
+            {/* Protected Routes */}
+            <Route path="/*" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Routes>
+                    {/* Main Dashboard */}
+                    <Route path="/" element={<Dashboard />} />
+
+                    {/* Dashboard Routes */}
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/inspection-dashboard" element={<RoadInspection />} />
+                    <Route path="/admin-dashboard" element={<AdminDashboard />} />
+
+                    {/* Admin Only Routes */}
+                    <Route path="/admin-portal" element={
+                      <ProtectedRoute requireAdmin={true}>
+                        <AdminPortal />
+                      </ProtectedRoute>
+                    } />
+
+                    {/* Infrastructure Management */}
+                    <Route path="/assets" element={<AssetManager />} />
+                    <Route path="/maintenance" element={<MaintenanceScheduler />} />
+                    <Route path="/contractors" element={<Contractors />} />
+                    <Route path="/inspections" element={<Inspections />} />
+                    <Route path="/inspections/new" element={<NewInspection />} />
+                    <Route path="/map" element={<MapPage />} />
+                    <Route path="/map-view" element={<MapView />} />
+                    <Route path="/verify" element={<VerifyPage />} />
+
+                    {/* Financial Management */}
+                    <Route path="/budget" element={<Planning />} />
+                    <Route path="/estimates" element={<CostEstimator />} />
+                    <Route path="/funding" element={<Funding />} />
+                    <Route path="/expenses" element={<Expenses />} />
+                    <Route path="/planning" element={<Planning />} />
+
+                    {/* Grant Management */}
+                    <Route path="/start-grant" element={<StartGrant />} />
+                    <Route path="/applications" element={<Applications />} />
+
+                    {/* Public Services */}
+                    <Route path="/citizen-reports" element={<CitizenEngagement />} />
+                    <Route path="/citizen-history" element={<CitizenHistory />} />
+                    <Route path="/reports" element={<Reports />} />
+
+                    {/* Administrative */}
+                    <Route path="/task-details" element={<TaskDetails />} />
+                    <Route path="/integrations" element={<Integrations />} />
+                    <Route path="/settings" element={<Settings />} />
+
+                    {/* Pricing */}
+                    <Route path="/pricing" element={<Pricing />} />
+
+                    {/* Catch-all */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Layout>
+              </ProtectedRoute>
+            } />
           </Routes>
-        </Layout>
-      </BrowserRouter>
-      </TooltipProvider>
-    </PricingProvider>
+        </BrowserRouter>
+        </TooltipProvider>
+      </PricingProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
