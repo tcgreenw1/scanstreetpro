@@ -124,10 +124,7 @@ const App = () => (
   </QueryClientProvider>
 );
 
-// Create root only once and render the App
-const container = document.getElementById("root");
-if (container && !container._reactRoot) {
-  const root = createRoot(container);
-  (container as any)._reactRoot = root;
-  root.render(<App />);
-}
+// Create and render the app only once
+const container = document.getElementById("root")!;
+const root = createRoot(container);
+root.render(<App />);
