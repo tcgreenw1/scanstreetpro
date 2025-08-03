@@ -73,6 +73,7 @@ const App = () => (
     <AuthProvider>
       <PricingProvider>
         <TooltipProvider>
+        <AppInitializer>
         <Toaster />
         <Sonner />
         <BrowserRouter>
@@ -146,6 +147,7 @@ const App = () => (
             } />
           </Routes>
         </BrowserRouter>
+        </AppInitializer>
         </TooltipProvider>
       </PricingProvider>
     </AuthProvider>
