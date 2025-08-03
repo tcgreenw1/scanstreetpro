@@ -144,7 +144,8 @@ export default function AdminPortal() {
       // Load the actual data
       await loadData();
     } catch (error: any) {
-      setError(`Failed to initialize admin portal: ${error.message}`);
+      const errorMessage = getErrorMessage(error);
+      setError(`Failed to initialize admin portal: ${errorMessage}`);
       setLoading(false);
     }
   };
