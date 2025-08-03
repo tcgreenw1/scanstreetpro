@@ -755,27 +755,58 @@ export const ensureDemoUsersExist = async () => {
         }
 
         const userId = authData?.user?.id;
-        if (userId) {
-          // Create in database
-          const { error: dbError } = await supabase
-            .from('users')
-            .insert({
-              id: userId,
-              organization_id: org.id,
-              email: demoUser.email,
-              name: demoUser.name,
-              role: demoUser.role,
-              is_active: true,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            });
+        if (!userId) {
+          console.error(`No user ID available for ${demoUser.email} - auth creation failed`);
+          continue;
+        }
 
-          if (dbError && !dbError.message.includes('duplicate')) {
-            const errorMessage = getErrorMessage(dbError);
-            console.error(`Failed to create db user ${demoUser.email}:`, errorMessage);
-          } else {
-            console.log(`✅ Created demo user: ${demoUser.email}`);
+        // Verify the auth user actually exists before creating database user
+        try {
+          const { data: authUser, error: authCheckError } = await supabase.auth.admin.getUserById(userId);
+          if (authCheckError || !authUser.user) {
+            console.error(`Auth user ${userId} not found, cannot create database user for ${demoUser.email}`);
+            continue;
           }
+          console.log(`✅ Auth user verified for ${demoUser.email}`);
+        } catch (authVerifyError) {
+          console.warn(`Cannot verify auth user for ${demoUser.email}, proceeding anyway`);
+        }
+
+        // Small delay to ensure auth user is fully propagated
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Create in database
+        const { error: dbError } = await supabase
+          .from('users')
+          .insert({
+            id: userId,
+            organization_id: org.id,
+            email: demoUser.email,
+            name: demoUser.name,
+            role: demoUser.role,
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+
+        if (dbError) {
+          const errorMessage = getErrorMessage(dbError);
+          if (dbError.message.includes('duplicate') || dbError.code === '23505') {
+            console.log(`ℹ️ User ${demoUser.email} already exists in database`);
+          } else if (dbError.message.includes('foreign key constraint') || dbError.code === '23503') {
+            console.error(`❌ Foreign key violation for ${demoUser.email}: Auth user ${userId} not found in auth.users`);
+            // Try to clean up the potentially orphaned auth user
+            try {
+              await supabase.auth.admin.deleteUser(userId);
+              console.log(`🧹 Cleaned up orphaned auth user ${userId}`);
+            } catch (cleanupError) {
+              console.warn('Failed to cleanup orphaned auth user');
+            }
+          } else {
+            console.error(`Failed to create db user ${demoUser.email}:`, errorMessage);
+          }
+        } else {
+          console.log(`✅ Created demo user: ${demoUser.email}`);
         }
       } else {
         console.log(`ℹ️ Demo user already exists: ${demoUser.email}`);
