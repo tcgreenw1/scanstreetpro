@@ -57,24 +57,44 @@ const Login = () => {
         return;
       }
 
-      // Test Supabase connection
-      const connectionTest = await testSupabaseConnection();
-
-      if (!connectionTest.success) {
-        console.log('⚠️ Supabase connection failed, enabling fallback mode');
+      // Check if we should use offline mode immediately
+      if (shouldUseOfflineMode()) {
+        console.log('🔄 Offline mode detected, enabling fallback immediately');
         setConnectionStatus('fallback');
         setFallbackMode(true);
-        setError(`Database connection failed: ${connectionTest.error || 'Unknown error'}. Using offline mode. Demo credentials: admin@scanstreetpro.com / AdminPass123!`);
+        setError(`Device appears to be offline. Using offline mode. Demo credentials: admin@scanstreetpro.com / AdminPass123!`);
         return;
       }
 
-      setConnectionStatus('connected');
-      setFallbackMode(false);
+      // Quick test Supabase connection with fast timeout
+      try {
+        const connectionTest = await testSupabaseConnection();
 
-      // Check if user is already logged in via Supabase
-      await checkUser();
+        if (!connectionTest.success) {
+          console.log('⚠️ Supabase connection failed, enabling fallback mode');
+          reportConnectionFailure();
+          setConnectionStatus('fallback');
+          setFallbackMode(true);
+          setError(`Database connection failed: ${connectionTest.error || 'Unknown error'}. Using offline mode. Demo credentials: admin@scanstreetpro.com / AdminPass123!`);
+          return;
+        }
+
+        reportConnectionSuccess();
+        setConnectionStatus('connected');
+        setFallbackMode(false);
+
+        // Check if user is already logged in via Supabase
+        await checkUser();
+      } catch (connectionError: any) {
+        console.warn('Connection test failed completely, using fallback mode');
+        reportConnectionFailure();
+        setConnectionStatus('fallback');
+        setFallbackMode(true);
+        setError(`Connection test failed. Using offline mode. Demo credentials: admin@scanstreetpro.com / AdminPass123!`);
+      }
     } catch (error: any) {
       console.error('Login initialization error:', error);
+      reportConnectionFailure();
       setConnectionStatus('fallback');
       setFallbackMode(true);
       const errorMessage = getErrorMessage(error);
