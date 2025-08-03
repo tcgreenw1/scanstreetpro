@@ -436,26 +436,34 @@ export const testSupabaseConnection = async () => {
       return { success: false, error: `Auth service error: ${errorMessage}` };
     }
 
-    // Test database connectivity
+    // Test database connectivity with progressive timeouts
     console.log('🔍 Testing database service...');
-    const dbPromise = supabase.from('organizations').select('count').limit(1);
-    const dbTimeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Database service timeout after 8 seconds')), 8000)
-    );
-
     let dbResult;
     try {
-      dbResult = await Promise.race([dbPromise, dbTimeoutPromise]) as any;
-    } catch (dbError: any) {
-      // Handle timeout or other errors from Promise.race
-      const errorMessage = extractErrorMessage(dbError);
-      console.error('❌ Database service test failed (race error):', errorMessage);
-      return { success: false, error: `Database connection error: ${errorMessage}` };
+      // Quick test first
+      dbResult = await withFastTimeout(
+        supabase.from('organizations').select('count').limit(1),
+        5000,
+        'Database service not responding (5s timeout)'
+      );
+    } catch (quickDbError: any) {
+      console.warn('Quick database test failed, trying extended timeout...');
+      try {
+        dbResult = await withTimeout(
+          supabase.from('organizations').select('count').limit(1),
+          20000,
+          'Database service timeout after extended wait'
+        );
+      } catch (extendedDbError: any) {
+        const errorMessage = extractErrorMessage(extendedDbError);
+        console.error('❌ Database service completely failed:', errorMessage);
+        return { success: false, error: `Database unavailable: ${errorMessage}. Using offline mode.` };
+      }
     }
 
     if (dbResult.error) {
       const errorMessage = extractErrorMessage(dbResult.error);
-      console.error('�� Database service test failed:', errorMessage);
+      console.error('❌ Database service test failed:', errorMessage);
 
       // Provide specific guidance for common database errors
       if (errorMessage.includes('relation "organizations" does not exist')) {
