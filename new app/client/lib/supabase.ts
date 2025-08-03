@@ -633,58 +633,139 @@ const extractErrorMessage = (error: any): string => {
 // Helper function to ensure demo users exist in Supabase Auth
 export const ensureDemoUsersExist = async () => {
   const demoUsers = [
-    { email: 'admin@scanstreetpro.com', password: 'AdminPass123!', role: 'admin' },
-    { email: 'test@springfield.gov', password: 'TestUser123!', role: 'viewer' },
-    { email: 'premium@springfield.gov', password: 'Premium!', role: 'manager' }
+    {
+      email: 'admin@scanstreetpro.com',
+      password: 'AdminPass123!',
+      role: 'admin',
+      name: 'System Administrator',
+      orgName: 'Scan Street Pro Admin',
+      orgSlug: 'scan-street-admin',
+      orgPlan: 'enterprise'
+    },
+    {
+      email: 'test@springfield.gov',
+      password: 'TestUser123!',
+      role: 'manager',
+      name: 'Test User',
+      orgName: 'City of Springfield (Free)',
+      orgSlug: 'springfield-free',
+      orgPlan: 'free'
+    },
+    {
+      email: 'premium@springfield.gov',
+      password: 'Premium!',
+      role: 'manager',
+      name: 'Premium User',
+      orgName: 'City of Springfield (Premium)',
+      orgSlug: 'springfield-premium',
+      orgPlan: 'professional'
+    }
   ];
 
   for (const demoUser of demoUsers) {
     try {
-      // First check if user exists in database
+      // First ensure organization exists
+      let { data: org } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('slug', demoUser.orgSlug)
+        .single();
+
+      if (!org) {
+        console.log(`🏢 Creating organization: ${demoUser.orgName}`);
+        const { data: newOrg, error: orgError } = await supabase
+          .from('organizations')
+          .insert({
+            name: demoUser.orgName,
+            slug: demoUser.orgSlug,
+            plan: demoUser.orgPlan
+          })
+          .select('id')
+          .single();
+
+        if (orgError && !orgError.message.includes('duplicate')) {
+          console.error(`Failed to create org ${demoUser.orgName}:`, orgError);
+          continue;
+        }
+        org = newOrg;
+      }
+
+      if (!org?.id) {
+        console.error(`No organization available for ${demoUser.email}`);
+        continue;
+      }
+
+      // Check if user exists in database
       const { data: dbUser } = await supabase
         .from('users')
         .select('id, email')
         .eq('email', demoUser.email)
-        .single();
+        .maybeSingle();
 
       if (!dbUser) {
         console.log(`🔧 Creating demo user: ${demoUser.email}`);
 
-        // Create in Supabase Auth first
+        // Try to create in Supabase Auth first
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: demoUser.email,
-          password: demoUser.password
+          password: demoUser.password,
+          options: {
+            data: {
+              name: demoUser.name
+            }
+          }
         });
 
         if (authError && !authError.message.includes('User already registered')) {
           console.error(`Failed to create auth user ${demoUser.email}:`, authError);
-          continue;
+
+          // Try admin create as fallback
+          try {
+            const { data: adminAuthData, error: adminAuthError } = await supabase.auth.admin.createUser({
+              email: demoUser.email,
+              password: demoUser.password,
+              email_confirm: true,
+              user_metadata: { name: demoUser.name }
+            });
+
+            if (adminAuthError) {
+              console.error(`Admin create also failed for ${demoUser.email}:`, adminAuthError);
+              continue;
+            }
+            authData.user = adminAuthData.user;
+          } catch (adminError) {
+            console.warn(`Admin create not available for ${demoUser.email}`);
+            continue;
+          }
         }
 
-        const userId = authData.user?.id;
+        const userId = authData?.user?.id;
         if (userId) {
           // Create in database
           const { error: dbError } = await supabase
             .from('users')
             .insert({
               id: userId,
+              organization_id: org.id,
               email: demoUser.email,
-              name: demoUser.email.split('@')[0],
+              name: demoUser.name,
               role: demoUser.role,
               is_active: true,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             });
 
-          if (dbError) {
+          if (dbError && !dbError.message.includes('duplicate')) {
             console.error(`Failed to create db user ${demoUser.email}:`, dbError);
           } else {
             console.log(`✅ Created demo user: ${demoUser.email}`);
           }
         }
+      } else {
+        console.log(`ℹ️ Demo user already exists: ${demoUser.email}`);
       }
     } catch (error) {
-      console.warn(`Error checking/creating demo user ${demoUser.email}:`, getErrorMessage(error));
+      console.warn(`Error ensuring demo user ${demoUser.email}:`, getErrorMessage(error));
     }
   }
 };
