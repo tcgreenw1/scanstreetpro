@@ -1480,6 +1480,251 @@ export default function AdminPortal() {
             </div>
           </TabsContent>
 
+          {/* User Diagnosis Tab */}
+          <TabsContent value="diagnosis" className="space-y-6">
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Authentication Diagnosis</h2>
+                <p className="text-gray-600">Diagnose and fix user authentication issues</p>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="w-5 h-5" />
+                    User Authentication Testing
+                  </CardTitle>
+                  <CardDescription>
+                    Test user credentials and diagnose authentication problems
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="diagnosis-email">Email Address</Label>
+                      <Input
+                        id="diagnosis-email"
+                        type="email"
+                        placeholder="premium@springfield.gov"
+                        value={userDiagnosisForm.email}
+                        onChange={(e) => setUserDiagnosisForm(prev => ({
+                          ...prev,
+                          email: e.target.value
+                        }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="diagnosis-password">Password (optional for auth test)</Label>
+                      <Input
+                        id="diagnosis-password"
+                        type="password"
+                        placeholder="Premium!"
+                        value={userDiagnosisForm.password}
+                        onChange={(e) => setUserDiagnosisForm(prev => ({
+                          ...prev,
+                          password: e.target.value
+                        }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={diagnoseUser}
+                      disabled={userDiagnosisForm.loading || !userDiagnosisForm.email}
+                      className="flex items-center gap-2"
+                    >
+                      {userDiagnosisForm.loading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Diagnosing...
+                        </>
+                      ) : (
+                        <>
+                          <AlertTriangle className="w-4 h-4" />
+                          Run Diagnosis
+                        </>
+                      )}
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      onClick={() => setUserDiagnosisForm(prev => ({
+                        ...prev,
+                        email: 'premium@springfield.gov',
+                        password: 'Premium!'
+                      }))}
+                    >
+                      Use Premium Demo
+                    </Button>
+                  </div>
+
+                  {userDiagnosisForm.testResults && (
+                    <div className="mt-6 space-y-4">
+                      <h3 className="text-lg font-semibold">Diagnosis Results</h3>
+
+                      {userDiagnosisForm.testResults.error ? (
+                        <Alert variant="destructive">
+                          <AlertTriangle className="h-4 w-4" />
+                          <AlertDescription>
+                            {userDiagnosisForm.testResults.error}
+                          </AlertDescription>
+                        </Alert>
+                      ) : (
+                        <div className="grid gap-4">
+                          {/* Database Test */}
+                          <Card>
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-sm flex items-center gap-2">
+                                <Database className="w-4 h-4" />
+                                Database Check
+                                {userDiagnosisForm.testResults.tests.database?.exists ? (
+                                  <CheckCircle className="w-4 h-4 text-green-600" />
+                                ) : (
+                                  <AlertTriangle className="w-4 h-4 text-red-600" />
+                                )}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm">
+                              {userDiagnosisForm.testResults.tests.database?.exists ? (
+                                <div className="text-green-700">
+                                  ✅ User found in database
+                                  <div className="mt-1 text-xs text-gray-600">
+                                    Role: {userDiagnosisForm.testResults.tests.database.user?.role || 'N/A'}<br/>
+                                    Active: {userDiagnosisForm.testResults.tests.database.user?.is_active ? 'Yes' : 'No'}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-red-700">
+                                  ❌ User not found in database
+                                  {userDiagnosisForm.testResults.tests.database?.error && (
+                                    <div className="text-xs mt-1">{userDiagnosisForm.testResults.tests.database.error}</div>
+                                  )}
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+
+                          {/* Connection Test */}
+                          <Card>
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-sm flex items-center gap-2">
+                                <Building2 className="w-4 h-4" />
+                                Supabase Connection
+                                {userDiagnosisForm.testResults.tests.connection?.success ? (
+                                  <CheckCircle className="w-4 h-4 text-green-600" />
+                                ) : (
+                                  <AlertTriangle className="w-4 h-4 text-red-600" />
+                                )}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm">
+                              {userDiagnosisForm.testResults.tests.connection?.success ? (
+                                <div className="text-green-700">✅ Supabase connection working</div>
+                              ) : (
+                                <div className="text-red-700">
+                                  ❌ Supabase connection failed
+                                  {userDiagnosisForm.testResults.tests.connection?.error && (
+                                    <div className="text-xs mt-1">{userDiagnosisForm.testResults.tests.connection.error}</div>
+                                  )}
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+
+                          {/* Authentication Test */}
+                          <Card>
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-sm flex items-center gap-2">
+                                <Shield className="w-4 h-4" />
+                                Authentication Test
+                                {userDiagnosisForm.testResults.tests.authentication?.skipped ? (
+                                  <Eye className="w-4 h-4 text-gray-600" />
+                                ) : userDiagnosisForm.testResults.tests.authentication?.success ? (
+                                  <CheckCircle className="w-4 h-4 text-green-600" />
+                                ) : (
+                                  <AlertTriangle className="w-4 h-4 text-red-600" />
+                                )}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm">
+                              {userDiagnosisForm.testResults.tests.authentication?.skipped ? (
+                                <div className="text-gray-600">⏸️ Skipped (no password provided)</div>
+                              ) : userDiagnosisForm.testResults.tests.authentication?.success ? (
+                                <div className="text-green-700">✅ Authentication successful</div>
+                              ) : (
+                                <div className="text-red-700">
+                                  ❌ Authentication failed
+                                  {userDiagnosisForm.testResults.tests.authentication?.error && (
+                                    <div className="text-xs mt-1">{userDiagnosisForm.testResults.tests.authentication.error}</div>
+                                  )}
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+
+                          {/* Demo Credentials Check */}
+                          {userDiagnosisForm.testResults.tests.demoCredentials?.isDemo && (
+                            <Card>
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm flex items-center gap-2">
+                                  <Crown className="w-4 h-4" />
+                                  Demo Credentials
+                                  {userDiagnosisForm.testResults.tests.demoCredentials?.passwordMatch ? (
+                                    <CheckCircle className="w-4 h-4 text-green-600" />
+                                  ) : (
+                                    <AlertTriangle className="w-4 h-4 text-orange-600" />
+                                  )}
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="pt-0 text-sm">
+                                <div>
+                                  Expected: {userDiagnosisForm.testResults.tests.demoCredentials.expectedPassword}
+                                </div>
+                                {userDiagnosisForm.testResults.tests.demoCredentials.passwordMatch ? (
+                                  <div className="text-green-700">✅ Password matches demo credentials</div>
+                                ) : (
+                                  <div className="text-orange-700">⚠️ Password doesn't match expected demo password</div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          )}
+
+                          {/* Action Buttons */}
+                          {!userDiagnosisForm.testResults.tests.database?.exists && (
+                            <Card className="border-blue-200 bg-blue-50">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm flex items-center gap-2">
+                                  <UserPlus className="w-4 h-4" />
+                                  Create Missing User
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="pt-0">
+                                <p className="text-sm text-gray-600 mb-3">
+                                  User not found in database. Create user account?
+                                </p>
+                                <Button
+                                  size="sm"
+                                  onClick={() => createMissingUser(
+                                    userDiagnosisForm.email,
+                                    userDiagnosisForm.password || 'TempPassword123!'
+                                  )}
+                                  disabled={!userDiagnosisForm.email}
+                                >
+                                  Create User
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
