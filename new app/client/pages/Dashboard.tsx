@@ -108,9 +108,26 @@ export default function Dashboard() {
           Dashboard
         </h1>
         <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
-          Advanced PCI scanning and analysis for smarter road maintenance decisions. 
+          Advanced PCI scanning and analysis for smarter road maintenance decisions.
           Choose from satellite, driving, or sample scanning methods based on your needs.
         </p>
+      </div>
+
+      {/* Debug Info for Premium Users */}
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-2xl mx-auto">
+        <h3 className="font-semibold text-yellow-800 mb-2">🔧 Data Service Debug Info</h3>
+        <div className="text-sm text-yellow-700 space-y-1">
+          <div>Plan: <span className="font-mono">{dataService.getPlanName()}</span></div>
+          <div>Is Premium: <span className="font-mono">{dataService.isPremiumPlan() ? 'Yes' : 'No'}</span></div>
+          <div>Organization ID: <span className="font-mono">{dataService.getOrganizationId() || 'None'}</span></div>
+          <div>Using Sample Data: <span className="font-mono">{dataService.getDebugInfo().willUseSampleData ? 'Yes' : 'No'}</span></div>
+        </div>
+        <button
+          onClick={() => dataService.forceRefresh().then(() => window.location.reload())}
+          className="mt-2 px-3 py-1 bg-yellow-200 hover:bg-yellow-300 text-yellow-800 text-sm rounded"
+        >
+          Force Refresh Data Service
+        </button>
       </div>
 
       {/* Quick Stats */}
