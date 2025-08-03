@@ -173,13 +173,10 @@ const Login = () => {
     }, 10000);
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: demoEmail,
-        password: demoPassword,
-      });
-      
+      const { data, error } = await signInWithTimeout(demoEmail, demoPassword);
+
       clearTimeout(timeoutId);
-      
+
       if (error) throw error;
       
       if (data.user) {
