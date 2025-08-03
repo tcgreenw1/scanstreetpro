@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase, signInWithTimeout, signUpWithTimeout, signOutWithTimeout } from '@/lib/supabase';
+import { getErrorMessage } from '@/utils/errorHandler';
 
 interface AuthUser extends User {
   role?: string;
