@@ -141,7 +141,7 @@ const Login = () => {
       if (error) throw error;
     } catch (error: any) {
       console.error('Google auth error:', error);
-      setError('Google authentication is not configured. Please contact your administrator.');
+      setError(error?.message || 'Google authentication is not configured. Please contact your administrator.');
       setLoading(false);
     }
   };
