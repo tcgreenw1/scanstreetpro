@@ -650,7 +650,7 @@ export const repairDemoUsers = async () => {
         .maybeSingle();
 
       if (dbUser) {
-        // Check if auth user exists
+        // Check if auth user exists (admin API may not be available)
         try {
           const { data: authUser, error } = await supabase.auth.admin.getUserById(dbUser.id);
           if (error || !authUser.user) {
@@ -658,7 +658,8 @@ export const repairDemoUsers = async () => {
             await supabase.from('users').delete().eq('id', dbUser.id);
           }
         } catch (authError) {
-          console.warn(`Cannot verify auth user for ${user.email}`);
+          console.warn(`Cannot verify auth user for ${user.email} - admin API may not be available`);
+          // Don't fail on admin API errors as they might not be available in client
         }
       }
     } catch (error) {
