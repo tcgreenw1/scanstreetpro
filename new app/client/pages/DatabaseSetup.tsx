@@ -213,7 +213,8 @@ export default function DatabaseSetup() {
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        const schemaText = document.getElementById('schema-sql')?.textContent;
+                        const schemaElement = document.getElementById('schema-sql')?.querySelector('pre');
+                        const schemaText = schemaElement?.textContent;
                         if (schemaText) {
                           navigator.clipboard.writeText(schemaText);
                           alert('Schema copied to clipboard!');
