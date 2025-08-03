@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { testSupabaseConnection } from '@/lib/supabase';
+import { runDiagnostics, getStatusIcon, getStatusColor, DiagnosticResult } from '@/utils/diagnostics';
 import { CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function ConnectionTest() {
