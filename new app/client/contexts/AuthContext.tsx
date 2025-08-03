@@ -112,6 +112,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     let isMounted = true; // Prevent state updates if component unmounts
 
+    // Safety timeout to prevent infinite loading
+    const loadingTimeout = setTimeout(() => {
+      if (isMounted) {
+        console.warn('⚠️ Auth loading timeout - forcing loading to false');
+        setLoading(false);
+      }
+    }, 10000); // 10 second timeout
+
     // Get initial session with fast-fail approach
     const getSession = async () => {
       try {
