@@ -74,7 +74,8 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <PricingProvider>
         <TooltipProvider>
@@ -155,7 +156,8 @@ const App = () => (
         </TooltipProvider>
       </PricingProvider>
     </AuthProvider>
-  </QueryClientProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
