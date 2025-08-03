@@ -17,11 +17,10 @@ export const refreshAdminData = async () => {
       });
     }
 
-    // Test database connection
+    // Test database connection with proper Supabase syntax
     const { data: connectionTest, error: connectionError } = await supabase
       .from('organizations')
-      .select('count(*)')
-      .limit(1);
+      .select('*', { count: 'exact', head: true });
     
     if (connectionError) {
       const errorMessage = getErrorMessage(connectionError);
