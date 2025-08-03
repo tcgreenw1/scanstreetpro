@@ -199,30 +199,55 @@ export default function DatabaseSetup() {
         {success && (
           <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
             <CardHeader>
-              <CardTitle>Next Steps</CardTitle>
+              <CardTitle>Manual Setup Required</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="p-4 bg-red-50 rounded-lg">
-                  <h3 className="font-semibold text-red-800">Admin Login</h3>
-                  <p className="text-sm text-red-600">admin@scanstreetpro.com</p>
-                  <p className="text-sm text-red-600">AdminPass123!</p>
-                  <p className="text-xs text-red-500 mt-2">Access admin portal and manage organizations</p>
+              <Alert className="border-blue-200 bg-blue-50">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className="text-blue-800">
+                  ✅ Database connection successful! Manual setup is required for full initialization.
+                </AlertDescription>
+              </Alert>
+
+              <div className="space-y-4">
+                <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <h3 className="font-semibold text-yellow-800 mb-2">Step 1: Create Organizations</h3>
+                  <p className="text-sm text-yellow-700 mb-2">Go to Supabase Dashboard → Database → organizations table</p>
+                  <div className="text-xs bg-yellow-100 p-2 rounded font-mono">
+                    INSERT INTO organizations (name, slug, plan) VALUES<br/>
+                    ('Scan Street Pro Admin', 'admin', 'enterprise'),<br/>
+                    ('City of Springfield', 'springfield', 'free');
+                  </div>
                 </div>
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <h3 className="font-semibold text-blue-800">Test User Login</h3>
-                  <p className="text-sm text-blue-600">test@springfield.gov</p>
-                  <p className="text-sm text-blue-600">TestUser123!</p>
-                  <p className="text-xs text-blue-500 mt-2">Experience the app as a regular user</p>
+
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <h3 className="font-semibold text-green-800 mb-2">Step 2: Create Auth Users</h3>
+                  <p className="text-sm text-green-700 mb-2">Go to Supabase Dashboard → Authentication → Users</p>
+                  <ul className="text-sm text-green-700 space-y-1">
+                    <li>• Email: admin@scanstreetpro.com | Password: AdminPass123!</li>
+                    <li>• Email: test@springfield.gov | Password: TestUser123!</li>
+                  </ul>
+                </div>
+
+                <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                  <h3 className="font-semibold text-purple-800 mb-2">Step 3: Link Users to Organizations</h3>
+                  <p className="text-sm text-purple-700 mb-2">After creating users, add records to the users table:</p>
+                  <div className="text-xs bg-purple-100 p-2 rounded font-mono">
+                    INSERT INTO users (id, organization_id, email, name, role) VALUES<br/>
+                    ('&lt;admin_user_id&gt;', '&lt;admin_org_id&gt;', 'admin@scanstreetpro.com', 'Admin', 'admin'),<br/>
+                    ('&lt;test_user_id&gt;', '&lt;test_org_id&gt;', 'test@springfield.gov', 'Test User', 'manager');
+                  </div>
                 </div>
               </div>
-              
+
               <div className="text-center">
                 <Button asChild className="mr-2">
                   <a href="/login">Go to Login Page</a>
                 </Button>
                 <Button variant="outline" asChild>
-                  <a href="/admin-portal">Admin Portal</a>
+                  <a href="https://supabase.com/dashboard/project/nwoeeejaxmwvxggcpchw" target="_blank">
+                    Open Supabase Dashboard
+                  </a>
                 </Button>
               </div>
             </CardContent>
