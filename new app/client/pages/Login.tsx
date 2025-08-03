@@ -362,11 +362,19 @@ const Login = () => {
                     {isSignUp ? 'Join the Future' : 'Welcome Back'}
                   </h2>
                   <p className="text-white/60">
-                    {isSignUp 
-                      ? 'Create your account to get started' 
+                    {isSignUp
+                      ? 'Create your account to get started'
                       : 'Sign in to your infrastructure dashboard'
                     }
                   </p>
+                  {fallbackMode && (
+                    <div className="bg-orange-500/20 border border-orange-400/30 rounded-lg p-3 mt-3">
+                      <p className="text-orange-200 text-sm">
+                        🔄 <strong>Offline Mode Active</strong> - Database connection unavailable.
+                        Using demo credentials for testing.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {error && (
