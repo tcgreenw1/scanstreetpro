@@ -441,23 +441,61 @@ export const testSupabaseConnection = async () => {
 
 // Helper function to extract meaningful error messages
 const extractErrorMessage = (error: any): string => {
+  // Handle null, undefined, or empty values
+  if (!error) return 'Unknown error occurred';
+
+  // Handle string errors
   if (typeof error === 'string') return error;
+
+  // Handle Error objects and similar
   if (error?.message) return error.message;
   if (error?.error?.message) return error.error.message;
+
+  // Handle Supabase-specific error properties
   if (error?.details) return error.details;
   if (error?.hint) return error.hint;
   if (error?.code) return `Error code: ${error.code}`;
+
+  // Handle nested error structures
+  if (error?.data?.error?.message) return error.data.error.message;
+  if (error?.response?.data?.message) return error.response.data.message;
+
+  // Try to find any message-like property
+  const messageKeys = ['msg', 'description', 'reason', 'statusText'];
+  for (const key of messageKeys) {
+    if (error[key] && typeof error[key] === 'string') {
+      return error[key];
+    }
+  }
 
   // Try to stringify if it's a simple object
   try {
     if (error && typeof error === 'object') {
       const keys = Object.keys(error);
       if (keys.length > 0) {
-        return `${keys[0]}: ${error[keys[0]]}`;
+        const firstKey = keys[0];
+        const firstValue = error[firstKey];
+
+        // If the first value is a string, use it
+        if (typeof firstValue === 'string') {
+          return `${firstKey}: ${firstValue}`;
+        }
+
+        // If it's a simple object, try to extract its string properties
+        if (typeof firstValue === 'object' && firstValue) {
+          const subKeys = Object.keys(firstValue);
+          if (subKeys.length > 0 && typeof firstValue[subKeys[0]] === 'string') {
+            return firstValue[subKeys[0]];
+          }
+        }
+
+        // Last resort - just show the key
+        return `Error in ${firstKey}`;
       }
     }
   } catch (e) {
     // Ignore stringify errors
+    console.warn('Failed to extract error message from object:', error);
   }
 
   return 'Unknown connection error - please check your internet connection and Supabase configuration';
