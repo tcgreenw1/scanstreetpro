@@ -16,6 +16,7 @@ export default function ConnectionTest() {
   useEffect(() => {
     if (!autoTested) {
       runConnectionTest();
+      runFullDiagnostics();
       setAutoTested(true);
     }
   }, [autoTested]);
