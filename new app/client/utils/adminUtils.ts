@@ -50,7 +50,7 @@ export const refreshAdminData = async () => {
       }
     };
   } catch (error: any) {
-    console.error('Admin data refresh failed:', error);
+    safeError('Admin data refresh failed', error);
     return { success: false, error: getErrorMessage(error) };
   }
 };
