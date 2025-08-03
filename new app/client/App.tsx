@@ -11,6 +11,7 @@ import { seedDemoUsers } from "./utils/seedUsers";
 import "./utils/errorTracer"; // Import to initialize error tracing
 import { Layout } from "./components/Layout";
 import { PlaceholderPage } from "./components/PlaceholderPage";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { PricingProvider } from "./contexts/PricingContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
