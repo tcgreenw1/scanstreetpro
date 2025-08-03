@@ -46,44 +46,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const fetchUserData = async (userId: string) => {
     try {
-      const query = supabase
-        .from('users')
-        .select(`
-          *,
-          organizations (
-            id,
-            name,
-            slug,
-            plan,
-            settings
-          )
-        `)
-        .eq('id', userId)
-        .single();
+      // Use retry logic for better reliability
+      const { data, error } = await withTimeoutAndRetry(
+        () => supabase
+          .from('users')
+          .select(`
+            *,
+            organizations (
+              id,
+              name,
+              slug,
+              plan,
+              settings
+            )
+          `)
+          .eq('id', userId)
+          .single(),
+        3000, // 3 second timeout per attempt
+        2,    // 2 retries (3 total attempts)
+        'User data fetch failed after retries'
+      );
 
-      // Handle timeout properly with shorter timeout
-      try {
-        const { data, error } = await withTimeout(
-          query,
-          5000,
-          'User data fetch timed out'
-        );
+      if (error) {
+        console.warn('User data fetch error:', error);
+        logError(error, 'AuthContext.fetchUserData');
 
-        if (error) {
-          logError(error, 'AuthContext.fetchUserData');
-          return null;
-        }
-
-        return data;
-      } catch (timeoutError: any) {
-        // This catches the timeout error from withTimeout
-        console.warn('User data fetch timed out, creating minimal user profile');
-        logError(timeoutError, 'AuthContext.fetchUserData.timeout');
-
-        // Return a minimal user profile to prevent blocking
+        // Return minimal profile for error cases
         return {
           id: userId,
-          email: 'unknown@example.com',
+          email: 'loading@example.com',
           role: 'viewer',
           organization_id: null,
           organizations: null,
@@ -96,10 +87,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           last_login: null
         };
       }
+
+      console.log('✅ User data fetched successfully');
+      return data;
     } catch (error: any) {
-      const errorMessage = logError(error, 'AuthContext.fetchUserData.general');
-      console.error('Error fetching user data:', errorMessage);
-      return null;
+      const errorMessage = logError(error, 'AuthContext.fetchUserData.failed');
+      console.warn('User data fetch completely failed, using fallback profile:', errorMessage);
+
+      // Return a fallback user profile to prevent app blocking
+      return {
+        id: userId,
+        email: 'fallback@example.com',
+        role: 'viewer',
+        organization_id: null,
+        organizations: null,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        name: null,
+        phone: null,
+        avatar_url: null,
+        last_login: null
+      };
     }
   };
 
