@@ -824,16 +824,21 @@ export default function AdminPortal() {
                         <TableCell>{new Date(org.created_at).toLocaleDateString()}</TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               variant="outline"
                               onClick={() => switchToOrgView(org.id)}
                               title="Access this organization's app"
                             >
                               <ExternalLink className="w-4 h-4" />
                             </Button>
-                            <Button size="sm" variant="outline">
-                              <Edit className="w-4 h-4" />
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => deleteOrganization(org.id)}
+                              title="Delete organization"
+                            >
+                              <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
                         </TableCell>
