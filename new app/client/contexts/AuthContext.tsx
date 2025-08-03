@@ -45,7 +45,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserData = async (userId: string) => {
+  // Memoize fetchUserData to prevent recreation on every render
+  const fetchUserData = React.useCallback(async (userId: string) => {
     // Immediate fallback profile - return this quickly if DB is slow
     const createFallbackProfile = (reason: string) => ({
       id: userId,
@@ -104,9 +105,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.warn('Network appears slow - using fallback profile to prevent blocking');
       return createFallbackProfile('slow-network');
     }
-  };
+  }, []); // Empty dependency array since this function doesn't depend on any state
 
   useEffect(() => {
+    let isMounted = true; // Prevent state updates if component unmounts
+
     // Get initial session with fast-fail approach
     const getSession = async () => {
       try {
@@ -120,7 +123,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           );
         } catch (quickError: any) {
           console.warn('Quick session fetch failed, app will start in logged-out state');
-          setLoading(false);
+          if (isMounted) setLoading(false);
           return;
         }
 
@@ -128,25 +131,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         if (error) {
           console.warn('Session error, starting logged out:', error.message || error);
-          setLoading(false);
+          if (isMounted) setLoading(false);
           return;
         }
 
-        if (session?.user) {
+        if (session?.user && isMounted) {
           console.log('📊 Session found, fetching user data:', session.user.id);
           const userData = await fetchUserData(session.user.id);
-          setUser({
-            ...session.user,
-            role: userData?.role || 'viewer',
-            organization_id: userData?.organization_id || null,
-            organization: userData?.organizations || null
-          });
+          if (isMounted) {
+            setUser({
+              ...session.user,
+              role: userData?.role || 'viewer',
+              organization_id: userData?.organization_id || null,
+              organization: userData?.organizations || null
+            });
+          }
         }
 
-        setLoading(false);
+        if (isMounted) setLoading(false);
       } catch (error: any) {
         console.warn('Session handling failed, starting in logged-out state:', error.message || error);
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
@@ -155,24 +160,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!isMounted) return; // Prevent updates if component unmounted
+
         try {
           console.log('🔄 Auth state changed:', event, session?.user?.id);
 
           if (session?.user) {
             // Fetch user data with timeout and retry
             const userData = await fetchUserData(session.user.id);
-            setUser({
-              ...session.user,
-              role: userData?.role,
-              organization_id: userData?.organization_id,
-              organization: userData?.organizations
-            });
-          } else {
+            if (isMounted) {
+              setUser({
+                ...session.user,
+                role: userData?.role,
+                organization_id: userData?.organization_id,
+                organization: userData?.organizations
+              });
+            }
+          } else if (isMounted) {
             setUser(null);
           }
-          setLoading(false);
+          if (isMounted) setLoading(false);
         } catch (error: any) {
           console.error('Error in auth state change:', error.message || error);
+          if (!isMounted) return;
+
           // Don't block auth flow on user data errors
           if (session?.user) {
             setUser({
@@ -189,8 +200,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     );
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [fetchUserData]); // Add fetchUserData to dependencies
 
   const signIn = async (email: string, password: string) => {
     try {
