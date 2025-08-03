@@ -36,6 +36,11 @@ class DataService {
           console.warn('⚠️ No organization found, using free plan');
           this.organizationPlan = 'free';
         }
+
+        // Force refresh for premium users
+        if (this.organizationPlan && this.organizationPlan !== 'free') {
+          console.log('🚀 Premium user detected, will serve real data');
+        }
       } catch (error) {
         const errorMessage = getErrorMessage(error);
         console.error('Failed to initialize DataService:', errorMessage);
