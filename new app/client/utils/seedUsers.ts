@@ -90,7 +90,7 @@ export const seedDemoUsers = async () => {
         });
 
         if (authError) {
-          console.error(`Error creating auth user ${user.email}:`, authError);
+          console.error(`Error creating auth user ${user.email}:`, authError.message || authError);
           continue;
         }
 
