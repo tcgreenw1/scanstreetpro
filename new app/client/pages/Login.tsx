@@ -40,23 +40,42 @@ const Login = () => {
     try {
       setConnectionStatus('checking');
 
-      // Test Supabase connection first
+      // Check for existing fallback session first
+      const fallbackSession = getFallbackSession();
+      if (fallbackSession) {
+        console.log('🔄 Found fallback session, redirecting...');
+        setFallbackMode(true);
+        setConnectionStatus('fallback');
+
+        if (fallbackSession.role === 'admin') {
+          navigate('/admin-portal');
+        } else {
+          navigate('/dashboard');
+        }
+        return;
+      }
+
+      // Test Supabase connection
       const connectionTest = await testSupabaseConnection();
 
       if (!connectionTest.success) {
-        setConnectionStatus('error');
-        setError(`Connection failed: ${connectionTest.error}. Please check your internet connection.`);
+        console.log('⚠️ Supabase connection failed, enabling fallback mode');
+        setConnectionStatus('fallback');
+        setFallbackMode(true);
+        setError(`Database connection failed. Using offline mode. Demo credentials: admin@scanstreetpro.com / AdminPass123!`);
         return;
       }
 
       setConnectionStatus('connected');
+      setFallbackMode(false);
 
-      // Check if user is already logged in
+      // Check if user is already logged in via Supabase
       await checkUser();
     } catch (error: any) {
       console.error('Login initialization error:', error);
-      setConnectionStatus('error');
-      setError(`Initialization failed: ${error?.message || 'Unknown error'}`);
+      setConnectionStatus('fallback');
+      setFallbackMode(true);
+      setError(`Initialization failed: ${error?.message || 'Unknown error'}. Using offline mode.`);
     }
   };
 
