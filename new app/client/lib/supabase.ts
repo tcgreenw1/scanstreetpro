@@ -348,7 +348,18 @@ export const getUserOrganization = async () => {
         return null;
       }
 
-      return data?.organizations;
+      // If user exists but has no organization_id or organization
+      if (!data.organization_id) {
+        console.warn('⚠️ User has no organization assigned:', user.id);
+        return null;
+      }
+
+      if (!data.organizations) {
+        console.warn('⚠️ User organization not found, organization_id:', data.organization_id);
+        return null;
+      }
+
+      return data.organizations;
     } finally {
       // Clean up cache after request completes
       delete userOrgCache[user.id];
