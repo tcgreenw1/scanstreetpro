@@ -832,6 +832,7 @@ export const ensureDemoUsersExist = async () => {
         }
 
         // Verify the auth user actually exists before creating database user
+        // Note: Admin API may not be available in client context
         try {
           const { data: authUser, error: authCheckError } = await supabase.auth.admin.getUserById(userId);
           if (authCheckError || !authUser.user) {
@@ -840,7 +841,8 @@ export const ensureDemoUsersExist = async () => {
           }
           console.log(`✅ Auth user verified for ${demoUser.email}`);
         } catch (authVerifyError) {
-          console.warn(`Cannot verify auth user for ${demoUser.email}, proceeding anyway`);
+          console.warn(`Cannot verify auth user for ${demoUser.email} - admin API not available, proceeding anyway`);
+          // Continue without verification as admin API might not be available
         }
 
         // Small delay to ensure auth user is fully propagated
