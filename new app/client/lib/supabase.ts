@@ -718,40 +718,70 @@ export const ensureDemoUsersExist = async () => {
       if (!dbUser) {
         console.log(`🔧 Creating demo user: ${demoUser.email}`);
 
-        // Try to create in Supabase Auth first
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: demoUser.email,
-          password: demoUser.password,
-          options: {
-            data: {
-              name: demoUser.name
-            }
-          }
-        });
+        let authData = null;
+        let authSuccess = false;
 
-        if (authError && !authError.message.includes('User already registered')) {
-          const errorMessage = getErrorMessage(authError);
-          console.error(`Failed to create auth user ${demoUser.email}:`, errorMessage);
-
-          // Try admin create as fallback
-          try {
-            const { data: adminAuthData, error: adminAuthError } = await supabase.auth.admin.createUser({
+        // Try multiple methods to create auth user
+        const authMethods = [
+          // Method 1: Regular signup
+          async () => {
+            console.log(`Trying regular signup for ${demoUser.email}`);
+            return await supabase.auth.signUp({
+              email: demoUser.email,
+              password: demoUser.password,
+              options: {
+                data: { name: demoUser.name }
+              }
+            });
+          },
+          // Method 2: Admin create
+          async () => {
+            console.log(`Trying admin create for ${demoUser.email}`);
+            return await supabase.auth.admin.createUser({
               email: demoUser.email,
               password: demoUser.password,
               email_confirm: true,
               user_metadata: { name: demoUser.name }
             });
-
-            if (adminAuthError) {
-              const errorMessage = getErrorMessage(adminAuthError);
-              console.error(`Admin create also failed for ${demoUser.email}:`, errorMessage);
-              continue;
-            }
-            authData.user = adminAuthData.user;
-          } catch (adminError) {
-            console.warn(`Admin create not available for ${demoUser.email}`);
-            continue;
           }
+        ];
+
+        for (const method of authMethods) {
+          try {
+            const result = await method();
+
+            if (!result.error && result.data?.user) {
+              authData = result.data;
+              authSuccess = true;
+              console.log(`✅ Auth user created successfully for ${demoUser.email}`);
+              break;
+            } else if (result.error && result.error.message.includes('User already registered')) {
+              console.log(`ℹ️ User ${demoUser.email} already exists in auth`);
+              // Try to get the existing user
+              try {
+                const { data: existingUser } = await supabase.auth.admin.listUsers();
+                const foundUser = existingUser.users.find(u => u.email === demoUser.email);
+                if (foundUser) {
+                  authData = { user: foundUser };
+                  authSuccess = true;
+                  break;
+                }
+              } catch (listError) {
+                console.warn('Cannot list users to find existing user');
+              }
+            } else if (result.error) {
+              const errorMessage = getErrorMessage(result.error);
+              console.warn(`Auth method failed for ${demoUser.email}:`, errorMessage);
+            }
+          } catch (methodError: any) {
+            const errorMessage = getErrorMessage(methodError);
+            console.warn(`Auth method exception for ${demoUser.email}:`, errorMessage);
+          }
+        }
+
+        if (!authSuccess) {
+          console.error(`❌ All auth creation methods failed for ${demoUser.email}`);
+          continue;
         }
 
         const userId = authData?.user?.id;
@@ -928,7 +958,7 @@ export const signUpWithTimeout = async (email: string, password: string) => {
 
     if (result.error) {
       const errorMessage = extractErrorMessage(result.error);
-      console.error('❌ Sign up failed:', errorMessage);
+      console.error('�� Sign up failed:', errorMessage);
 
       if (errorMessage.includes('User already registered')) {
         throw new Error('An account with this email already exists. Please sign in instead.');
