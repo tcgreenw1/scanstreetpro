@@ -747,6 +747,71 @@ export default function AdminPortal() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Debug Panel */}
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg border-orange-200">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-orange-800">
+                  <Database className="w-5 h-5" />
+                  <span>System Debug Info</span>
+                </CardTitle>
+                <CardDescription>Technical information for troubleshooting</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-gray-800">Database Status</h4>
+                    <p>Organizations loaded: {organizations.length}</p>
+                    <p>Users loaded: {users.length}</p>
+                    <p>Stats computed: {stats ? '✅' : '❌'}</p>
+                    <p>Loading state: {loading ? '🔄' : '✅'}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-gray-800">User Context</h4>
+                    <p>Current user: {user?.email || 'Not logged in'}</p>
+                    <p>User role: {user?.role || 'Unknown'}</p>
+                    <p>Organization: {user?.organization?.name || 'None'}</p>
+                    <p>Plan: {user?.organization?.plan || 'Unknown'}</p>
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={initializeAdminPortal}
+                      disabled={loading}
+                    >
+                      🔄 Refresh All Data
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        const debugData = {
+                          timestamp: new Date().toISOString(),
+                          organizations: organizations.length,
+                          users: users.length,
+                          stats,
+                          user: user ? {
+                            id: user.id,
+                            email: user.email,
+                            role: user.role,
+                            organization: user.organization
+                          } : null,
+                          error: error || null
+                        };
+                        navigator.clipboard.writeText(JSON.stringify(debugData, null, 2));
+                        setError('Debug data copied to clipboard!');
+                        setTimeout(() => setError(''), 3000);
+                      }}
+                    >
+                      📋 Copy Debug Data
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Organizations Tab */}
