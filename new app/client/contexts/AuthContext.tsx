@@ -57,9 +57,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         console.log('🔄 AuthContext initializing...');
 
-        // Check if Supabase client is available
-        if (!supabase) {
-          console.warn('Supabase client not available - starting in logged out state');
+        // Check if Supabase client and environment are properly configured
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+        if (!supabase || !supabaseUrl || !supabaseKey) {
+          console.warn('Supabase not properly configured:', {
+            client: !!supabase,
+            url: !!supabaseUrl,
+            key: !!supabaseKey
+          });
+          console.warn('Starting in logged out state - check environment variables');
           if (mounted.current) setLoading(false);
           return;
         }
