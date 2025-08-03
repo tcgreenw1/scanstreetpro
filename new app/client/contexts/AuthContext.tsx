@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
-import { supabase, withTimeout, withFastTimeout, signInWithTimeout, signUpWithTimeout, signOutWithTimeout } from '@/lib/supabase';
+import { supabase, signInWithTimeout, signUpWithTimeout, signOutWithTimeout } from '@/lib/supabase';
 
 interface AuthUser extends User {
   role?: string;
@@ -42,131 +42,132 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const initializationRef = useRef(false);
-  
-  console.log('🔍 AuthProvider render - loading:', loading, 'user:', user?.email || 'none');
+  const mounted = useRef(true);
+  const initialized = useRef(false);
 
   useEffect(() => {
     // Prevent multiple initializations
-    if (initializationRef.current) {
-      console.log('⚠️ Auth already initialized, skipping');
-      return;
-    }
-    
-    initializationRef.current = true;
-    let isMounted = true;
+    if (initialized.current) return;
+    initialized.current = true;
 
-    const initializeAuth = async () => {
+    console.log('🚀 AuthProvider initializing...');
+
+    const initialize = async () => {
       try {
-        console.log('🚀 Initializing Auth...');
-        
-        // Get current session
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
+        // Get session with timeout
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session timeout')), 5000)
+        );
+
+        const { data: { session }, error } = await Promise.race([
+          sessionPromise,
+          timeoutPromise
+        ]) as any;
+
+        if (!mounted.current) return;
+
         if (error) {
           console.warn('Session error:', error.message);
-          if (isMounted) setLoading(false);
+          setLoading(false);
           return;
         }
 
-        if (session?.user && isMounted) {
-          console.log('📊 Session found for user:', session.user.email);
+        if (session?.user) {
+          console.log('✅ Session found:', session.user.email);
           
-          // Try to get user data with timeout
-          try {
-            const { data: userData } = await Promise.race([
-              supabase
-                .from('users')
-                .select(`
-                  *,
-                  organizations (
-                    id,
-                    name,
-                    slug,
-                    plan,
-                    settings
-                  )
-                `)
-                .eq('id', session.user.id)
-                .maybeSingle(),
-              new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('User data timeout')), 3000)
-              )
-            ]) as any;
-
-            if (userData && isMounted) {
-              setUser({
-                ...session.user,
-                role: userData.role || 'viewer',
-                organization_id: userData.organization_id || null,
-                organization: userData.organizations || null
-              });
-            } else if (isMounted) {
-              // Set user with minimal data if database fetch fails
-              setUser({
-                ...session.user,
-                role: 'viewer',
-                organization_id: null,
-                organization: null
-              });
-            }
-          } catch (userDataError) {
-            console.warn('User data fetch failed, using minimal user data');
-            if (isMounted) {
-              setUser({
-                ...session.user,
-                role: 'viewer',
-                organization_id: null,
-                organization: null
-              });
-            }
-          }
-        }
-
-        if (isMounted) setLoading(false);
-        
-      } catch (error: any) {
-        console.error('Auth initialization failed:', error);
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    // Initialize auth
-    initializeAuth();
-
-    // Listen for auth changes (but don't fetch user data here to prevent loops)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!isMounted) return;
-        
-        console.log('🔄 Auth state changed:', event);
-        
-        if (event === 'SIGNED_OUT' || !session) {
-          setUser(null);
-          setLoading(false);
-        } else if (event === 'SIGNED_IN' && session?.user) {
-          // For sign in events, just set basic user data to prevent loops
+          // Set user with basic info first
           setUser({
             ...session.user,
-            role: 'viewer', // Default role, will be updated by re-initialization if needed
+            role: 'viewer', // Default role
             organization_id: null,
             organization: null
           });
-          setLoading(false);
+
+          // Try to get extended user data (non-blocking)
+          try {
+            const userDataPromise = supabase
+              .from('users')
+              .select(`
+                role,
+                organization_id,
+                organizations (
+                  id,
+                  name,
+                  slug,
+                  plan,
+                  settings
+                )
+              `)
+              .eq('id', session.user.id)
+              .maybeSingle();
+
+            const userDataTimeout = new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('User data timeout')), 3000)
+            );
+
+            const { data: userData } = await Promise.race([
+              userDataPromise,
+              userDataTimeout
+            ]) as any;
+
+            if (userData && mounted.current) {
+              console.log('✅ User data loaded:', userData.role);
+              setUser(prev => prev ? {
+                ...prev,
+                role: userData.role || 'viewer',
+                organization_id: userData.organization_id || null,
+                organization: userData.organizations || null
+              } : null);
+            }
+          } catch (userDataError) {
+            console.warn('User data fetch failed, using basic session data');
+          }
+        } else {
+          console.log('ℹ️ No session found');
         }
+
+        if (mounted.current) setLoading(false);
+
+      } catch (error: any) {
+        console.error('Auth initialization failed:', error);
+        if (mounted.current) setLoading(false);
+      }
+    };
+
+    initialize();
+
+    // Simple auth state listener (minimal to prevent loops)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (!mounted.current) return;
+        
+        console.log('🔄 Auth event:', event);
+        
+        if (event === 'SIGNED_OUT') {
+          setUser(null);
+        } else if (event === 'SIGNED_IN' && session?.user) {
+          setUser({
+            ...session.user,
+            role: 'viewer',
+            organization_id: null,
+            organization: null
+          });
+        }
+        
+        setLoading(false);
       }
     );
 
     return () => {
-      isMounted = false;
+      mounted.current = false;
       subscription.unsubscribe();
     };
-  }, []); // Empty dependency array
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
-      const result = await signInWithTimeout(email, password);
-      return result;
+      return await signInWithTimeout(email, password);
     } catch (error: any) {
       return { data: null, error };
     }
@@ -174,8 +175,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signUp = async (email: string, password: string) => {
     try {
-      const result = await signUpWithTimeout(email, password);
-      return result;
+      return await signUpWithTimeout(email, password);
     } catch (error: any) {
       return { data: null, error };
     }
@@ -183,8 +183,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signOut = async () => {
     try {
-      const result = await signOutWithTimeout();
-      return result;
+      return await signOutWithTimeout();
     } catch (error: any) {
       return { error };
     }
@@ -205,21 +204,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const switchToOrganization = async (orgId: string) => {
-    if (!user) return;
+    if (!user || user.role !== 'admin') return;
     
     try {
-      if (user.role === 'admin') {
-        const { data: orgData, error } = await supabase
-          .from('organizations')
-          .select('*')
-          .eq('id', orgId)
-          .single();
+      const { data: orgData, error } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('id', orgId)
+        .single();
 
-        if (error) {
-          console.error('Error fetching organization:', error);
-          return;
-        }
-
+      if (!error && orgData && mounted.current) {
         setUser({
           ...user,
           organization_id: orgData.id,
