@@ -38,6 +38,7 @@ import TaskDetails from "./pages/TaskDetails";
 import MapView from "./pages/MapView";
 import Login from "./pages/Login";
 import DatabaseSetup from "./pages/DatabaseSetup";
+import DatabaseTest from "./pages/DatabaseTest";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +55,7 @@ const App = () => (
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/database-setup" element={<DatabaseSetup />} />
+            <Route path="/database-test" element={<DatabaseTest />} />
 
             {/* Protected Routes */}
             <Route path="/*" element={
