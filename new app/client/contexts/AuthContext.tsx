@@ -95,6 +95,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return data;
     } catch (error: any) {
       const errorMessage = logError(error, 'AuthContext.fetchUserData.failed');
+
+      // Check if circuit breaker is open
+      if (error.message?.includes('Circuit breaker is OPEN')) {
+        console.warn('Circuit breaker is OPEN for user data - using cached fallback');
+
+        return {
+          id: userId,
+          email: 'offline@example.com',
+          role: 'viewer',
+          organization_id: null,
+          organizations: null,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          name: null,
+          phone: null,
+          avatar_url: null,
+          last_login: null
+        };
+      }
+
       console.warn('User data fetch completely failed, using fallback profile:', errorMessage);
 
       // Return a fallback user profile to prevent app blocking
