@@ -684,7 +684,8 @@ export const ensureDemoUsersExist = async () => {
           .single();
 
         if (orgError && !orgError.message.includes('duplicate')) {
-          console.error(`Failed to create org ${demoUser.orgName}:`, orgError);
+          const errorMessage = getErrorMessage(orgError);
+          console.error(`Failed to create org ${demoUser.orgName}:`, errorMessage);
           continue;
         }
         org = newOrg;
