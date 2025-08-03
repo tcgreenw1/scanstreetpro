@@ -379,7 +379,15 @@ export const testSupabaseConnection = async () => {
       setTimeout(() => reject(new Error('Database service timeout after 8 seconds')), 8000)
     );
 
-    const dbResult = await Promise.race([dbPromise, dbTimeoutPromise]) as any;
+    let dbResult;
+    try {
+      dbResult = await Promise.race([dbPromise, dbTimeoutPromise]) as any;
+    } catch (dbError: any) {
+      // Handle timeout or other errors from Promise.race
+      const errorMessage = extractErrorMessage(dbError);
+      console.error('❌ Database service test failed (race error):', errorMessage);
+      return { success: false, error: `Database connection error: ${errorMessage}` };
+    }
 
     if (dbResult.error) {
       const errorMessage = extractErrorMessage(dbResult.error);
