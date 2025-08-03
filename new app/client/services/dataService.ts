@@ -9,21 +9,58 @@ interface DataServiceOptions {
 class DataService {
   private organizationPlan: string | null = null;
   private organizationId: string | null = null;
+  private initializationPromise: Promise<void> | null = null;
 
   // Initialize with user's organization plan
   async initialize() {
-    try {
-      const organization = await getUserOrganization();
-      if (organization) {
-        this.organizationPlan = organization.plan;
-        this.organizationId = organization.id;
-      }
-    } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      console.error('Failed to initialize DataService:', errorMessage);
-      // Default to free plan for demo purposes
-      this.organizationPlan = 'free';
+    // Prevent concurrent initialization
+    if (this.initializationPromise) {
+      console.log('🔄 DataService initialization already in progress, waiting...');
+      return this.initializationPromise;
     }
+
+    this.initializationPromise = (async () => {
+      try {
+        console.log('🚀 Initializing DataService...');
+        const organization = await getUserOrganization();
+        if (organization) {
+          this.organizationPlan = organization.plan;
+          this.organizationId = organization.id;
+          console.log('✅ DataService initialized with organization:', organization.name);
+        } else {
+          console.warn('⚠️ No organization found, using free plan');
+          this.organizationPlan = 'free';
+        }
+      } catch (error) {
+        const errorMessage = getErrorMessage(error);
+        console.error('Failed to initialize DataService:', errorMessage);
+
+        // If it's a retry error, try once more after a delay
+        if (errorMessage.includes('will retry')) {
+          console.log('🔄 Retrying DataService initialization...');
+          await new Promise(resolve => setTimeout(resolve, 200));
+          try {
+            const organization = await getUserOrganization();
+            if (organization) {
+              this.organizationPlan = organization.plan;
+              this.organizationId = organization.id;
+              console.log('✅ DataService initialized on retry');
+              return;
+            }
+          } catch (retryError) {
+            console.warn('Retry also failed, using defaults');
+          }
+        }
+
+        // Default to free plan for demo purposes
+        this.organizationPlan = 'free';
+      } finally {
+        // Clear the promise so future calls can reinitialize if needed
+        this.initializationPromise = null;
+      }
+    })();
+
+    return this.initializationPromise;
   }
 
   // Determine if we should use sample data or real data
