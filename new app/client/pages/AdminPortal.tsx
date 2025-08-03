@@ -158,7 +158,7 @@ export default function AdminPortal() {
         loadStats()
       ]);
     } catch (error: any) {
-      setError(error.message || 'Failed to load admin data');
+      setError(error?.message || 'Failed to load admin data');
       console.error('Error loading admin data:', error);
     } finally {
       setLoading(false);
