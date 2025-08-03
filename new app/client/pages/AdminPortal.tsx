@@ -233,6 +233,18 @@ export default function AdminPortal() {
     }
 
     try {
+      // First, verify the organization exists
+      const { data: orgExists, error: orgCheckError } = await supabase
+        .from('organizations')
+        .select('id, name')
+        .eq('id', newUserForm.organization_id)
+        .single();
+
+      if (orgCheckError || !orgExists) {
+        setError(`Selected organization does not exist. Please refresh and try again.`);
+        return;
+      }
+
       // Create user in auth
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: newUserForm.email,
@@ -255,7 +267,23 @@ export default function AdminPortal() {
             phone: newUserForm.phone || null
           });
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          // If user profile creation fails, we should clean up the auth user
+          if (profileError.message.includes('foreign key constraint')) {
+            setError('Failed to link user to organization. The organization may have been deleted.');
+          } else {
+            setError(`Failed to create user profile: ${profileError.message}`);
+          }
+
+          // Try to delete the auth user we just created
+          try {
+            await supabase.auth.admin.deleteUser(authData.user.id);
+          } catch (cleanupError) {
+            console.error('Failed to cleanup auth user:', cleanupError);
+          }
+
+          throw profileError;
+        }
 
         // Reset form and reload data
         setNewUserForm({
