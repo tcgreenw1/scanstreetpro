@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,6 +57,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePricing } from "@/contexts/PricingContext";
+import dataService from "@/services/dataService";
+import { ContractorUpgradeCard } from "@/components/PremiumUpgradeCard";
 
 interface Contractor {
   id: string;
