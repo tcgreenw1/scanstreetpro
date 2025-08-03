@@ -123,8 +123,30 @@ export default function AdminPortal() {
   const { user, switchToOrganization } = useAuth();
 
   useEffect(() => {
-    loadData();
+    initializeAdminPortal();
   }, []);
+
+  const initializeAdminPortal = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      // First refresh admin data to ensure fresh connection
+      const refreshResult = await refreshAdminData();
+
+      if (!refreshResult.success) {
+        setError(`Admin portal initialization failed: ${refreshResult.error}`);
+        setLoading(false);
+        return;
+      }
+
+      // Load the actual data
+      await loadData();
+    } catch (error: any) {
+      setError(`Failed to initialize admin portal: ${error.message}`);
+      setLoading(false);
+    }
+  };
 
   const loadData = async () => {
     setLoading(true);
