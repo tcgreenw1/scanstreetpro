@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase, testSupabaseConnection, signInWithTimeout, signUpWithTimeout } from '@/lib/supabase';
+import { supabase, testSupabaseConnection, signInWithTimeout, signUpWithTimeout, ensureDemoUsersExist } from '@/lib/supabase';
 import { tryFallbackLogin, getFallbackSession, isFallbackMode } from '@/utils/authFallback';
 import { getErrorMessage } from '@/utils/errorHandler';
 import { shouldUseOfflineMode, reportConnectionFailure, reportConnectionSuccess } from '@/utils/offlineManager';
