@@ -38,6 +38,7 @@ import {
   X,
   TrendingDown
 } from 'lucide-react';
+import { dataService } from '@/services/dataService';
 import { cn } from '@/lib/utils';
 import { usePricing } from '@/contexts/PricingContext';
 import { ModifySampleDataModal } from '@/components/ModifySampleDataModal';
