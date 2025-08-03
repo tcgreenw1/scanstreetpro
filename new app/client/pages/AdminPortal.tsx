@@ -162,11 +162,39 @@ export default function AdminPortal() {
     setLoading(true);
     setError('');
     try {
-      await Promise.all([
+      console.log('🔄 Loading admin portal data...');
+
+      const [orgsResult, usersResult, statsResult] = await Promise.allSettled([
         loadOrganizations(),
         loadUsers(),
         loadStats()
       ]);
+
+      // Handle results
+      if (orgsResult.status === 'rejected') {
+        console.error('Organizations loading failed:', orgsResult.reason);
+      } else {
+        console.log('✅ Organizations loaded:', orgsResult.value?.length || 0);
+      }
+
+      if (usersResult.status === 'rejected') {
+        console.error('Users loading failed:', usersResult.reason);
+      } else {
+        console.log('✅ Users loaded:', usersResult.value?.length || 0);
+      }
+
+      if (statsResult.status === 'rejected') {
+        console.error('Stats loading failed:', statsResult.reason);
+      } else {
+        console.log('✅ Stats loaded');
+      }
+
+      // Only throw error if all failed
+      const failedCount = [orgsResult, usersResult, statsResult].filter(r => r.status === 'rejected').length;
+      if (failedCount === 3) {
+        throw new Error('All data loading operations failed');
+      }
+
     } catch (error: any) {
       const errorMessage = getErrorMessage(error);
       setError(errorMessage || 'Failed to load admin data');
