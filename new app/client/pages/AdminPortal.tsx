@@ -60,6 +60,7 @@ import {
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
+import { refreshAdminData } from "@/utils/adminUtils";
 
 interface Organization {
   id: string;
