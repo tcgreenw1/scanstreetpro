@@ -116,15 +116,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               .maybeSingle();
 
             const userDataTimeout = new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('User data timeout')), 3000)
+              setTimeout(() => reject(new Error('User data timeout after 3 seconds')), 3000)
             );
 
-            const { data: userData } = await Promise.race([
+            const { data: userData, error: userDataError } = await Promise.race([
               userDataPromise,
               userDataTimeout
             ]) as any;
 
-            if (userData && mounted.current) {
+            if (userDataError) {
+              const errorMessage = getErrorMessage(userDataError);
+              console.warn('User data query error:', errorMessage);
+            } else if (userData && mounted.current) {
               console.log('✅ User data loaded:', userData.role);
               setUser(prev => prev ? {
                 ...prev,
@@ -133,8 +136,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 organization: userData.organizations || null
               } : null);
             }
-          } catch (userDataError) {
-            console.warn('User data fetch failed, using basic session data');
+          } catch (userDataError: any) {
+            const errorMessage = getErrorMessage(userDataError);
+            console.warn('User data fetch failed:', errorMessage);
           }
         } else {
           console.log('ℹ️ No session found');
