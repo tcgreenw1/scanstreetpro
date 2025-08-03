@@ -945,8 +945,9 @@ export const createUserInSupabase = async (email: string, password: string, user
     });
 
     if (authError) {
-      console.error('❌ Failed to create user in Auth:', authError);
-      throw new Error(`Failed to create user in Auth: ${authError.message}`);
+      const errorMessage = getErrorMessage(authError);
+      console.error('❌ Failed to create user in Auth:', errorMessage);
+      throw new Error(`Failed to create user in Auth: ${errorMessage}`);
     }
 
     if (!authData.user) {
