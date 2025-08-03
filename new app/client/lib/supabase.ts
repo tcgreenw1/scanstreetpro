@@ -324,13 +324,59 @@ export const withTimeout = <T>(
   ]);
 };
 
-// Enhanced auth functions with timeout
+// Test Supabase connection
+export const testSupabaseConnection = async () => {
+  try {
+    console.log('🔍 Testing Supabase connection...');
+
+    // Test basic connectivity
+    const { data, error } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error('❌ Supabase connection test failed:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log('✅ Supabase connection successful');
+    return { success: true, data };
+  } catch (error: any) {
+    console.error('❌ Supabase connection test error:', error);
+    return { success: false, error: error.message || 'Unknown connection error' };
+  }
+};
+
+// Enhanced auth functions with timeout and better error handling
 export const signInWithTimeout = async (email: string, password: string) => {
-  return withTimeout(
-    supabase.auth.signInWithPassword({ email, password }),
-    15000,
-    'Sign in timed out. Please check your connection.'
-  );
+  try {
+    console.log('🔐 Attempting sign in for:', email);
+
+    const result = await withTimeout(
+      supabase.auth.signInWithPassword({ email, password }),
+      15000,
+      'Sign in timed out. Please check your connection.'
+    );
+
+    if (result.error) {
+      console.error('❌ Sign in failed:', result.error);
+
+      // Handle specific error types
+      if (result.error.message?.includes('Invalid login credentials')) {
+        throw new Error('Invalid email or password. Please check your credentials.');
+      } else if (result.error.message?.includes('Email not confirmed')) {
+        throw new Error('Please check your email and click the confirmation link.');
+      } else if (result.error.message?.includes('Too many requests')) {
+        throw new Error('Too many login attempts. Please wait a few minutes and try again.');
+      } else {
+        throw new Error(result.error.message || 'Authentication failed');
+      }
+    }
+
+    console.log('✅ Sign in successful');
+    return result;
+  } catch (error: any) {
+    console.error('❌ Sign in error:', error);
+    throw error;
+  }
 };
 
 export const signUpWithTimeout = async (email: string, password: string) => {
