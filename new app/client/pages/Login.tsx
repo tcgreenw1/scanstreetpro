@@ -254,7 +254,29 @@ const Login = () => {
                   <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
                     Scan Street Pro
                   </h1>
-                  <p className="text-sm text-white/70 font-medium">Municipal Infrastructure</p>
+                  <div className="flex items-center space-x-2">
+                    <p className="text-sm text-white/70 font-medium">Municipal Infrastructure</p>
+                    <div className="flex items-center space-x-1 text-xs">
+                      {connectionStatus === 'checking' && (
+                        <>
+                          <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                          <span className="text-yellow-200">Connecting...</span>
+                        </>
+                      )}
+                      {connectionStatus === 'connected' && (
+                        <>
+                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                          <span className="text-green-200">Connected</span>
+                        </>
+                      )}
+                      {connectionStatus === 'error' && (
+                        <>
+                          <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                          <span className="text-red-200">Connection Error</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
