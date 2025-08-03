@@ -46,93 +46,63 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchUserData = async (userId: string) => {
+    // Immediate fallback profile - return this quickly if DB is slow
+    const createFallbackProfile = (reason: string) => ({
+      id: userId,
+      email: `${reason}@example.com`,
+      role: 'viewer' as const,
+      organization_id: null,
+      organizations: null,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      name: null,
+      phone: null,
+      avatar_url: null,
+      last_login: null
+    });
+
+    // Quick check first - fail fast and use fallback
     try {
-      // Use circuit breaker to prevent repeated failures
-      const { data, error } = await userDataCircuitBreaker.execute(async () => {
-        return await withTimeoutAndRetry(
-          () => supabase
-            .from('users')
-            .select(`
-              *,
-              organizations (
-                id,
-                name,
-                slug,
-                plan,
-                settings
-              )
-            `)
-            .eq('id', userId)
-            .single(),
-          3000, // 3 second timeout per attempt
-          1,    // 1 retry (2 total attempts) - reduced since circuit breaker handles failures
-          'User data fetch failed after retries'
-        );
-      });
+      const { data, error } = await withFastTimeout(
+        supabase
+          .from('users')
+          .select(`
+            *,
+            organizations (
+              id,
+              name,
+              slug,
+              plan,
+              settings
+            )
+          `)
+          .eq('id', userId)
+          .single(),
+        2000, // Very quick 2-second timeout
+        'Quick user data fetch timed out'
+      );
 
       if (error) {
-        console.warn('User data fetch error:', error);
-        logError(error, 'AuthContext.fetchUserData');
-
-        // Return minimal profile for error cases
-        return {
-          id: userId,
-          email: 'loading@example.com',
-          role: 'viewer',
-          organization_id: null,
-          organizations: null,
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          name: null,
-          phone: null,
-          avatar_url: null,
-          last_login: null
-        };
+        console.warn('Quick user data fetch failed, using fallback immediately');
+        return createFallbackProfile('quick-fail');
       }
 
-      console.log('✅ User data fetched successfully');
+      console.log('✅ User data fetched quickly');
       return data;
-    } catch (error: any) {
-      const errorMessage = logError(error, 'AuthContext.fetchUserData.failed');
+    } catch (quickError: any) {
+      console.warn('Quick fetch failed, will use fallback:', quickError.message);
 
-      // Check if circuit breaker is open
-      if (error.message?.includes('Circuit breaker is OPEN')) {
-        console.warn('Circuit breaker is OPEN for user data - using cached fallback');
-
-        return {
-          id: userId,
-          email: 'offline@example.com',
-          role: 'viewer',
-          organization_id: null,
-          organizations: null,
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          name: null,
-          phone: null,
-          avatar_url: null,
-          last_login: null
-        };
+      // Check circuit breaker state
+      const circuitState = userDataCircuitBreaker.getState();
+      if (circuitState === 'OPEN') {
+        console.warn('Circuit breaker is OPEN - immediate fallback');
+        return createFallbackProfile('circuit-open');
       }
 
-      console.warn('User data fetch completely failed, using fallback profile:', errorMessage);
-
-      // Return a fallback user profile to prevent app blocking
-      return {
-        id: userId,
-        email: 'fallback@example.com',
-        role: 'viewer',
-        organization_id: null,
-        organizations: null,
-        is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: null,
-        phone: null,
-        avatar_url: null,
-        last_login: null
-      };
+      // For slow networks, return fallback immediately instead of waiting
+      console.warn('Network appears slow - using fallback profile to prevent blocking');
+      return createFallbackProfile('slow-network');
     }
   };
 
