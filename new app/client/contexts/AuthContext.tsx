@@ -81,32 +81,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     // Get initial session
     const getSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Error getting session:', error);
-        setLoading(false);
-        return;
-      }
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
 
-      if (session?.user) {
-        const userData = await fetchUserData(session.user.id);
-        setUser({
-          ...session.user,
-          role: userData?.role,
-          organization_id: userData?.organization_id,
-          organization: userData?.organizations
-        });
-      }
-      
-      setLoading(false);
-    };
+        if (error) {
+          console.error('Error getting session:', error.message || error);
+          setLoading(false);
+          return;
+        }
 
-    getSession();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
         if (session?.user) {
           const userData = await fetchUserData(session.user.id);
           setUser({
@@ -115,10 +98,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             organization_id: userData?.organization_id,
             organization: userData?.organizations
           });
-        } else {
-          setUser(null);
         }
+
         setLoading(false);
+      } catch (error: any) {
+        console.error('Error in getSession:', error.message || error);
+        setLoading(false);
+      }
+    };
+
+    getSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        try {
+          if (session?.user) {
+            const userData = await fetchUserData(session.user.id);
+            setUser({
+              ...session.user,
+              role: userData?.role,
+              organization_id: userData?.organization_id,
+              organization: userData?.organizations
+            });
+          } else {
+            setUser(null);
+          }
+          setLoading(false);
+        } catch (error: any) {
+          console.error('Error in auth state change:', error.message || error);
+          setLoading(false);
+        }
       }
     );
 
