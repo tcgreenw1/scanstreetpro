@@ -49,7 +49,7 @@ export const refreshAdminData = async () => {
     };
   } catch (error: any) {
     console.error('Admin data refresh failed:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: getErrorMessage(error) };
   }
 };
 
