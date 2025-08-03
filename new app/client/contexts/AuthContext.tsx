@@ -131,7 +131,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (mounted.current) setLoading(false);
 
       } catch (error: any) {
-        console.error('Auth initialization failed:', error);
+        const errorMessage = getErrorMessage(error);
+        console.error('Auth initialization failed:', errorMessage);
         if (mounted.current) setLoading(false);
       }
     };
