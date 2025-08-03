@@ -23,7 +23,7 @@ export default function ConnectionTest() {
   const runConnectionTest = async () => {
     setTesting(true);
     setTestResult(null);
-    
+
     try {
       console.log('🧪 Running connection test...');
       const result = await testSupabaseConnection();
@@ -37,6 +37,28 @@ export default function ConnectionTest() {
       });
     } finally {
       setTesting(false);
+    }
+  };
+
+  const runFullDiagnostics = async () => {
+    setRunningDiagnostics(true);
+    setDiagnostics([]);
+
+    try {
+      console.log('🔍 Running full diagnostics...');
+      const results = await runDiagnostics();
+      setDiagnostics(results);
+      console.log('🔍 Diagnostics completed:', results);
+    } catch (error: any) {
+      console.error('🔍 Diagnostics failed:', error);
+      setDiagnostics([{
+        component: 'Diagnostics System',
+        status: 'fail',
+        message: 'Failed to run diagnostics',
+        details: error?.message || 'Unknown error'
+      }]);
+    } finally {
+      setRunningDiagnostics(false);
     }
   };
 
