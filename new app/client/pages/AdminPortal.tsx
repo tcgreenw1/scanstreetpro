@@ -966,9 +966,18 @@ export default function AdminPortal() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge className={cn("text-xs", getRoleColor(user.role))}>
-                            {user.role}
-                          </Badge>
+                          <Select value={user.role} onValueChange={(value) => updateUserRole(user.id, value)}>
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="viewer">Viewer</SelectItem>
+                              <SelectItem value="inspector">Inspector</SelectItem>
+                              <SelectItem value="contractor">Contractor</SelectItem>
+                              <SelectItem value="manager">Manager</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                         <TableCell>
                           <Badge className={cn("text-xs", user.is_active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")}>
