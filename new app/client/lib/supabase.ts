@@ -756,7 +756,8 @@ export const ensureDemoUsersExist = async () => {
             });
 
           if (dbError && !dbError.message.includes('duplicate')) {
-            console.error(`Failed to create db user ${demoUser.email}:`, dbError);
+            const errorMessage = getErrorMessage(dbError);
+            console.error(`Failed to create db user ${demoUser.email}:`, errorMessage);
           } else {
             console.log(`✅ Created demo user: ${demoUser.email}`);
           }
