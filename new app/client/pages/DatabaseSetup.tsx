@@ -22,19 +22,44 @@ export default function DatabaseSetup() {
     setSuccess(false);
 
     try {
-      logProgress('🔄 Starting database connection test...');
+      logProgress('🔄 Starting database initialization...');
 
-      // Test database connection first
-      const { data: testConnection, error: connectionError } = await supabase
+      // First, test basic connection
+      logProgress('🔌 Testing basic database connection...');
+      const { data: basicTest, error: basicError } = await supabase
+        .from('_realtime')
+        .select('*')
+        .limit(1);
+
+      if (basicError && !basicError.message.includes('does not exist')) {
+        throw new Error(`Basic connection failed: ${basicError.message}`);
+      }
+
+      logProgress('✅ Basic connection established');
+
+      // Try to check if tables exist
+      logProgress('📋 Checking if schema exists...');
+      const { data: orgCheck, error: orgError } = await supabase
         .from('organizations')
         .select('count')
         .limit(1);
 
-      if (connectionError) {
-        throw new Error(`Database connection failed: ${connectionError.message}`);
+      if (orgError && orgError.message.includes('does not exist')) {
+        logProgress('❌ Database schema not found - tables need to be created');
+        logProgress('📋 You need to run the schema.sql file in Supabase');
+        logProgress('🔗 Go to Supabase Dashboard → SQL Editor');
+        logProgress('📄 Copy and paste the schema from database/schema.sql');
+
+        // Show the schema creation instructions
+        setError('Database schema not found. Please create the tables first using the SQL schema.');
+        return;
       }
 
-      logProgress('✅ Database connection successful');
+      if (orgError) {
+        throw new Error(`Schema check failed: ${orgError.message}`);
+      }
+
+      logProgress('✅ Database schema exists');
 
       // Create admin organization
       logProgress('📁 Creating admin organization...');
