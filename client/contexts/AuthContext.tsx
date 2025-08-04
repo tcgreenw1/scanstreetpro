@@ -63,12 +63,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         if (token) {
           try {
-            const response = await fetch('/api/me', {
+            // First try the main auth endpoint
+            let response = await fetch('/api/me', {
               headers: {
                 'Authorization': `Bearer ${token}`
               }
             });
-            
+
+            // If main auth fails, try mock auth as fallback
+            if (!response.ok && token === 'mock-admin-token-12345') {
+              response = await fetch('/api/mock/me', {
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              });
+            }
+
             if (response.ok) {
               const result = await response.json();
               if (result.success && result.data.user) {
