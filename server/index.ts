@@ -40,6 +40,7 @@ export function createServer() {
   app.use("/api", hashGenRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/migrate", migrateRoutes);
+  app.use("/api/export", exportRoutes);
 
   // Database routes
   app.post("/api/db/query", protectedQueryDatabase);
