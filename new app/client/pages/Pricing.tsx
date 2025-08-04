@@ -106,10 +106,21 @@ export default function Pricing() {
   const plans = getAllPlans();
   const planOrder: PlanType[] = ['free', 'basic', 'pro', 'premium', 'satellite', 'driving'];
 
-  const getPrice = (plan: PlanType) => {
-    const basePrice = plans[plan].price;
-    if (plan === 'enterprise' || basePrice === 0) return basePrice;
-    return billingPeriod === 'annual' ? Math.floor(basePrice * 0.8) : basePrice;
+  const getPlanInfo = (planKey: string) => {
+    const planData = {
+      free: { name: 'Free', description: 'Perfect for getting started with sample data', price: 0 },
+      basic: { name: 'Basic', description: 'Essential features for small municipalities', price: 99 },
+      pro: { name: 'Pro', description: 'Advanced features for growing cities', price: 199, popular: true },
+      premium: { name: 'Premium', description: 'Custom solution with dedicated support', price: 999 },
+      satellite: { name: 'Satellite Enterprise', description: 'AI-powered satellite-based data collection', price: 0 },
+      driving: { name: 'Driving Enterprise', description: 'High-precision driving-based data collection', price: 0 }
+    };
+    return planData[planKey] || planData.free;
+  };
+
+  const getPlanPrice = (planKey: string) => {
+    const plan = getPlanInfo(planKey);
+    return plan.price;
   };
 
   const handleUpgrade = (plan: PlanType) => {
