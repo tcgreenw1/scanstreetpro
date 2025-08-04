@@ -842,13 +842,7 @@ export const ensureDemoUsersExist = async () => {
             console.log(`ℹ️ User ${demoUser.email} already exists in database`);
           } else if (dbError.message.includes('foreign key constraint') || dbError.code === '23503') {
             console.error(`❌ Foreign key violation for ${demoUser.email}: Auth user ${userId} not found in auth.users`);
-            // Try to clean up the potentially orphaned auth user
-            try {
-              await supabase.auth.admin.deleteUser(userId);
-              console.log(`🧹 Cleaned up orphaned auth user ${userId}`);
-            } catch (cleanupError) {
-              console.warn('Failed to cleanup orphaned auth user');
-            }
+            console.warn('⚠️ Cannot cleanup orphaned auth user with client API');
           } else {
             console.error(`Failed to create db user ${demoUser.email}:`, errorMessage);
           }
