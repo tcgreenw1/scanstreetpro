@@ -824,19 +824,44 @@ export const ensureDemoUsersExist = async () => {
         console.log(`⏳ Waiting for auth user propagation...`);
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Create in database
-        const { error: dbError } = await supabase
-          .from('users')
-          .insert({
-            id: userId,
-            organization_id: org.id,
-            email: demoUser.email,
-            name: demoUser.name,
-            role: demoUser.role,
-            is_active: true,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
+        // Create in database with retry logic for foreign key issues
+        let dbError = null;
+        let retries = 3;
+
+        while (retries > 0) {
+          console.log(`📝 Attempting database user creation for ${demoUser.email} (${4 - retries}/3)`);
+
+          const result = await supabase
+            .from('users')
+            .insert({
+              id: userId,
+              organization_id: org.id,
+              email: demoUser.email,
+              name: demoUser.name,
+              role: demoUser.role,
+              is_active: true,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
+
+          dbError = result.error;
+
+          if (!dbError) {
+            console.log(`✅ Database user created successfully for ${demoUser.email}`);
+            break;
+          } else if (dbError.message.includes('foreign key constraint') || dbError.code === '23503') {
+            retries--;
+            if (retries > 0) {
+              console.warn(`⚠️ Foreign key constraint error for ${demoUser.email}, retrying in 2 seconds... (${retries} attempts left)`);
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            } else {
+              console.error(`❌ Foreign key constraint persists after all retries for ${demoUser.email}`);
+            }
+          } else {
+            // Other error, don't retry
+            break;
+          }
+        }
 
         if (dbError) {
           const errorMessage = getErrorMessage(dbError);
