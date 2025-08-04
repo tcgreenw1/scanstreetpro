@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
+import { signIn, signUp, verifyToken } from "./routes/auth";
+import { protectedQueryDatabase, testConnection } from "./routes/database";
 
 export function createServer() {
   const app = express();
