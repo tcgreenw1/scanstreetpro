@@ -185,21 +185,57 @@ const mockUsers = [
 const mockTransactions = [
   {
     id: '1',
-    organization_name: 'Sample Company',
+    organization_name: 'Acme Corporation',
     type: 'upgrade',
-    amount: 99,
+    amount: 999,
     status: 'completed',
-    plan: 'basic',
-    created_at: new Date().toISOString()
+    plan: 'premium',
+    created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
   },
   {
     id: '2',
-    organization_name: 'Pro Business',
+    organization_name: 'TechStart Inc',
     type: 'upgrade',
     amount: 299,
     status: 'completed',
     plan: 'pro',
-    created_at: new Date(Date.now() - 86400000).toISOString()
+    created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: '3',
+    organization_name: 'Sample Industries',
+    type: 'payment',
+    amount: 99,
+    status: 'completed',
+    plan: 'basic',
+    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: '4',
+    organization_name: 'Beta Testing Co',
+    type: 'upgrade',
+    amount: 99,
+    status: 'completed',
+    plan: 'basic',
+    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: '5',
+    organization_name: 'Sample Industries',
+    type: 'payment',
+    amount: 99,
+    status: 'completed',
+    plan: 'basic',
+    created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: '6',
+    organization_name: 'StartupX',
+    type: 'upgrade',
+    amount: 99,
+    status: 'pending',
+    plan: 'basic',
+    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
   }
 ];
 
