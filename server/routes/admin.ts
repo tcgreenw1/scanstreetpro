@@ -702,10 +702,21 @@ router.get('/revenue-analytics', authenticateAdmin, async (req: Request, res: Re
 
   } catch (error: any) {
     console.error('Get revenue analytics error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to get revenue analytics'
-    });
+    if (error.code === '42P01') { // Table doesn't exist
+      res.json({
+        success: true,
+        data: {
+          monthlyTrend: [],
+          planRevenue: [],
+          topCustomers: []
+        }
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get revenue analytics'
+      });
+    }
   }
 });
 
