@@ -171,20 +171,36 @@ export default function CitizenEngagement() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (currentPlan === 'free' && submissionCount >= 5) {
       alert('Free plan limit reached! Upgrade to submit unlimited reports.');
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     // Simulate submission
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
+    // Create new submission record
+    const newSubmission = {
+      id: `RPT-${String(submissions.length + 1).padStart(3, '0')}`,
+      title: formData.title,
+      category: formData.category,
+      location: formData.location,
+      status: 'queued' as const,
+      priority: 'medium' as const,
+      submitted: new Date().toISOString().split('T')[0],
+      assignedTo: 'Unassigned',
+      estimatedCompletion: 'TBD',
+      description: formData.description
+    };
+
+    // Add to submissions
+    setSubmissions(prev => [newSubmission, ...prev]);
     setSubmissionCount(prev => prev + 1);
     setIsSubmitting(false);
-    
+
     // Reset form
     setFormData({
       title: '',
@@ -195,7 +211,7 @@ export default function CitizenEngagement() {
       phone: '',
       photo: null
     });
-    
+
     alert('Thank you! Your report has been submitted. You will receive updates via email and SMS.');
   };
 
