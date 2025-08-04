@@ -15,7 +15,9 @@ console.log('🔧 Supabase Configuration:', {
 });
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('����� Supabase configuration missing! Check environment variables.');
+  console.error('⚠️ Supabase configuration missing! Check environment variables.');
+} else if (supabaseUrl.includes('placeholder') || supabaseAnonKey.includes('placeholder')) {
+  console.log('⚠️ Using placeholder Supabase configuration - database operations will fail');
 } else if (!supabaseUrl.includes('supabase.co')) {
   console.error('❌ Invalid Supabase URL format! Should be https://xxx.supabase.co');
 } else if (!supabaseAnonKey.startsWith('eyJ')) {
