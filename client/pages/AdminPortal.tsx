@@ -62,6 +62,17 @@ import { supabase, testDatabaseConnection as testSupabaseConnection, signInWithT
 import { useAuth } from "@/contexts/AuthContext";
 import { refreshAdminData } from "@/utils/adminUtils";
 import { getErrorMessage } from "@/utils/errorHandler";
+import {
+  mockToggleUserActive,
+  mockUpdateOrganizationPlan,
+  mockDeleteUser,
+  mockDiagnoseUser,
+  mockCreateUserInSupabase,
+  mockDeleteOrganization,
+  mockUpdateUserRole,
+  mockSwitchOrganizationPlan,
+  mockExportData
+} from "@/lib/mockAdminFunctions";
 
 interface Organization {
   id: string;
