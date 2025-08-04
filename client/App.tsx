@@ -85,9 +85,7 @@ const App = () => (
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/database-setup" element={<DatabaseSetup />} />
-            <Route path="/database-test" element={<DatabaseTest />} />
-            <Route path="/test-org-creation" element={<TestOrgCreation />} />
+
             <Route path="/premium-analysis" element={<PremiumAnalysis />} />
             <Route path="/debug-env" element={<DebugEnv />} />
             <Route path="/connection-test" element={<ConnectionTest />} />
