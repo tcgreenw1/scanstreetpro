@@ -201,13 +201,12 @@ const Login = () => {
             </form>
 
             <div className="text-center">
-              <button
-                type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-slate-600 hover:text-slate-800 font-medium transition-colors"
+              <Link
+                to="/signup"
+                className="text-slate-600 hover:text-slate-800 font-medium transition-colors hover:underline"
               >
-                {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-              </button>
+                Don't have an account? Sign up
+              </Link>
             </div>
           </div>
         </div>
