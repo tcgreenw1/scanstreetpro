@@ -15,6 +15,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { PricingProvider } from "./contexts/PricingContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { PlanProvider } from "./hooks/usePlan";
+import { OrganizationProvider } from "./contexts/OrganizationContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoadInspection from "./pages/RoadInspection";
 import Dashboard from "./pages/Dashboard";
