@@ -54,7 +54,9 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
-  BarChart3
+  BarChart3,
+  Edit,
+  Trash2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePricing } from "@/contexts/PricingContext";
