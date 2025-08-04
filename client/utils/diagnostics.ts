@@ -190,4 +190,26 @@ export class SystemDiagnostics {
   }
 }
 
+// Utility functions for status display
+export function getStatusIcon(status: DiagnosticResult['status']) {
+  switch (status) {
+    case 'success': return 'CheckCircle';
+    case 'warning': return 'AlertCircle';
+    case 'error': return 'XCircle';
+    default: return 'AlertCircle';
+  }
+}
+
+export function getStatusColor(status: DiagnosticResult['status']) {
+  switch (status) {
+    case 'success': return 'text-green-600';
+    case 'warning': return 'text-yellow-600';
+    case 'error': return 'text-red-600';
+    default: return 'text-gray-600';
+  }
+}
+
+// Backward compatibility export
+export const runDiagnostics = SystemDiagnostics.runFullDiagnostics;
+
 export default SystemDiagnostics;
