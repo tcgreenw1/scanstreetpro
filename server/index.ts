@@ -7,6 +7,7 @@ import { protectedQueryDatabase, testConnection } from "./routes/database";
 import signupRoutes from "./routes/signup";
 import plansRoutes from "./routes/plans";
 import initDbRoutes from "./routes/init-db";
+import hashGenRoutes from "./routes/hash-generator";
 
 export function createServer() {
   const app = express();
