@@ -319,7 +319,7 @@ export default function CostEstimator() {
                 <Label className="text-slate-700 dark:text-slate-300 mb-3 block">Asset Categories</Label>
                 <div className="space-y-2">
                   {assetCategories.map((category) => (
-                    <div key={category.id} className="flex items-center space-x-3">
+                    <div key={category.id} className="flex items-center space-x-3 group">
                       <input
                         type="checkbox"
                         checked={selectedCategories.includes(category.id)}
@@ -337,6 +337,14 @@ export default function CostEstimator() {
                         <p className="text-xs text-slate-500 dark:text-slate-400">
                           PCI: {category.currentPCI} • {category.laneMiles} lane miles
                         </p>
+                      </div>
+                      <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="outline" size="sm" onClick={() => editAssetCategory(category)}>
+                          <Edit className="w-3 h-3" />
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => deleteAssetCategory(category.id)}>
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
                       </div>
                     </div>
                   ))}
