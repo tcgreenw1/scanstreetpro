@@ -100,7 +100,7 @@ const AdminPortal = () => {
 
   // Form states
   const [orgForm, setOrgForm] = useState({ name: '', plan: 'free' as const });
-  const [userForm, setUserForm] = useState({ email: '', name: '', role: 'member' as const, organizationId: '' });
+  const [userForm, setUserForm] = useState({ email: '', name: '', role: 'viewer' as const, organizationId: '' });
 
   // Filters
   const [orgFilter, setOrgFilter] = useState('all');
