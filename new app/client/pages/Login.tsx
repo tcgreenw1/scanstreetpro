@@ -141,42 +141,42 @@ const Login = () => {
               </Alert>
             )}
 
-            <form onSubmit={handleAuth} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-700">Email</Label>
+            <form onSubmit={handleAuth} className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-slate-700 font-medium">Email Address</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder="your@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    className="pl-12 h-14 glass-card border-slate-200/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 bg-white/60 backdrop-blur-sm rounded-xl text-slate-800 placeholder:text-slate-400"
                     required
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-700">Password</Label>
+              <div className="space-y-3">
+                <Label htmlFor="password" className="text-slate-700 font-medium">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    className="pl-12 pr-12 h-14 glass-card border-slate-200/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 bg-white/60 backdrop-blur-sm rounded-xl text-slate-800 placeholder:text-slate-400"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
               </div>
