@@ -247,7 +247,7 @@ export default function MaintenanceScheduler() {
           </Badge>
         </div>
         
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Select value={viewMode} onValueChange={(value: 'calendar' | 'list') => setViewMode(value)}>
             <SelectTrigger className="w-[120px] glass-card border-white/30">
               <SelectValue />
@@ -257,7 +257,22 @@ export default function MaintenanceScheduler() {
               <SelectItem value="list">List View</SelectItem>
             </SelectContent>
           </Select>
-          
+
+          <Button variant="outline" className="glass-card border-white/30">
+            <Share2 className="w-4 h-4 mr-2" />
+            Share with Contractor
+          </Button>
+
+          <Button variant="outline" className="glass-card border-white/30">
+            <Upload className="w-4 h-4 mr-2" />
+            Import CSV to Calendar
+          </Button>
+
+          <Button variant="outline" className="glass-card border-white/30">
+            <Download className="w-4 h-4 mr-2" />
+            Export XLS
+          </Button>
+
           <Dialog open={isAddingTask} onOpenChange={setIsAddingTask}>
             <DialogTrigger asChild>
               <Button className="bg-blue-600 hover:bg-blue-700">
