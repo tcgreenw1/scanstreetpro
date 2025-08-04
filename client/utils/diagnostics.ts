@@ -1,4 +1,4 @@
-interface DiagnosticResult {
+export interface DiagnosticResult {
   name: string;
   status: 'success' | 'warning' | 'error';
   message: string;
