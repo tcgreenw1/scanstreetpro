@@ -187,23 +187,42 @@ export default function Dashboard() {
           const trendIcon = stat.trend === 'up' ? TrendingUp : stat.trend === 'down' ? TrendingDown : Activity;
           const TrendIcon = trendIcon;
           return (
-            <Card key={index} className="glass-card border-white/20 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group animate-fadeInUp" style={{ animationDelay: `${index * 200}ms` }}>
+            <Card key={index} className={cn(
+              "glass-card border-white/20 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group animate-fadeInUp",
+              stat.locked && "opacity-75 bg-gradient-to-br from-amber-50/50 to-yellow-50/50 border-amber-200/50"
+            )} style={{ animationDelay: `${index * 200}ms` }}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">{stat.label}</p>
-                    <p className="text-2xl font-bold text-slate-800 dark:text-white mt-1">
-                      {stat.value}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">{stat.label}</p>
+                      {stat.locked && <Crown className="w-4 h-4 text-amber-500" />}
+                    </div>
+                    <p className={cn(
+                      "text-2xl font-bold mt-1",
+                      stat.locked ? "text-slate-400" : "text-slate-800 dark:text-white"
+                    )}>
+                      {stat.locked ? '••••' : stat.value}
                     </p>
                     <div className="flex items-center mt-1">
-                      <TrendIcon className={cn("w-3 h-3 mr-1", 
-                        stat.trend === 'up' ? 'text-green-500' : 
-                        stat.trend === 'down' ? 'text-red-500' : 'text-slate-400'
-                      )} />
-                      <span className="text-xs text-slate-500">vs last scan</span>
+                      {!stat.locked && (
+                        <>
+                          <TrendIcon className={cn("w-3 h-3 mr-1",
+                            stat.trend === 'up' ? 'text-green-500' :
+                            stat.trend === 'down' ? 'text-red-500' : 'text-slate-400'
+                          )} />
+                          <span className="text-xs text-slate-500">vs last scan</span>
+                        </>
+                      )}
+                      {stat.locked && (
+                        <span className="text-xs text-amber-600">Upgrade to unlock</span>
+                      )}
                     </div>
                   </div>
-                  <Icon className={cn("w-8 h-8 group-hover:scale-110 transition-transform", stat.color)} />
+                  <Icon className={cn(
+                    "w-8 h-8 group-hover:scale-110 transition-transform",
+                    stat.locked ? "text-slate-300" : stat.color
+                  )} />
                 </div>
               </CardContent>
             </Card>
