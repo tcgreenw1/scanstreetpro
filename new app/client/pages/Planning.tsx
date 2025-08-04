@@ -479,7 +479,15 @@ export default function Planning() {
                             </p>
                           </div>
                         </div>
-                        {getPriorityBadge(goal.priority)}
+                        <div className="flex items-center space-x-2">
+                          {getPriorityBadge(goal.priority)}
+                          <Button variant="outline" size="sm" onClick={() => editBudgetGoal(goal)}>
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => deleteBudgetGoal(goal.id)}>
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
 
                       <div className="space-y-3">
