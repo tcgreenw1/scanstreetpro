@@ -250,39 +250,43 @@ export default function Pricing() {
                       <>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          Up to 20 assets
+                          Sample Data
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-4 h-4 text-green-500" />
+                          OpenStreetMap PCI Example
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-4 h-4 text-green-500" />
+                          1 export/month
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
                           Basic dashboard
                         </li>
-                        <li className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-green-500" />
-                          OpenStreetMap integration
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-green-500" />
-                          1 export per month
-                        </li>
                       </>
                     )}
-                    {planKey === 'standard' && (
+                    {planKey === 'basic' && (
                       <>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          Unlimited assets
+                          Unlimited Asset Management
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          Interactive calendar
+                          Budget Simulations
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          Basic inspection tools
+                          Expense Management
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
                           3 team members
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-4 h-4 text-green-500" />
+                          Interactive calendar
                         </li>
                       </>
                     )}
@@ -290,15 +294,39 @@ export default function Pricing() {
                       <>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          Satellite scan viewer
+                          Everything in Basic plus:
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          Advanced analytics
+                          Maintenance Scheduling
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          Full inspection toolkit
+                          Unlimited Exports
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-4 h-4 text-green-500" />
+                          Full Integrations
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-4 h-4 text-green-500" />
+                          Funding Center
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-4 h-4 text-green-500" />
+                          Road Inspection Dashboard
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-4 h-4 text-green-500" />
+                          Contractor Dashboard
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-4 h-4 text-green-500" />
+                          Custom Reports
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-4 h-4 text-green-500" />
+                          Citizen Engagement
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
@@ -306,23 +334,23 @@ export default function Pricing() {
                         </li>
                       </>
                     )}
-                    {planKey === 'enterprise' && (
+                    {planKey === 'premium' && (
                       <>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          Everything in Pro
+                          Everything in Pro plus:
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          Driving scan viewer
+                          Personalized Mobile & Web App
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          Full API access
+                          Website Integration
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-4 h-4 text-green-500" />
-                          White-label branding
+                          Dedicated IT Setup
                         </li>
                       </>
                     )}
