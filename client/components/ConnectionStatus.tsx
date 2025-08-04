@@ -3,7 +3,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
 import { userDataCircuitBreaker, connectionCircuitBreaker } from '@/utils/circuitBreaker';
-import { testSupabaseConnection } from '@/lib/supabase';
+import { testSupabaseConnection } from '@/lib/neonAuth';
 
 interface ConnectionStatusProps {
   show?: boolean;
