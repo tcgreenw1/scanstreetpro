@@ -18,7 +18,8 @@
     "start": "node dist/server/node-build.mjs",
     "test": "vitest --run",
     "format.fix": "prettier --write .",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "setup-admin": "node scripts/setup-admin.js"
   },
   "dependencies": {
     "@builder.io/sdk-react": "^4.2.3",
