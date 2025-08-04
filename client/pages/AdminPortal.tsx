@@ -534,57 +534,7 @@ export default function AdminPortal() {
         testResults: mockResults.testResults
       }));
 
-      // Test 3: Try authentication (if password provided)
-      if (password) {
-        console.log('Test 3: Testing authentication...');
-        try {
-          const authResult = await signInWithTimeout(email, password);
-          results.tests.authentication = {
-            success: !authResult.error,
-            error: authResult.error?.message || null,
-            session: authResult.data?.session ? 'valid' : 'invalid'
-          };
 
-          // Sign out immediately to not affect current session
-          if (authResult.data?.session) {
-            await supabase.auth.signOut();
-          }
-        } catch (authErr: any) {
-          results.tests.authentication = {
-            success: false,
-            error: authErr.message,
-            session: 'failed'
-          };
-        }
-      } else {
-        results.tests.authentication = {
-          skipped: true,
-          reason: 'No password provided'
-        };
-      }
-
-      // Test 4: Check if demo user matches expected credentials
-      const demoCredentials = {
-        'admin@scanstreetpro.com': 'AdminPass123!',
-        'test@springfield.gov': 'TestUser123!',
-        'premium@springfield.gov': 'Premium!'
-      };
-
-      if (demoCredentials[email as keyof typeof demoCredentials]) {
-        results.tests.demoCredentials = {
-          isDemo: true,
-          expectedPassword: demoCredentials[email as keyof typeof demoCredentials],
-          passwordMatch: password === demoCredentials[email as keyof typeof demoCredentials]
-        };
-      } else {
-        results.tests.demoCredentials = {
-          isDemo: false,
-          expectedPassword: null,
-          passwordMatch: null
-        };
-      }
-
-      setUserDiagnosisForm(prev => ({ ...prev, testResults: results }));
 
     } catch (error: any) {
       setUserDiagnosisForm(prev => ({
