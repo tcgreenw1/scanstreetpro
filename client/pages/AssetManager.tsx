@@ -328,77 +328,131 @@ export default function AssetManager() {
                       <TableHead>Asset</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Location</TableHead>
-                      <TableHead>Condition</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>Condition (PCI)</TableHead>
+                      <TableHead>Last Inspection</TableHead>
                       <TableHead>Next Inspection</TableHead>
-                      <TableHead>Priority</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredAssets.map((asset) => (
-                      <TableRow key={asset.id} className="opacity-60">
-                        <TableCell>
-                          <div>
-                            <p className="font-medium text-slate-800 dark:text-white">{asset.name}</p>
-                            <p className="text-sm text-slate-500">{asset.id}</p>
-                          </div>
+                    {isLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-12">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                          <span className="text-slate-600 mt-3 block">Loading assets...</span>
                         </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                            {asset.type}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <MapPin className="w-4 h-4 mr-2 text-slate-400" />
-                            <span className="text-sm text-slate-600 dark:text-slate-300">
-                              {asset.location.address}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={getConditionColor(asset.condition)}>
-                            {asset.condition}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={
-                            asset.status === 'Active' ? 'bg-green-100 text-green-800 border-green-200' :
-                            asset.status === 'Needs Repair' ? 'bg-red-100 text-red-800 border-red-200' :
-                            'bg-gray-100 text-gray-800 border-gray-200'
-                          }>
-                            {asset.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <Calendar className="w-4 h-4 mr-2 text-slate-400" />
-                            <span className="text-sm text-slate-600 dark:text-slate-300">
-                              {new Date(asset.nextInspection).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={getPriorityColor(asset.priority)}>
-                            {asset.priority}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
-                            <Button variant="ghost" size="sm" disabled>
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" disabled>
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" disabled>
-                              <History className="w-4 h-4" />
-                            </Button>
+                      </TableRow>
+                    ) : filteredAssets.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-12">
+                          <div className="flex flex-col items-center gap-3">
+                            <Building2 className="w-12 h-12 text-slate-300" />
+                            <p className="text-slate-500">
+                              {planFeatures?.sampleDataOnly
+                                ? "No sample assets available"
+                                : "No assets found"}
+                            </p>
+                            {!canManageAssets && (
+                              <Button onClick={() => window.location.href = '/pricing'} size="sm">
+                                <Crown className="w-4 h-4 mr-2" />
+                                Upgrade to Add Assets
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      filteredAssets.map((asset) => (
+                        <TableRow
+                          key={asset.id}
+                          className={cn(
+                            canManageAssets ? "hover:bg-slate-50 dark:hover:bg-slate-800" : "opacity-75",
+                            asset.isSampleData && "bg-blue-50/50 dark:bg-blue-900/20"
+                          )}
+                        >
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div>
+                                <p className="font-medium text-slate-800 dark:text-white">{asset.name}</p>
+                                <p className="text-sm text-slate-500">{asset.id}</p>
+                              </div>
+                              {asset.isSampleData && (
+                                <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700">
+                                  Sample
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                              {asset.type.charAt(0).toUpperCase() + asset.type.slice(1)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <MapPin className="w-4 h-4 mr-2 text-slate-400" />
+                              <span className="text-sm text-slate-600 dark:text-slate-300">
+                                {asset.location.address || `${asset.location.lat}, ${asset.location.lng}`}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className={getConditionColor(asset.condition.status)}>
+                                {asset.condition.status.charAt(0).toUpperCase() + asset.condition.status.slice(1)}
+                              </Badge>
+                              <span className="text-sm text-slate-500">
+                                PCI: {asset.condition.pci}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <Calendar className="w-4 h-4 mr-2 text-slate-400" />
+                              <span className="text-sm text-slate-600 dark:text-slate-300">
+                                {asset.condition.lastInspected.toLocaleDateString()}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <Clock className="w-4 h-4 mr-2 text-slate-400" />
+                              <span className="text-sm text-slate-600 dark:text-slate-300">
+                                {asset.condition.nextInspection.toLocaleDateString()}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={!canManageAssets}
+                                className={!canManageAssets ? "opacity-50" : ""}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={!canManageAssets}
+                                className={!canManageAssets ? "opacity-50" : ""}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={!canManageAssets}
+                                className={!canManageAssets ? "opacity-50" : ""}
+                              >
+                                <History className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>
