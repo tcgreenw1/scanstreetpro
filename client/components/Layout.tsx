@@ -200,6 +200,7 @@ export function Layout({ children }: LayoutProps) {
           onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           isDarkMode={isDarkMode}
           toggleTheme={toggleTheme}
+          user={user}
         />
       </aside>
 
