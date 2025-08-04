@@ -244,6 +244,28 @@ export default function CitizenEngagement() {
     window.location.href = '/pricing';
   };
 
+  const updateReportStatus = (reportId: string, newStatus: 'queued' | 'scheduled' | 'in-progress' | 'resolved') => {
+    setSubmissions(prev => prev.map(submission =>
+      submission.id === reportId ? { ...submission, status: newStatus } : submission
+    ));
+  };
+
+  const assignReport = (reportId: string, assignee: string) => {
+    setSubmissions(prev => prev.map(submission =>
+      submission.id === reportId ? { ...submission, assignedTo: assignee } : submission
+    ));
+  };
+
+  const hideReport = (reportId: string) => {
+    setHiddenReports(prev => [...prev, reportId]);
+  };
+
+  const showReport = (reportId: string) => {
+    setHiddenReports(prev => prev.filter(id => id !== reportId));
+  };
+
+  const visibleSubmissions = submissions.filter(submission => !hiddenReports.includes(submission.id));
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'queued': return Clock;
