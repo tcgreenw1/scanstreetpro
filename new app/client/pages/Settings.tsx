@@ -465,10 +465,74 @@ export default function Settings() {
         <TabsContent value="users" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white">User Management</h2>
-            <Button onClick={addUser} disabled={currentPlan === 'free' && users.length >= 3}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add User
-            </Button>
+            <Dialog open={isAddUserDialogOpen} onOpenChange={setIsAddUserDialogOpen}>
+              <DialogTrigger asChild>
+                <Button disabled={currentPlan === 'free' && usersList.length >= 3}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add User
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Add New User</DialogTitle>
+                  <DialogDescription>
+                    Invite a new team member to your organization
+                  </DialogDescription>
+                </DialogHeader>
+                <form
+                  className="space-y-4"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.target as HTMLFormElement);
+                    addUser({
+                      name: formData.get('name'),
+                      email: formData.get('email'),
+                      role: formData.get('role')
+                    });
+                  }}
+                >
+                  <div>
+                    <Label htmlFor="user-name">Full Name</Label>
+                    <Input
+                      id="user-name"
+                      name="name"
+                      placeholder="John Doe"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="user-email">Email Address</Label>
+                    <Input
+                      id="user-email"
+                      name="email"
+                      type="email"
+                      placeholder="john@cityname.gov"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="user-role">Role</Label>
+                    <Select name="role" defaultValue="viewer" required>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="manager">Manager</SelectItem>
+                        <SelectItem value="inspector">Inspector</SelectItem>
+                        <SelectItem value="viewer">Viewer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button type="button" variant="outline" onClick={() => setIsAddUserDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit">Send Invitation</Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <Card className="glass-card border-white/20">
