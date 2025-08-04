@@ -98,6 +98,7 @@ const App = () => (
             <Route path="/create-demo-users" element={<CreateDemoUsers />} />
             <Route path="/migration-helper" element={<MigrationHelper />} />
             <Route path="/setup" element={<Setup />} />
+            <Route path="/builder-test" element={<BuilderTest />} />
 
             {/* Protected Routes */}
             <Route path="/*" element={
