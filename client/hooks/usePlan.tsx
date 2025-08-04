@@ -86,9 +86,7 @@ export function PlanProvider({ children }: PlanProviderProps) {
     isFreePlan: plan === 'free',
     isBasicPlan: plan === 'basic',
     isProPlan: plan === 'pro',
-    isPremiumPlan: plan === 'premium',
-    isSatellitePlan: plan === 'satellite',
-    isDrivingPlan: plan === 'driving'
+    isPremiumPlan: plan === 'premium'
   };
 
   return (
