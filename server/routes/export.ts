@@ -8,7 +8,7 @@ let pool: Pool | null = null;
 
 function getPool() {
   if (process.env.DISABLE_DB === 'true') {
-    throw new Error('Database is disabled');
+    return null;
   }
   if (!pool) {
     pool = new Pool({
