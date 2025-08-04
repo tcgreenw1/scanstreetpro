@@ -124,16 +124,11 @@ export class Diagnostics {
 
   static async testAuthService(): Promise<DiagnosticResult> {
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-
       const { error } = await supabase.auth.getSession();
-
-      clearTimeout(timeoutId);
 
       if (error) {
         return {
-          component: 'Supabase Auth Service',
+          component: 'Neon Auth Service',
           status: 'fail',
           message: 'Auth service error',
           details: error.message || 'Unknown auth error'
@@ -141,13 +136,13 @@ export class Diagnostics {
       }
 
       return {
-        component: 'Supabase Auth Service',
+        component: 'Neon Auth Service',
         status: 'pass',
         message: 'Auth service is responding'
       };
     } catch (error: any) {
       return {
-        component: 'Supabase Auth Service',
+        component: 'Neon Auth Service',
         status: 'fail',
         message: 'Auth service test failed',
         details: error.message || 'Unknown error'
