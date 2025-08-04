@@ -162,7 +162,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const isAdmin = () => {
-    return user?.role === 'manager'; // In our system, managers are essentially admins
+    return user?.role === 'manager' || user?.role === 'admin'; // Support both admin and manager roles
   };
 
   const value = {
