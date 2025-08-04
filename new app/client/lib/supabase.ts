@@ -1006,6 +1006,8 @@ export const signInWithTimeout = async (email: string, password: string) => {
         throw new Error('Too many login attempts. Please wait a few minutes and try again.');
       } else if (errorMessage.includes('Network request failed')) {
         throw new Error('Network connection failed. Please check your internet connection.');
+      } else if (errorMessage.includes('foreign key') || errorMessage.includes('constraint')) {
+        throw new Error('Account setup is still in progress. Please wait a moment and try again.');
       } else {
         throw new Error(errorMessage || 'Authentication failed');
       }
