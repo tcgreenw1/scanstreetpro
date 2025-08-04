@@ -633,18 +633,7 @@ export default function AdminPortal() {
 
   const exportUserData = async () => {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select(`
-          *,
-          organizations (
-            id,
-            name,
-            plan
-          )
-        `);
-
-      if (error) throw error;
+      const data = await mockExportData('users');
 
       const csvContent = [
         'ID,Email,Name,Role,Organization,Plan,Active,Created',
