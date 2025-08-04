@@ -227,7 +227,7 @@ export default function Dashboard() {
                   <Link to="/map">
                     <Button className="w-full bg-blue-500 hover:bg-blue-600 group-hover:scale-105 transition-all duration-200">
                       <Eye className="w-4 h-4 mr-2" />
-                      View Sample Map
+                      View Sample Demo Map
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
