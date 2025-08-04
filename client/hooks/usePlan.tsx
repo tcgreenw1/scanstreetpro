@@ -128,18 +128,16 @@ export function useSampleData(componentName: string) {
 }
 
 export function usePlanCheck() {
-  const { plan, isFreePlan, isBasicPlan, isProPlan, isPremiumPlan, isSatellitePlan, isDrivingPlan } = usePlan();
-  
+  const { plan, isFreePlan, isBasicPlan, isProPlan, isPremiumPlan } = usePlan();
+
   return {
     plan,
     isFreePlan,
-    isBasicPlan, 
+    isBasicPlan,
     isProPlan,
     isPremiumPlan,
-    isSatellitePlan,
-    isDrivingPlan,
     isPaidPlan: !isFreePlan,
-    isProfessionalTier: isProPlan || isPremiumPlan || isSatellitePlan || isDrivingPlan,
-    hasUnlimitedFeatures: isPremiumPlan || isSatellitePlan || isDrivingPlan
+    isProfessionalTier: isProPlan || isPremiumPlan,
+    hasUnlimitedFeatures: isPremiumPlan
   };
 }
