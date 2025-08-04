@@ -1,22 +1,25 @@
 import { RequestHandler } from "express";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { getPool, isDatabaseAvailable } from '../lib/database';
 
 // In a real app, this would be from environment variables
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const NEON_PROJECT_ID = 'hidden-queen-27037107';
 
-// Helper function to execute Neon SQL queries
-const executeNeonQuery = async (sql: string, params?: any[]) => {
+// Helper function to execute SQL queries with Neon
+const executeQuery = async (sql: string, params?: any[]) => {
+  if (!isDatabaseAvailable()) {
+    throw new Error('Database is not available');
+  }
+
+  const pool = getPool();
+  const client = await pool.connect();
+  
   try {
-    // This would be replaced with actual Neon SDK calls
-    // For now, we'll simulate the database calls
-    console.log('Executing SQL:', sql, 'with params:', params);
-    
-    // Simulate database response
-    return { rows: [] };
-  } catch (error: any) {
-    throw new Error(`Database error: ${error.message}`);
+    const result = await client.query(sql, params);
+    return { rows: result.rows };
+  } finally {
+    client.release();
   }
 };
 
@@ -26,7 +29,8 @@ export const signIn: RequestHandler = async (req, res) => {
 
     if (!email || !password) {
       return res.status(400).json({ 
-        message: 'Email and password are required' 
+        success: false,
+        error: 'Email and password are required' 
       });
     }
 
@@ -38,11 +42,12 @@ export const signIn: RequestHandler = async (req, res) => {
       WHERE u.email = $1 AND u.is_active = true
     `;
 
-    const userResult = await executeNeonQuery(userQuery, [email]);
+    const userResult = await executeQuery(userQuery, [email]);
 
     if (!userResult.rows || userResult.rows.length === 0) {
       return res.status(401).json({ 
-        message: 'Invalid credentials' 
+        success: false,
+        error: 'Invalid credentials' 
       });
     }
 
@@ -51,7 +56,8 @@ export const signIn: RequestHandler = async (req, res) => {
     // Verify password
     if (!user.password_hash) {
       return res.status(401).json({ 
-        message: 'Account not properly configured. Please contact admin.' 
+        success: false,
+        error: 'Account not properly configured. Please contact admin.' 
       });
     }
 
@@ -59,12 +65,13 @@ export const signIn: RequestHandler = async (req, res) => {
 
     if (!isValidPassword) {
       return res.status(401).json({ 
-        message: 'Invalid credentials' 
+        success: false,
+        error: 'Invalid credentials' 
       });
     }
 
     // Update last login
-    await executeNeonQuery(
+    await executeQuery(
       'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
       [user.id]
     );
@@ -85,14 +92,23 @@ export const signIn: RequestHandler = async (req, res) => {
     const { password_hash, ...userWithoutPassword } = user;
 
     res.json({
-      user: userWithoutPassword,
-      token
+      success: true,
+      data: {
+        user: userWithoutPassword,
+        organization: {
+          id: user.organization_id,
+          name: user.org_name,
+          plan: user.org_plan
+        },
+        token
+      }
     });
 
   } catch (error: any) {
     console.error('Sign in error:', error);
     res.status(500).json({ 
-      message: 'Internal server error' 
+      success: false,
+      error: 'Internal server error' 
     });
   }
 };
@@ -103,23 +119,26 @@ export const signUp: RequestHandler = async (req, res) => {
 
     if (!email || !password) {
       return res.status(400).json({ 
-        message: 'Email and password are required' 
+        success: false,
+        error: 'Email and password are required' 
       });
     }
 
     if (password.length < 6) {
       return res.status(400).json({ 
-        message: 'Password must be at least 6 characters long' 
+        success: false,
+        error: 'Password must be at least 6 characters long' 
       });
     }
 
     // Check if user already exists
     const existingUserQuery = 'SELECT id FROM users WHERE email = $1';
-    const existingUser = await executeNeonQuery(existingUserQuery, [email]);
+    const existingUser = await executeQuery(existingUserQuery, [email]);
 
     if (existingUser.rows && existingUser.rows.length > 0) {
       return res.status(400).json({ 
-        message: 'An account with this email already exists' 
+        success: false,
+        error: 'An account with this email already exists' 
       });
     }
 
@@ -137,11 +156,12 @@ export const signUp: RequestHandler = async (req, res) => {
       RETURNING id
     `;
 
-    const orgResult = await executeNeonQuery(createOrgQuery, [orgName, orgSlug]);
+    const orgResult = await executeQuery(createOrgQuery, [orgName, orgSlug]);
     
     if (!orgResult.rows || orgResult.rows.length === 0) {
       return res.status(500).json({ 
-        message: 'Failed to create organization' 
+        success: false,
+        error: 'Failed to create organization' 
       });
     }
 
@@ -154,7 +174,7 @@ export const signUp: RequestHandler = async (req, res) => {
       RETURNING id, email, name, role, organization_id, is_active, created_at
     `;
 
-    const userResult = await executeNeonQuery(createUserQuery, [
+    const userResult = await executeQuery(createUserQuery, [
       email,
       passwordHash,
       name || null,
@@ -163,7 +183,8 @@ export const signUp: RequestHandler = async (req, res) => {
 
     if (!userResult.rows || userResult.rows.length === 0) {
       return res.status(500).json({ 
-        message: 'Failed to create user account' 
+        success: false,
+        error: 'Failed to create user account' 
       });
     }
 
@@ -182,14 +203,23 @@ export const signUp: RequestHandler = async (req, res) => {
     );
 
     res.status(201).json({
-      user: newUser,
-      token
+      success: true,
+      data: {
+        user: newUser,
+        organization: {
+          id: organizationId,
+          name: orgName,
+          plan: 'free'
+        },
+        token
+      }
     });
 
   } catch (error: any) {
     console.error('Sign up error:', error);
     res.status(500).json({ 
-      message: 'Internal server error' 
+      success: false,
+      error: 'Internal server error' 
     });
   }
 };
@@ -199,7 +229,10 @@ export const verifyToken: RequestHandler = async (req, res) => {
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'No token provided' });
+      return res.status(401).json({ 
+        success: false,
+        error: 'No token provided' 
+      });
     }
 
     const token = authHeader.substring(7);
@@ -215,22 +248,41 @@ export const verifyToken: RequestHandler = async (req, res) => {
         WHERE u.id = $1 AND u.is_active = true
       `;
 
-      const userResult = await executeNeonQuery(userQuery, [decoded.userId]);
+      const userResult = await executeQuery(userQuery, [decoded.userId]);
 
       if (!userResult.rows || userResult.rows.length === 0) {
-        return res.status(401).json({ message: 'User not found' });
+        return res.status(401).json({ 
+          success: false,
+          error: 'User not found' 
+        });
       }
 
       const { password_hash, ...user } = userResult.rows[0];
 
-      res.json({ user });
+      res.json({ 
+        success: true,
+        data: {
+          user,
+          organization: {
+            id: user.organization_id,
+            name: user.org_name,
+            plan: user.org_plan
+          }
+        }
+      });
 
     } catch (jwtError) {
-      return res.status(401).json({ message: 'Invalid token' });
+      return res.status(401).json({ 
+        success: false,
+        error: 'Invalid token' 
+      });
     }
 
   } catch (error: any) {
     console.error('Token verification error:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ 
+      success: false,
+      error: 'Internal server error' 
+    });
   }
 };
