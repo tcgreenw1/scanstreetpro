@@ -301,10 +301,18 @@ export default function CostEstimator() {
         <div className="lg:col-span-1 space-y-6">
           <Card className="glass-card border-white/20">
             <CardHeader>
-              <CardTitle className="flex items-center text-slate-800 dark:text-white">
-                <Calculator className="w-5 h-5 mr-2" />
-                Estimation Parameters
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center text-slate-800 dark:text-white">
+                    <Calculator className="w-5 h-5 mr-2" />
+                    Estimation Parameters
+                  </CardTitle>
+                </div>
+                <Button onClick={() => setIsAddingAsset(true)} size="sm" variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Category
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
