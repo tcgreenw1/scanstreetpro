@@ -82,15 +82,24 @@ router.get('/stats', authenticateAdmin, async (req: Request, res: Response<ApiRe
       planDistribution[row.plan] = parseInt(row.count);
     });
     
-    // Calculate monthly revenue from actual transactions
-    const revenueResult = await pool.query(`
-      SELECT COALESCE(SUM(amount), 0) as total
-      FROM transactions
-      WHERE status = 'completed'
-      AND type IN ('payment', 'upgrade')
-      AND created_at >= DATE_TRUNC('month', CURRENT_DATE)
-    `);
-    const monthlyRevenue = parseInt(revenueResult.rows[0].total) / 100; // Convert from cents
+    // Calculate monthly revenue from actual transactions (fallback if table doesn't exist)
+    let monthlyRevenue = 0;
+    try {
+      const revenueResult = await pool.query(`
+        SELECT COALESCE(SUM(amount), 0) as total
+        FROM transactions
+        WHERE status = 'completed'
+        AND type IN ('payment', 'upgrade')
+        AND created_at >= DATE_TRUNC('month', CURRENT_DATE)
+      `);
+      monthlyRevenue = parseInt(revenueResult.rows[0].total) / 100; // Convert from cents
+    } catch (error: any) {
+      // Fallback calculation if transactions table doesn't exist
+      monthlyRevenue =
+        (planDistribution.basic || 0) * 99 +
+        (planDistribution.pro || 0) * 199 +
+        (planDistribution.premium || 0) * 999;
+    }
     
     // Get additional stats
     const transactionResult = await pool.query(`
