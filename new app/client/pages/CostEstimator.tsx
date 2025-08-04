@@ -138,6 +138,10 @@ export default function CostEstimator() {
   const [planningHorizon, setPlanningHorizon] = useState<5 | 10>(5);
   const [inflationRate, setInflationRate] = useState<number>(2.8);
   const [savedScenarios, setSavedScenarios] = useState<number>(1);
+  const [assetCategories, setAssetCategories] = useState<AssetCategory[]>(initialAssetCategories);
+  const [editingAsset, setEditingAsset] = useState<AssetCategory | null>(null);
+  const [isAddingAsset, setIsAddingAsset] = useState(false);
+  const [assetForm, setAssetForm] = useState<Partial<AssetCategory>>({});
   const { currentPlan } = usePricing();
 
   const generateProjections = (): CostProjection[] => {
