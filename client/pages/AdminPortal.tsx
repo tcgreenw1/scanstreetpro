@@ -594,29 +594,7 @@ export default function AdminPortal() {
     }
 
     try {
-      // First get all users in this organization
-      const { data: orgUsers, error: usersError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('organization_id', orgId);
-
-      if (usersError) throw usersError;
-
-      // Delete all users in this organization
-      if (orgUsers && orgUsers.length > 0) {
-        for (const user of orgUsers) {
-          await deleteUser(user.id);
-        }
-      }
-
-      // Then delete the organization
-      const { error: orgError } = await supabase
-        .from('organizations')
-        .delete()
-        .eq('id', orgId);
-
-      if (orgError) throw orgError;
-
+      await mockDeleteOrganization(orgId);
       await loadData();
       setError('Organization and all associated users deleted successfully!');
       setTimeout(() => setError(''), 3000);
