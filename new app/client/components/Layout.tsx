@@ -74,7 +74,7 @@ const navSections: NavSection[] = [
     title: "Dashboard",
     items: [
       { name: 'Dashboard', href: '/dashboard', icon: Home, description: 'Main overview and metrics' },
-      { name: 'Road Inspection', href: '/inspection-dashboard', icon: Search, description: 'AI-powered road monitoring' }
+      { name: 'Road Inspection', href: '/inspection-dashboard', icon: Search, description: 'AI-powered road monitoring', isPremium: true }
     ]
   },
   {
@@ -82,7 +82,7 @@ const navSections: NavSection[] = [
     items: [
       { name: 'Asset Manager', href: '/assets', icon: Building2, description: 'Track infrastructure assets', isPremium: true },
       { name: 'Maintenance', href: '/maintenance', icon: Calendar, description: 'Schedule and track maintenance', isPremium: true },
-      { name: 'Inspections', href: '/inspections', icon: ClipboardCheck, description: 'Inspection workflows' },
+      { name: 'Inspections', href: '/inspections', icon: ClipboardCheck, description: 'Inspection workflows', isPremium: true },
       { name: 'Map View', href: '/map', icon: MapPin, description: 'Geographic asset view' }
     ]
   },
@@ -91,17 +91,17 @@ const navSections: NavSection[] = [
     items: [
       { name: 'Budget Planning', href: '/budget', icon: TrendingUp, description: '5-year budget projections' },
       { name: 'Cost Estimator', href: '/estimates', icon: Calculator, description: 'PCI-based cost projections', isPremium: true },
-      { name: 'Funding Center', href: '/funding', icon: DollarSign, description: 'Grants and funding sources' },
-      { name: 'Expenses', href: '/expenses', icon: FileText, description: 'Track spending and costs' }
+      { name: 'Funding Center', href: '/funding', icon: DollarSign, description: 'Grants and funding sources', isPremium: true },
+      { name: 'Expenses', href: '/expenses', icon: FileText, description: 'Track spending and costs', isPremium: true }
     ]
   },
   {
     title: "Operations",
     items: [
       { name: 'Contractors', href: '/contractors', icon: Users, description: 'Contractor management portal', isPremium: true },
-      { name: 'Citizen Reports', href: '/citizen-reports', icon: MessageSquare, description: 'Fix My Road submissions' },
+      { name: 'Citizen Reports', href: '/citizen-reports', icon: MessageSquare, description: 'Fix My Road submissions', isPremium: true },
       { name: 'Verification', href: '/verify', icon: ClipboardCheck, description: 'Issue verification workflow' },
-      { name: 'Reports', href: '/reports', icon: FileText, description: 'Generate public reports' }
+      { name: 'Reports', href: '/reports', icon: FileText, description: 'Generate public reports', isPremium: true }
     ]
   },
   {
