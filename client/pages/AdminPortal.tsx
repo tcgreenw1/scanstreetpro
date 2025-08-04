@@ -51,7 +51,7 @@ interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'manager' | 'member';
+  role: 'admin' | 'manager' | 'inspector' | 'contractor' | 'viewer';
   organization_id: string;
   organization_name: string;
   plan: string;
