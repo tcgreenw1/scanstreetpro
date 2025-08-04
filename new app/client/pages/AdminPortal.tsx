@@ -96,7 +96,7 @@ interface AdminStats {
 }
 
 export default function AdminPortal() {
-  const { user } = useAuth();
+  const { user, switchToOrganization } = useAuth();
   const [selectedTab, setSelectedTab] = useState('overview');
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -104,7 +104,7 @@ export default function AdminPortal() {
   const [loading, setLoading] = useState(true);
   const [selectedOrg, setSelectedOrg] = useState<string>('');
   const [error, setError] = useState('');
-  
+
   // New user form state
   const [newUserForm, setNewUserForm] = useState({
     email: '',
@@ -114,7 +114,7 @@ export default function AdminPortal() {
     role: 'viewer' as const,
     phone: ''
   });
-  
+
   // User diagnosis state
   const [userDiagnosisForm, setUserDiagnosisForm] = useState({
     email: '',
@@ -129,8 +129,6 @@ export default function AdminPortal() {
     slug: '',
     plan: 'free' as const
   });
-
-  const { switchToOrganization } = useAuth();
 
   useEffect(() => {
     initializeAdminPortal();
@@ -1009,7 +1007,7 @@ export default function AdminPortal() {
                     <p>Organizations loaded: {organizations.length}</p>
                     <p>Users loaded: {users.length}</p>
                     <p>Stats computed: {stats ? '✅' : '❌'}</p>
-                    <p>Loading state: {loading ? '🔄' : '✅'}</p>
+                    <p>Loading state: {loading ? '���' : '✅'}</p>
                   </div>
                   <div className="space-y-2">
                     <h4 className="font-semibold text-gray-800">User Context</h4>
