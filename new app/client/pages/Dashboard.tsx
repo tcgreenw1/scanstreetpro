@@ -338,17 +338,30 @@ export default function Dashboard() {
               <Crown className="w-8 h-8 text-amber-500 mx-auto mb-3" />
               <h3 className="text-lg font-bold text-amber-800 dark:text-amber-200 mb-2">Ready to Upgrade Your PCI Analysis?</h3>
               <p className="text-amber-700 dark:text-amber-300 mb-4">
-                Get precise pavement condition data with our satellite or driving scan methods. 
+                Get precise pavement condition data with our satellite or driving scan methods.
                 Perfect for data-driven maintenance planning and budget optimization.
               </p>
-              <Button 
-                onClick={handleUpgrade}
-                className="bg-amber-600 hover:bg-amber-700 text-white"
-                title="See pricing and included features"
-              >
-                <Crown className="w-4 h-4 mr-2" />
-                View Pricing & Features
-              </Button>
+              <p className="text-amber-600 dark:text-amber-400 mb-6 text-sm">
+                You can also purchase the software plans without PCI rating tools — click below to explore plan options.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  onClick={handleUpgrade}
+                  className="bg-amber-600 hover:bg-amber-700 text-white"
+                  title="Contact us for custom quote and consultation"
+                >
+                  <Crown className="w-4 h-4 mr-2" />
+                  Contact Us
+                </Button>
+                <Button
+                  onClick={handleUpgrade}
+                  variant="outline"
+                  className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                  title="See pricing and included features"
+                >
+                  View Pricing & Features
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>
