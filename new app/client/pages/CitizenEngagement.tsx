@@ -164,6 +164,8 @@ export default function CitizenEngagement() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionCount, setSubmissionCount] = useState(3); // Current month submissions
+  const [submissions, setSubmissions] = useState(recentSubmissions);
+  const [hiddenReports, setHiddenReports] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { currentPlan } = usePricing();
 
