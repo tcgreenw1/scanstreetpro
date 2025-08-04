@@ -104,7 +104,7 @@ export default function Pricing() {
   });
 
   const plans = getAllPlans();
-  const planOrder: PlanType[] = ['free', 'standard', 'pro', 'enterprise'];
+  const planOrder: PlanType[] = ['free', 'basic', 'pro', 'premium', 'satellite', 'driving'];
 
   const getPrice = (plan: PlanType) => {
     const basePrice = plans[plan].price;
@@ -141,31 +141,24 @@ export default function Pricing() {
           From small towns to large cities, we have a plan that fits your infrastructure management needs.
           Start free and scale as you grow.
         </p>
-        
-        {/* Billing Toggle */}
-        <div className="flex items-center justify-center space-x-4 mb-8">
-          <span className={cn("text-sm font-medium", billingPeriod === 'monthly' ? 'text-slate-800 dark:text-white' : 'text-slate-500')}>
-            Monthly
-          </span>
-          <Switch
-            checked={billingPeriod === 'annual'}
-            onCheckedChange={(checked) => setBillingPeriod(checked ? 'annual' : 'monthly')}
-          />
-          <span className={cn("text-sm font-medium", billingPeriod === 'annual' ? 'text-slate-800 dark:text-white' : 'text-slate-500')}>
-            Annual
-          </span>
-          <Badge className="bg-green-100 text-green-800 border-green-200">Save 20%</Badge>
+
+        {/* Billing Notice */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 max-w-md mx-auto mb-8">
+          <p className="text-blue-800 dark:text-blue-200 font-medium">
+            All plans billed annually – contact us for monthly pricing.
+          </p>
         </div>
       </div>
 
       {/* Pricing Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {planOrder.map((planKey) => {
-          const plan = plans[planKey];
-          const price = getPrice(planKey);
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        {/* Core Plans */}
+        {planOrder.slice(0, 4).map((planKey) => {
+          const plan = plans[planKey] || getPlanInfo(planKey);
+          const price = getPlanPrice(planKey);
           const isCurrentPlan = currentPlan === planKey;
-          const isPopular = plan.popular;
-          
+          const isPopular = planKey === 'pro';
+
           return (
             <Card 
               key={planKey}
