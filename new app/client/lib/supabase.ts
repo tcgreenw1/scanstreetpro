@@ -1025,6 +1025,12 @@ export const signUpWithTimeout = async (email: string, password: string) => {
   try {
     console.log('📝 Attempting sign up for:', email);
 
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error('Please enter a valid email address.');
+    }
+
     const result = await withTimeout(
       supabase.auth.signUp({ email, password }),
       15000,
