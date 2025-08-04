@@ -61,7 +61,7 @@ const Login = () => {
 
     try {
       if (isSignUp) {
-        const result = await signInWithTimeout(email, password);
+        const result = await signUpWithTimeout(email, password);
         if (result.error) throw result.error;
         setError('✅ Check your email for verification link!');
       } else {
