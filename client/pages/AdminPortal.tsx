@@ -427,15 +427,11 @@ export default function AdminPortal() {
     }
 
     try {
-      const { error } = await supabase
-        .from('organizations')
-        .insert({
-          name: newOrgForm.name,
-          slug: newOrgForm.slug,
-          plan: newOrgForm.plan
-        });
+      // Mock organization creation
+      console.log('Creating organization:', newOrgForm);
 
-      if (error) throw error;
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Reset form and reload data
       setNewOrgForm({
