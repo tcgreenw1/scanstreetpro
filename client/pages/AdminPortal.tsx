@@ -597,8 +597,8 @@ const AdminPortal = () => {
                   <TableRow key={org.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{org.name}</div>
-                        <div className="text-sm text-gray-500">{org.slug}</div>
+                        <div className="font-medium">{org.name || 'Unnamed Organization'}</div>
+                        <div className="text-sm text-gray-500">{org.slug || 'no-slug'}</div>
                       </div>
                     </TableCell>
                     <TableCell>
