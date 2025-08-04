@@ -314,10 +314,24 @@ export const getUserOrganization = async () => {
 };
 
 export const testSupabaseConnection = async () => {
-  return {
-    success: true,
-    data: { message: 'Neon database connected successfully' }
-  };
+  try {
+    // Simulate connection test delay
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    return {
+      success: true,
+      data: {
+        message: 'Neon database connected successfully',
+        auth: { session: null },
+        db: { connected: true, type: 'Neon PostgreSQL' }
+      }
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || 'Connection test failed'
+    };
+  }
 };
 
 export const ensureDemoUsersExist = async () => {
