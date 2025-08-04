@@ -85,15 +85,77 @@ const pciMethodComparison = [
   }
 ];
 
-const quickStats = [
-  { label: 'Sample Roads Scanned', value: 12, icon: MapPin, color: 'text-blue-600', trend: 'stable' },
-  { label: 'Average PCI Score', value: 72, icon: BarChart3, color: 'text-green-600', trend: 'up' },
-  { label: 'Critical Issues', value: 3, icon: AlertCircle, color: 'text-red-600', trend: 'down' },
-  { label: 'Est. Repair Cost', value: '$125K', icon: DollarSign, color: 'text-orange-600', trend: 'stable' }
-];
-
 export default function Dashboard() {
   const { currentPlan } = usePricing();
+  const { organization, planFeatures } = useOrganization();
+  const { shouldShowUpgrade, isFeatureUnlocked } = usePermissions();
+
+  const [dashboardMetrics, setDashboardMetrics] = useState({
+    totalAssets: 0,
+    avgPCI: 0,
+    criticalAssets: 0,
+    totalBudget: 0,
+    monthlyExpenses: 0,
+    upcomingInspections: 0,
+    activeProjects: 0,
+    teamMembers: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load dashboard metrics from database
+  useEffect(() => {
+    const loadMetrics = async () => {
+      if (!organization) return;
+
+      try {
+        setIsLoading(true);
+        const metrics = await neonService.getDashboardMetrics(organization.id);
+        setDashboardMetrics(metrics);
+      } catch (error) {
+        console.error('Failed to load dashboard metrics:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadMetrics();
+  }, [organization]);
+
+  // Generate dynamic stats based on plan and real data
+  const quickStats = [
+    {
+      label: planFeatures?.sampleDataOnly ? 'Sample Roads' : 'Total Assets',
+      value: isLoading ? '...' : dashboardMetrics.totalAssets,
+      icon: MapPin,
+      color: 'text-blue-600',
+      trend: 'stable',
+      locked: false
+    },
+    {
+      label: 'Average PCI Score',
+      value: isLoading ? '...' : Math.round(dashboardMetrics.avgPCI),
+      icon: BarChart3,
+      color: 'text-green-600',
+      trend: 'up',
+      locked: false
+    },
+    {
+      label: 'Critical Issues',
+      value: isLoading ? '...' : dashboardMetrics.criticalAssets,
+      icon: AlertCircle,
+      color: 'text-red-600',
+      trend: 'down',
+      locked: !isFeatureUnlocked('assetManagement')
+    },
+    {
+      label: 'Monthly Budget',
+      value: isLoading ? '...' : `$${Math.round(dashboardMetrics.monthlyExpenses / 1000)}K`,
+      icon: DollarSign,
+      color: 'text-orange-600',
+      trend: 'stable',
+      locked: !planFeatures?.budgetSimulations
+    }
+  ];
 
   const handleUpgrade = () => {
     window.location.href = '/pricing';
