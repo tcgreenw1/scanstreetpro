@@ -71,6 +71,21 @@ const authenticateAdmin = (req: Request, res: Response, next: any) => {
 // GET /api/admin/stats - Get admin dashboard stats
 router.get('/stats', authenticateAdmin, async (req: Request, res: Response<ApiResponse>) => {
   try {
+    // Check if database is available before proceeding
+    if (process.env.DISABLE_DB === 'true') {
+      return res.json({
+        success: true,
+        data: {
+          totalOrganizations: 0,
+          totalUsers: 0,
+          monthlyRevenue: 0,
+          totalRevenue: 0,
+          totalTransactions: 0,
+          planDistribution: { free: 0, basic: 0, pro: 0, premium: 0 }
+        }
+      });
+    }
+
     const pool = getPool();
     
     // Get total organizations
