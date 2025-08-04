@@ -868,8 +868,12 @@ export const ensureDemoUsersExist = async () => {
           if (dbError.message.includes('duplicate') || dbError.code === '23505') {
             console.log(`ℹ️ User ${demoUser.email} already exists in database`);
           } else if (dbError.message.includes('foreign key constraint') || dbError.code === '23503') {
-            console.error(`❌ Foreign key violation for ${demoUser.email}: Auth user ${userId} not found in auth.users`);
-            console.warn('⚠️ Cannot cleanup orphaned auth user with client API');
+            console.error(`❌ Persistent foreign key violation for ${demoUser.email}: Auth user ${userId} not found in auth.users table`);
+            console.error(`This typically means:`);
+            console.error(`1. User was created but requires email confirmation`);
+            console.error(`2. There's a delay in auth user propagation`);
+            console.error(`3. Supabase RLS policies may be blocking the reference`);
+            console.warn('⚠️ User exists in auth but cannot be referenced in database - may need admin intervention');
           } else {
             console.error(`Failed to create db user ${demoUser.email}:`, errorMessage);
           }
