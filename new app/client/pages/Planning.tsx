@@ -453,8 +453,16 @@ export default function Planning() {
           {/* Budget Goals */}
           <Card className="glass-card border-white/20">
             <CardHeader>
-              <CardTitle className="text-slate-800 dark:text-white">Capital Improvement Goals</CardTitle>
-              <CardDescription>Track progress toward major infrastructure investments</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-slate-800 dark:text-white">Capital Improvement Goals</CardTitle>
+                  <CardDescription>Track progress toward major infrastructure investments</CardDescription>
+                </div>
+                <Button onClick={() => setIsAddingGoal(true)} className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Goal
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
