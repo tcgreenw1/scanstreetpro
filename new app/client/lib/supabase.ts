@@ -774,41 +774,21 @@ export const ensureDemoUsersExist = async () => {
           }
         });
 
-        for (const method of authMethods) {
-          try {
-            const result = await method();
-
-            if (!result.error && result.data?.user) {
-              authData = result.data;
-              authSuccess = true;
-              console.log(`✅ Auth user created successfully for ${demoUser.email}`);
-              break;
-            } else if (result.error && result.error.message.includes('User already registered')) {
-              console.log(`ℹ️ User ${demoUser.email} already exists in auth`);
-              // Try to get the existing user
-              try {
-                const { data: existingUser } = await supabase.auth.admin.listUsers();
-                const foundUser = existingUser.users.find(u => u.email === demoUser.email);
-                if (foundUser) {
-                  authData = { user: foundUser };
-                  authSuccess = true;
-                  break;
-                }
-              } catch (listError) {
-                console.warn('Cannot list users to find existing user');
-              }
-            } else if (result.error) {
-              const errorMessage = getErrorMessage(result.error);
-              console.warn(`Auth method failed for ${demoUser.email}:`, errorMessage);
-            }
-          } catch (methodError: any) {
-            const errorMessage = getErrorMessage(methodError);
-            console.warn(`Auth method exception for ${demoUser.email}:`, errorMessage);
-          }
-        }
-
-        if (!authSuccess) {
-          console.error(`❌ All auth creation methods failed for ${demoUser.email}`);
+        if (!authResult.error && authResult.data?.user) {
+          authData = authResult.data;
+          authSuccess = true;
+          console.log(`✅ Auth user created successfully for ${demoUser.email}`);
+        } else if (authResult.error && authResult.error.message.includes('User already registered')) {
+          console.log(`ℹ️ User ${demoUser.email} already exists in auth`);
+          // For existing users, we'll create the database entry if it doesn't exist
+          authSuccess = true;
+          authData = { user: { id: 'existing-user', email: demoUser.email } };
+        } else if (authResult.error) {
+          const errorMessage = getErrorMessage(authResult.error);
+          console.error(`❌ Auth creation failed for ${demoUser.email}:`, errorMessage);
+          continue;
+        } else {
+          console.error(`❌ Unknown auth result for ${demoUser.email}`);
           continue;
         }
 
