@@ -123,13 +123,65 @@ export default function Pricing() {
     return plan.price;
   };
 
-  const handleUpgrade = (plan: PlanType) => {
-    if (plan === 'enterprise') {
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'ach' | 'invoice'>('card');
+
+  const handleUpgrade = async (plan: PlanType) => {
+    if (plan === 'satellite' || plan === 'driving') {
       setShowContactForm(true);
-    } else {
+      return;
+    }
+
+    if (plan === 'free') {
       upgradePlan(plan);
-      // In a real app, this would integrate with Stripe
-      alert(`Upgrading to ${plans[plan].name} plan for $${getPrice(plan)}/${billingPeriod === 'annual' ? 'year' : 'month'}`);
+      alert('Downgraded to Free plan successfully!');
+      return;
+    }
+
+    // Simulate Stripe payment processing
+    setIsProcessingPayment(true);
+
+    try {
+      // In a real implementation, this would call Stripe API
+      const mockStripeSession = {
+        id: 'cs_' + Math.random().toString(36).substring(2, 15),
+        amount: getPrice(plan) * (billingPeriod === 'annual' ? 12 : 1) * 100, // Convert to cents
+        currency: 'usd',
+        customer_email: 'user@example.com',
+        line_items: [{
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `${plans[plan].name} Plan`,
+              description: plans[plan].description
+            },
+            unit_amount: getPrice(plan) * 100,
+            recurring: {
+              interval: billingPeriod === 'annual' ? 'year' : 'month'
+            }
+          },
+          quantity: 1
+        }],
+        mode: 'subscription',
+        success_url: window.location.origin + '/pricing?success=true',
+        cancel_url: window.location.origin + '/pricing?canceled=true'
+      };
+
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Mock successful payment
+      upgradePlan(plan);
+      alert(`Payment successful! Welcome to ${plans[plan].name} plan! 🎉\\n\\nSession ID: ${mockStripeSession.id}\\nAmount: $${(mockStripeSession.amount / 100).toFixed(2)}\\n\\nIn a real app, this would redirect to Stripe Checkout.`);
+
+      // In a real app, you would redirect to Stripe Checkout:
+      // window.location.href = stripeSession.url;
+
+    } catch (error) {
+      console.error('Payment failed:', error);
+      alert('Payment failed. Please try again or contact support.');
+    } finally {
+      setIsProcessingPayment(false);
     }
   };
 
