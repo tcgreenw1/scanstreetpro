@@ -114,6 +114,7 @@ const App = () => (
                     {/* Admin Only Routes */}
                     <Route path="/admin-portal" element={<AdminPortal />} />
                     <Route path="/admin/organizations" element={<AdminOrganizations />} />
+                    <Route path="/admin/users" element={<AdminUsers />} />
 
                     {/* Infrastructure Management */}
                     <Route path="/assets" element={<AssetManager />} />
