@@ -234,18 +234,18 @@ export function PricingProvider({ children }: PricingProviderProps) {
   const getUpgradePrompt = (feature: keyof PlanFeatures): string => {
     if (currentPlan === 'free') {
       if (features[feature]) return '';
-      if (PLAN_CONFIGS.standard.features[feature]) return 'Upgrade to Standard to access this feature';
+      if (PLAN_CONFIGS.basic.features[feature]) return 'Upgrade to Basic to access this feature';
       if (PLAN_CONFIGS.pro.features[feature]) return 'Upgrade to Pro to access this feature';
-      return 'Upgrade to Enterprise to access this feature';
+      return 'Upgrade to Premium to access this feature';
     }
-    if (currentPlan === 'standard') {
+    if (currentPlan === 'basic') {
       if (features[feature]) return '';
       if (PLAN_CONFIGS.pro.features[feature]) return 'Upgrade to Pro to access this feature';
-      return 'Upgrade to Enterprise to access this feature';
+      return 'Upgrade to Premium to access this feature';
     }
     if (currentPlan === 'pro') {
       if (features[feature]) return '';
-      return 'Upgrade to Enterprise to access this feature';
+      return 'Upgrade to Premium to access this feature';
     }
     return '';
   };
