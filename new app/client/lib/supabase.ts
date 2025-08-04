@@ -15,7 +15,7 @@ console.log('🔧 Supabase Configuration:', {
 });
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('��� Supabase configuration missing! Check environment variables.');
+  console.error('����� Supabase configuration missing! Check environment variables.');
 } else if (!supabaseUrl.includes('supabase.co')) {
   console.error('❌ Invalid Supabase URL format! Should be https://xxx.supabase.co');
 } else if (!supabaseAnonKey.startsWith('eyJ')) {
@@ -345,7 +345,7 @@ export const getUserOrganization = async () => {
 
       // If no user found, return null gracefully
       if (!data) {
-        console.warn('⚠️ User not found in database:', user.id);
+        console.warn('���️ User not found in database:', user.id);
         return null;
       }
 
@@ -785,11 +785,44 @@ export const ensureDemoUsersExist = async () => {
           continue;
         }
 
-        // Skip admin API verification since it's not available in client context
-        console.log(`📝 Proceeding to create database user for ${demoUser.email} with ID: ${userId}`);
+        console.log(`📝 Auth user created for ${demoUser.email} with ID: ${userId}`);
 
-        // Small delay to ensure auth user is fully propagated
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Validate auth user exists by checking current session after signup
+        let userValidated = false;
+
+        if (authData.session) {
+          console.log(`✅ Auth user has active session, proceeding with database creation`);
+          userValidated = true;
+        } else {
+          console.log(`⚠️ Auth user created but no session - may need email confirmation`);
+          // For demo users, try to sign them in to validate they exist
+          try {
+            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+              email: demoUser.email,
+              password: demoUser.password
+            });
+
+            if (!signInError && signInData.user) {
+              console.log(`✅ Auth user validated via sign-in for ${demoUser.email}`);
+              userValidated = true;
+              // Sign out to not affect current session
+              await supabase.auth.signOut();
+            } else {
+              console.error(`❌ Cannot validate auth user for ${demoUser.email}:`, getErrorMessage(signInError));
+            }
+          } catch (validationError) {
+            console.error(`❌ Error validating auth user for ${demoUser.email}:`, getErrorMessage(validationError));
+          }
+        }
+
+        if (!userValidated) {
+          console.error(`❌ Auth user validation failed for ${demoUser.email}, skipping database creation`);
+          continue;
+        }
+
+        // Wait longer to ensure auth user is fully propagated in the system
+        console.log(`⏳ Waiting for auth user propagation...`);
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
         // Create in database
         const { error: dbError } = await supabase
