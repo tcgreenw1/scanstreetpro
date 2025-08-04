@@ -105,20 +105,22 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8">
         {/* Logo/Brand */}
         <div className="text-center">
           <div className="inline-flex items-center space-x-3 mb-6">
-            <Building2 className="w-8 h-8 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">Scan Street Pro</h1>
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg backdrop-blur-xl">
+              <Building2 className="w-7 h-7 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Scan Street Pro</h1>
           </div>
-          <p className="text-gray-600">Municipal Infrastructure Management</p>
+          <p className="text-slate-500 font-medium">Municipal Infrastructure Management</p>
         </div>
 
-        {/* Main Login Card */}
-        <div className="bg-white rounded-lg shadow-lg border border-gray-200">
-          <div className="p-6 space-y-4">
+        {/* Main Login Card - Apple Glass Style */}
+        <div className="glass-card border-white/20 backdrop-blur-xl bg-white/80 shadow-2xl rounded-3xl border border-slate-200/50">
+          <div className="p-8 space-y-6">
             <div className="text-center">
               <h2 className="text-xl font-semibold text-gray-900">
                 {isSignUp ? 'Create Account' : 'Sign In'}
