@@ -53,6 +53,9 @@ export function createServer() {
   app.use("/api/migrate", migrateRoutes);
   app.use("/api/export", exportRoutes);
 
+  // Always enable mock routes as fallback
+  app.use("/api/mock", mockRoutes);
+
   // Database routes
   app.post("/api/db/query", protectedQueryDatabase);
   app.get("/api/db/test", testConnection);
