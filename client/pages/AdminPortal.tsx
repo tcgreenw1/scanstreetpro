@@ -787,8 +787,8 @@ const AdminPortal = () => {
                   <TableRow key={user.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{user.name}</div>
-                        <div className="text-sm text-gray-500">{user.email}</div>
+                        <div className="font-medium">{user.name || 'Unnamed User'}</div>
+                        <div className="text-sm text-gray-500">{user.email || 'No email'}</div>
                       </div>
                     </TableCell>
                     <TableCell>
