@@ -232,13 +232,13 @@ export default function Dashboard() {
                     </Button>
                   </Link>
                 ) : (
-                  <Button 
+                  <Button
                     onClick={handleUpgrade}
                     className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 group-hover:scale-105 transition-all duration-200"
-                    title="See pricing and included features"
+                    title="Contact us to get a custom quote"
                   >
                     <Crown className="w-4 h-4 mr-2" />
-                    Upgrade Required
+                    Contact Us for Quote
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 )}
