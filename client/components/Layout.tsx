@@ -184,6 +184,7 @@ export function Layout({ children }: LayoutProps) {
             onClose={() => setIsSidebarOpen(false)}
             isDarkMode={isDarkMode}
             toggleTheme={toggleTheme}
+            user={user}
           />
         </SheetContent>
       </Sheet>
