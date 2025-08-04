@@ -122,13 +122,13 @@ const Login = () => {
         <div className="glass-card border-white/20 backdrop-blur-xl bg-white/80 shadow-2xl rounded-3xl border border-slate-200/50">
           <div className="p-8 space-y-6">
             <div className="text-center">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {isSignUp ? 'Create Account' : 'Sign In'}
+              <h2 className="text-2xl font-bold text-slate-800">
+                {isSignUp ? 'Create Account' : 'Welcome Back'}
               </h2>
-              <p className="text-gray-600 text-sm mt-1">
+              <p className="text-slate-500 mt-2">
                 {isSignUp
-                  ? 'Create your account to get started'
-                  : 'Access your infrastructure dashboard'
+                  ? 'Join the future of infrastructure management'
+                  : 'Sign in to your infrastructure dashboard'
                 }
               </p>
             </div>
