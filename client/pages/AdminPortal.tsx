@@ -1,733 +1,582 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Shield,
-  Users,
-  Building,
-  Database,
-  Settings,
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  Download,
-  Upload,
-  BarChart3,
-  Crown,
-  CheckCircle,
-  AlertTriangle,
-  TrendingUp,
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { toast } from '@/hooks/use-toast';
+import { 
+  Building2, 
+  Users, 
+  CreditCard, 
+  BarChart3, 
+  Download, 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Crown, 
+  Activity,
   DollarSign,
-  ExternalLink,
-  UserPlus,
-  Building2,
-  CreditCard,
-  Calendar,
+  TrendingUp,
   FileText,
-  Wallet,
-  LineChart
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
+  Search,
+  Filter,
+  MoreHorizontal,
+  Eye,
+  Mail,
+  Shield,
+  UserPlus,
+  ArrowUpRight
+} from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface Organization {
   id: string;
   name: string;
-  slug?: string;
+  slug: string;
   plan: 'free' | 'basic' | 'pro' | 'premium';
-  settings?: any;
   created_at: string;
-  updated_at?: string;
   user_count: number;
+  monthly_revenue: number;
+  status: 'active' | 'suspended' | 'trial';
 }
 
 interface User {
   id: string;
-  organization_id: string;
   email: string;
   name: string;
   role: 'admin' | 'manager' | 'member';
-  phone: string | null;
+  organization_id: string;
+  organization_name: string;
+  plan: string;
+  last_login: string;
   is_active: boolean;
-  last_login: string | null;
   created_at: string;
-  organization?: Organization;
 }
 
 interface Transaction {
   id: string;
-  organization_id: string;
-  amount: number;
-  currency: string;
-  type: 'payment' | 'refund' | 'upgrade' | 'downgrade';
-  status: 'pending' | 'completed' | 'failed' | 'canceled';
-  description: string;
-  created_at: string;
-  completed_at: string | null;
   organization_name: string;
-  organization_plan: string;
+  type: 'payment' | 'refund' | 'upgrade' | 'downgrade';
+  amount: number;
+  status: 'completed' | 'pending' | 'failed';
+  plan: string;
+  created_at: string;
 }
 
-interface AdminStats {
+interface DashboardStats {
   totalOrganizations: number;
   totalUsers: number;
   monthlyRevenue: number;
   totalRevenue: number;
-  totalTransactions: number;
-  planDistribution: Record<string, number>;
+  planDistribution: { free: number; basic: number; pro: number; premium: number };
+  recentSignups: number;
+  activeTrials: number;
 }
 
-interface RevenueAnalytics {
-  monthlyTrend: Array<{
-    month: string;
-    revenue: number;
-    transactions: number;
-  }>;
-  planRevenue: Array<{
-    plan: string;
-    revenue: number;
-    transactions: number;
-  }>;
-  topCustomers: Array<{
-    name: string;
-    plan: string;
-    revenue: number;
-    transactions: number;
-  }>;
-}
-
-interface SystemSetting {
-  id: number;
-  key: string;
-  value: string;
-  description: string;
-  updated_at: string;
-}
-
-export default function AdminPortal() {
+const AdminPortal = () => {
   const { user } = useAuth();
-  const [selectedTab, setSelectedTab] = useState('overview');
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [stats, setStats] = useState<AdminStats | null>(null);
-  const [revenueAnalytics, setRevenueAnalytics] = useState<RevenueAnalytics | null>(null);
-  const [settings, setSettings] = useState<SystemSetting[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+
+  // Modal states
+  const [showCreateOrgModal, setShowCreateOrgModal] = useState(false);
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [showEditOrgModal, setShowEditOrgModal] = useState(false);
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
+  
+  // Selected items for editing
+  const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   // Form states
-  const [newUserForm, setNewUserForm] = useState({
-    email: '',
-    password: '',
-    name: '',
-    organization_id: '',
-    role: 'member' as const,
-    phone: ''
-  });
+  const [orgForm, setOrgForm] = useState({ name: '', plan: 'free' as const });
+  const [userForm, setUserForm] = useState({ email: '', name: '', role: 'member' as const, organizationId: '' });
 
-  const [newOrgForm, setNewOrgForm] = useState({
-    name: '',
-    plan: 'free' as const
-  });
+  // Filters
+  const [orgFilter, setOrgFilter] = useState('all');
+  const [userFilter, setUserFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const [newTransactionForm, setNewTransactionForm] = useState({
-    organization_id: '',
-    amount: '',
-    type: 'payment' as const,
-    description: ''
-  });
-
-  const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [editingSetting, setEditingSetting] = useState<SystemSetting | null>(null);
-
-  // Get auth token for API calls
-  const getAuthToken = () => {
-    return localStorage.getItem('neon_auth_token');
-  };
-
-  // API call helper
-  const apiCall = async (endpoint: string, options: RequestInit = {}) => {
-    const token = getAuthToken();
-    const response = await fetch(endpoint, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        ...options.headers
-      }
-    });
-
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.error || `HTTP ${response.status}`);
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      loadDashboardData();
     }
-    
-    return data;
-  };
+  }, [user]);
 
-  // Show success message
-  const showSuccess = (message: string) => {
-    setSuccessMessage(message);
-    setTimeout(() => setSuccessMessage(''), 3000);
-  };
-
-  // Load admin stats
-  const loadStats = async () => {
+  const loadDashboardData = async () => {
+    setLoading(true);
     try {
-      const result = await apiCall('/api/admin/stats');
-      setStats(result.data);
-    } catch (error: any) {
-      console.error('Failed to load stats:', error);
-      setError(error.message);
+      // Load all data in parallel
+      const [statsRes, orgsRes, usersRes, transactionsRes] = await Promise.all([
+        fetch('/api/admin/stats'),
+        fetch('/api/admin/organizations'),
+        fetch('/api/admin/users'),
+        fetch('/api/admin/transactions')
+      ]);
+
+      const [statsData, orgsData, usersData, transactionsData] = await Promise.all([
+        statsRes.json(),
+        orgsRes.json(),
+        usersRes.json(),
+        transactionsRes.json()
+      ]);
+
+      if (statsData.success) setStats(statsData.data);
+      if (orgsData.success) setOrganizations(orgsData.data);
+      if (usersData.success) setUsers(usersData.data);
+      if (transactionsData.success) setTransactions(transactionsData.data.transactions || []);
+
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error);
+      toast({ title: "Error", description: "Failed to load dashboard data", variant: "destructive" });
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Load organizations
-  const loadOrganizations = async () => {
-    try {
-      const result = await apiCall('/api/admin/organizations');
-      setOrganizations(result.data);
-    } catch (error: any) {
-      console.error('Failed to load organizations:', error);
-      setError(error.message);
-    }
-  };
-
-  // Load users
-  const loadUsers = async () => {
-    try {
-      const result = await apiCall('/api/admin/users');
-      setUsers(result.data);
-    } catch (error: any) {
-      console.error('Failed to load users:', error);
-      setError(error.message);
-    }
-  };
-
-  // Load transactions
-  const loadTransactions = async () => {
-    try {
-      const result = await apiCall('/api/admin/transactions?limit=100');
-      setTransactions(result.data.transactions);
-    } catch (error: any) {
-      console.error('Failed to load transactions:', error);
-      setError(error.message);
-    }
-  };
-
-  // Load revenue analytics
-  const loadRevenueAnalytics = async () => {
-    try {
-      const result = await apiCall('/api/admin/revenue-analytics');
-      setRevenueAnalytics(result.data);
-    } catch (error: any) {
-      console.error('Failed to load revenue analytics:', error);
-      setError(error.message);
-    }
-  };
-
-  // Load settings
-  const loadSettings = async () => {
-    try {
-      const result = await apiCall('/api/admin/settings');
-      setSettings(result.data);
-    } catch (error: any) {
-      console.error('Failed to load settings:', error);
-      setError(error.message);
-    }
-  };
-
-  // Create organization
   const createOrganization = async () => {
     try {
-      if (!newOrgForm.name) {
-        setError('Organization name is required');
-        return;
-      }
-
-      await apiCall('/api/admin/organizations', {
+      const response = await fetch('/api/admin/organizations', {
         method: 'POST',
-        body: JSON.stringify(newOrgForm)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orgForm)
       });
+
+      const result = await response.json();
       
-      setNewOrgForm({ name: '', plan: 'free' });
-      await loadOrganizations();
-      await loadStats();
-      showSuccess('Organization created successfully');
-    } catch (error: any) {
-      console.error('Failed to create organization:', error);
-      setError(error.message);
+      if (result.success) {
+        toast({ title: "Success", description: "Organization created successfully" });
+        setShowCreateOrgModal(false);
+        setOrgForm({ name: '', plan: 'free' });
+        loadDashboardData();
+      } else {
+        toast({ title: "Error", description: result.error, variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to create organization", variant: "destructive" });
     }
   };
 
-  // Update organization
-  const updateOrganization = async (orgId: string, updates: Partial<Organization>) => {
+  const updateOrganization = async () => {
+    if (!selectedOrg) return;
+    
     try {
-      await apiCall(`/api/admin/organizations/${orgId}`, {
+      const response = await fetch(`/api/admin/organizations/${selectedOrg.id}`, {
         method: 'PUT',
-        body: JSON.stringify(updates)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orgForm)
       });
-      await loadOrganizations();
-      await loadStats();
-      setEditingOrg(null);
-      showSuccess('Organization updated successfully');
-    } catch (error: any) {
-      console.error('Failed to update organization:', error);
-      setError(error.message);
+
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({ title: "Success", description: "Organization updated successfully" });
+        setShowEditOrgModal(false);
+        setSelectedOrg(null);
+        setOrgForm({ name: '', plan: 'free' });
+        loadDashboardData();
+      } else {
+        toast({ title: "Error", description: result.error, variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update organization", variant: "destructive" });
     }
   };
 
-  // Update organization plan
-  const updateOrganizationPlan = async (orgId: string, plan: string) => {
-    try {
-      await apiCall(`/api/admin/organizations/${orgId}/plan`, {
-        method: 'PUT',
-        body: JSON.stringify({ plan })
-      });
-      await loadOrganizations();
-      await loadStats();
-      showSuccess('Organization plan updated successfully');
-    } catch (error: any) {
-      console.error('Failed to update organization plan:', error);
-      setError(error.message);
-    }
-  };
-
-  // Delete organization
   const deleteOrganization = async (orgId: string) => {
     try {
-      await apiCall(`/api/admin/organizations/${orgId}`, {
+      const response = await fetch(`/api/admin/organizations/${orgId}`, {
         method: 'DELETE'
       });
-      await loadOrganizations();
-      await loadUsers();
-      await loadStats();
-      showSuccess('Organization deleted successfully');
-    } catch (error: any) {
-      console.error('Failed to delete organization:', error);
-      setError(error.message);
+
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({ title: "Success", description: "Organization deleted successfully" });
+        loadDashboardData();
+      } else {
+        toast({ title: "Error", description: result.error, variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to delete organization", variant: "destructive" });
     }
   };
 
-  // Create user
   const createUser = async () => {
     try {
-      if (!newUserForm.email || !newUserForm.password || !newUserForm.organization_id) {
-        setError('Email, password, and organization are required');
-        return;
-      }
-
-      await apiCall('/api/admin/users', {
+      const response = await fetch('/api/admin/users', {
         method: 'POST',
-        body: JSON.stringify(newUserForm)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userForm)
       });
+
+      const result = await response.json();
       
-      setNewUserForm({
-        email: '',
-        password: '',
-        name: '',
-        organization_id: '',
-        role: 'member',
-        phone: ''
+      if (result.success) {
+        toast({ title: "Success", description: "User created successfully" });
+        setShowCreateUserModal(false);
+        setUserForm({ email: '', name: '', role: 'member', organizationId: '' });
+        loadDashboardData();
+      } else {
+        toast({ title: "Error", description: result.error, variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to create user", variant: "destructive" });
+    }
+  };
+
+  const updateUser = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      const response = await fetch(`/api/admin/users/${selectedUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userForm)
       });
+
+      const result = await response.json();
       
-      await loadUsers();
-      await loadStats();
-      showSuccess('User created successfully');
-    } catch (error: any) {
-      console.error('Failed to create user:', error);
-      setError(error.message);
+      if (result.success) {
+        toast({ title: "Success", description: "User updated successfully" });
+        setShowEditUserModal(false);
+        setSelectedUser(null);
+        setUserForm({ email: '', name: '', role: 'member', organizationId: '' });
+        loadDashboardData();
+      } else {
+        toast({ title: "Error", description: result.error, variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update user", variant: "destructive" });
     }
   };
 
-  // Update user
-  const updateUser = async (userId: string, updates: Partial<User>) => {
-    try {
-      await apiCall(`/api/admin/users/${userId}`, {
-        method: 'PUT',
-        body: JSON.stringify(updates)
-      });
-      await loadUsers();
-      setEditingUser(null);
-      showSuccess('User updated successfully');
-    } catch (error: any) {
-      console.error('Failed to update user:', error);
-      setError(error.message);
-    }
-  };
-
-  // Update user role
-  const updateUserRole = async (userId: string, role: string) => {
-    try {
-      await apiCall(`/api/admin/users/${userId}/role`, {
-        method: 'PUT',
-        body: JSON.stringify({ role })
-      });
-      await loadUsers();
-      showSuccess('User role updated successfully');
-    } catch (error: any) {
-      console.error('Failed to update user role:', error);
-      setError(error.message);
-    }
-  };
-
-  // Delete user
   const deleteUser = async (userId: string) => {
     try {
-      await apiCall(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/admin/users/${userId}`, {
         method: 'DELETE'
       });
-      await loadUsers();
-      await loadStats();
-      showSuccess('User deleted successfully');
-    } catch (error: any) {
-      console.error('Failed to delete user:', error);
-      setError(error.message);
+
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({ title: "Success", description: "User deleted successfully" });
+        loadDashboardData();
+      } else {
+        toast({ title: "Error", description: result.error, variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to delete user", variant: "destructive" });
     }
   };
 
-  // Create transaction
-  const createTransaction = async () => {
+  const upgradePlan = async (orgId: string, newPlan: string) => {
     try {
-      if (!newTransactionForm.organization_id || !newTransactionForm.amount) {
-        setError('Organization and amount are required');
-        return;
-      }
-
-      await apiCall('/api/admin/transactions', {
+      const response = await fetch(`/api/admin/organizations/${orgId}/upgrade`, {
         method: 'POST',
-        body: JSON.stringify({
-          ...newTransactionForm,
-          amount: parseFloat(newTransactionForm.amount)
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: newPlan })
       });
-      
-      setNewTransactionForm({
-        organization_id: '',
-        amount: '',
-        type: 'payment',
-        description: ''
-      });
-      
-      await loadTransactions();
-      await loadStats();
-      await loadRevenueAnalytics();
-      showSuccess('Transaction created successfully');
-    } catch (error: any) {
-      console.error('Failed to create transaction:', error);
-      setError(error.message);
-    }
-  };
 
-  // Update setting
-  const updateSetting = async (key: string, value: string) => {
-    try {
-      await apiCall(`/api/admin/settings/${key}`, {
-        method: 'PUT',
-        body: JSON.stringify({ value })
-      });
-      await loadSettings();
-      setEditingSetting(null);
-      showSuccess('Setting updated successfully');
-    } catch (error: any) {
-      console.error('Failed to update setting:', error);
-      setError(error.message);
-    }
-  };
-
-  // Load all data on component mount
-  useEffect(() => {
-    const initializeAdminPortal = async () => {
-      try {
-        setLoading(true);
-        await Promise.all([
-          loadStats(),
-          loadOrganizations(),
-          loadUsers(),
-          loadTransactions(),
-          loadRevenueAnalytics(),
-          loadSettings()
-        ]);
-      } catch (error: any) {
-        console.error('Failed to initialize admin portal:', error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({ title: "Success", description: `Plan upgraded to ${newPlan}` });
+        loadDashboardData();
+      } else {
+        toast({ title: "Error", description: result.error, variant: "destructive" });
       }
-    };
-
-    initializeAdminPortal();
-  }, []);
-
-  // Clear messages
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => setError(''), 5000);
-      return () => clearTimeout(timer);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to upgrade plan", variant: "destructive" });
     }
-  }, [error]);
+  };
+
+  const exportData = async (type: 'organizations' | 'users' | 'transactions') => {
+    try {
+      const response = await fetch(`/api/export/${type}`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `${type}-export.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      toast({ title: "Success", description: `${type} data exported successfully` });
+    } catch (error) {
+      toast({ title: "Error", description: "Export failed", variant: "destructive" });
+    }
+  };
 
   const getPlanBadgeColor = (plan: string) => {
     switch (plan) {
       case 'free': return 'bg-gray-100 text-gray-800';
       case 'basic': return 'bg-blue-100 text-blue-800';
       case 'pro': return 'bg-purple-100 text-purple-800';
-      case 'premium': return 'bg-yellow-100 text-yellow-800';
+      case 'premium': return 'bg-gold-100 text-gold-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'failed': return 'bg-red-100 text-red-800';
-      case 'canceled': return 'bg-gray-100 text-gray-800';
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'bg-red-100 text-red-800';
+      case 'manager': return 'bg-blue-100 text-blue-800';
+      case 'member': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
+  const filteredOrganizations = organizations.filter(org => {
+    const matchesFilter = orgFilter === 'all' || org.plan === orgFilter;
+    const matchesSearch = org.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         org.slug.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
+  const filteredUsers = users.filter(user => {
+    const matchesFilter = userFilter === 'all' || user.role === userFilter;
+    const matchesSearch = user.email.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         user.organization_name.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  if (!user || user.role !== 'admin') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="w-96">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Access Denied
+            </CardTitle>
+            <CardDescription>
+              You need admin privileges to access this page.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-gray-600">Loading admin portal...</p>
+          <p className="text-gray-600">Loading admin dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Admin Portal</h1>
-          <p className="text-muted-foreground">
-            Manage users, organizations, finances, and system settings
-          </p>
+          <h1 className="text-3xl font-bold">Admin Portal</h1>
+          <p className="text-gray-600 mt-1">Manage organizations, users, and system settings</p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Shield className="h-5 w-5 text-blue-600" />
-          <span className="text-sm font-medium">Admin Access</span>
+        <div className="flex items-center gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Export Data
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Export Options</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => exportData('organizations')}>
+                <Building2 className="h-4 w-4 mr-2" />
+                Organizations
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportData('users')}>
+                <Users className="h-4 w-4 mr-2" />
+                Users
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportData('transactions')}>
+                <CreditCard className="h-4 w-4 mr-2" />
+                Transactions
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
-      {/* Success/Error Alerts */}
-      {successMessage && (
-        <Alert className="border-green-200 bg-green-50">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">
-            {successMessage}
-          </AlertDescription>
-        </Alert>
+      {/* Dashboard Stats */}
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Organizations</CardTitle>
+              <Building2 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalOrganizations}</div>
+              <p className="text-xs text-muted-foreground">
+                +{stats.recentSignups} new this month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalUsers}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.activeTrials} active trials
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">${stats.monthlyRevenue}</div>
+              <p className="text-xs text-muted-foreground">
+                Total: ${stats.totalRevenue}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Plan Distribution</CardTitle>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span>Premium: {stats.planDistribution.premium}</span>
+                  <span>Pro: {stats.planDistribution.pro}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Basic: {stats.planDistribution.basic}</span>
+                  <span>Free: {stats.planDistribution.free}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
-      {error && (
-        <Alert className="border-red-200 bg-red-50">
-          <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">
-            {error}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="organizations">Organizations</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="financials">Financials</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="organizations" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="organizations" className="flex items-center gap-2">
+            <Building2 className="h-4 w-4" />
+            Organizations
+          </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Users
+          </TabsTrigger>
+          <TabsTrigger value="financials" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" />
+            Financials
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Analytics
+          </TabsTrigger>
         </TabsList>
 
-        {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6">
-          {stats && (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Organizations</CardTitle>
-                  <Building className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalOrganizations}</div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalUsers}</div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatCurrency(stats.monthlyRevenue)}</div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats.totalTransactions} transactions
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* Plan Distribution */}
-          {stats && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Plan Distribution</CardTitle>
-                <CardDescription>Current subscription breakdown</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {Object.entries(stats.planDistribution).map(([plan, count]) => (
-                    <div key={plan} className="text-center p-4 border rounded-lg">
-                      <div className="text-2xl font-bold">{count}</div>
-                      <div className="text-sm text-muted-foreground capitalize">{plan}</div>
-                      <Badge className={getPlanBadgeColor(plan)}>{plan}</Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
         {/* Organizations Tab */}
-        <TabsContent value="organizations" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Organizations</h2>
-            <div className="flex space-x-2">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Building2 className="h-4 w-4 mr-2" />
-                    Add Organization
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create New Organization</DialogTitle>
-                    <DialogDescription>
-                      Add a new organization to the system.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="org-name">Organization Name</Label>
-                      <Input
-                        id="org-name"
-                        placeholder="Acme Corp"
-                        value={newOrgForm.name}
-                        onChange={(e) => setNewOrgForm({...newOrgForm, name: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="org-plan">Plan</Label>
-                      <Select
-                        value={newOrgForm.plan}
-                        onValueChange={(value: any) => setNewOrgForm({...newOrgForm, plan: value})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="free">Free</SelectItem>
-                          <SelectItem value="basic">Basic</SelectItem>
-                          <SelectItem value="pro">Pro</SelectItem>
-                          <SelectItem value="premium">Premium</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="flex justify-end space-x-2">
-                    <DialogTrigger asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogTrigger>
-                    <Button onClick={createOrganization}>Create Organization</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-              <Button onClick={loadOrganizations}>
-                <Download className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
+        <TabsContent value="organizations" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search organizations..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 w-64"
+                />
+              </div>
+              <Select value={orgFilter} onValueChange={setOrgFilter}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Plans</SelectItem>
+                  <SelectItem value="free">Free</SelectItem>
+                  <SelectItem value="basic">Basic</SelectItem>
+                  <SelectItem value="pro">Pro</SelectItem>
+                  <SelectItem value="premium">Premium</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+            <Dialog open={showCreateOrgModal} onOpenChange={setShowCreateOrgModal}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Create Organization
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New Organization</DialogTitle>
+                  <DialogDescription>
+                    Add a new organization to the system.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="org-name">Organization Name</Label>
+                    <Input
+                      id="org-name"
+                      value={orgForm.name}
+                      onChange={(e) => setOrgForm({ ...orgForm, name: e.target.value })}
+                      placeholder="Enter organization name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="org-plan">Plan</Label>
+                    <Select value={orgForm.plan} onValueChange={(value: any) => setOrgForm({ ...orgForm, plan: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="free">Free</SelectItem>
+                        <SelectItem value="basic">Basic</SelectItem>
+                        <SelectItem value="pro">Pro</SelectItem>
+                        <SelectItem value="premium">Premium</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowCreateOrgModal(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={createOrganization}>
+                    Create Organization
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <Card>
@@ -737,187 +586,187 @@ export default function AdminPortal() {
                   <TableHead>Organization</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Users</TableHead>
+                  <TableHead>Revenue</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {organizations.map((org) => (
+                {filteredOrganizations.map((org) => (
                   <TableRow key={org.id}>
                     <TableCell>
                       <div>
                         <div className="font-medium">{org.name}</div>
-                        {org.slug && <div className="text-sm text-muted-foreground">{org.slug}</div>}
+                        <div className="text-sm text-gray-500">{org.slug}</div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge className={getPlanBadgeColor(org.plan)}>
+                        {org.plan === 'premium' && <Crown className="h-3 w-3 mr-1" />}
                         {org.plan.charAt(0).toUpperCase() + org.plan.slice(1)}
                       </Badge>
                     </TableCell>
                     <TableCell>{org.user_count}</TableCell>
-                    <TableCell>{formatDate(org.created_at)}</TableCell>
+                    <TableCell>${org.monthly_revenue}/mo</TableCell>
                     <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditingOrg(org)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Select
-                          value={org.plan}
-                          onValueChange={(value) => updateOrganizationPlan(org.id, value)}
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="free">Free</SelectItem>
-                            <SelectItem value="basic">Basic</SelectItem>
-                            <SelectItem value="pro">Pro</SelectItem>
-                            <SelectItem value="premium">Premium</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            if (confirm(`Delete organization "${org.name}"? This will also delete all users in this organization.`)) {
-                              deleteOrganization(org.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      <Badge variant={org.status === 'active' ? 'default' : 'secondary'}>
+                        {org.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{new Date(org.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => {
+                            setSelectedOrg(org);
+                            setOrgForm({ name: org.name, plan: org.plan });
+                            setShowEditOrgModal(true);
+                          }}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => upgradePlan(org.id, 'premium')}>
+                            <ArrowUpRight className="h-4 w-4 mr-2" />
+                            Upgrade Plan
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Organization</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will permanently delete "{org.name}" and all associated data. This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => deleteOrganization(org.id)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </Card>
-
-          {/* Edit Organization Dialog */}
-          {editingOrg && (
-            <Dialog open={!!editingOrg} onOpenChange={() => setEditingOrg(null)}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Edit Organization</DialogTitle>
-                  <DialogDescription>
-                    Update organization details.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-org-name">Organization Name</Label>
-                    <Input
-                      id="edit-org-name"
-                      value={editingOrg.name}
-                      onChange={(e) => setEditingOrg({...editingOrg, name: e.target.value})}
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => setEditingOrg(null)}>Cancel</Button>
-                  <Button onClick={() => updateOrganization(editingOrg.id, { name: editingOrg.name })}>
-                    Update Organization
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
         </TabsContent>
 
         {/* Users Tab */}
-        <TabsContent value="users" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Users</h2>
-            <div className="flex space-x-2">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button>
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Add User
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create New User</DialogTitle>
-                    <DialogDescription>
-                      Add a new user to an existing organization.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="user@example.com"
-                        value={newUserForm.email}
-                        onChange={(e) => setNewUserForm({...newUserForm, email: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="Enter password"
-                        value={newUserForm.password}
-                        onChange={(e) => setNewUserForm({...newUserForm, password: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="organization">Organization</Label>
-                      <Select
-                        value={newUserForm.organization_id}
-                        onValueChange={(value) => setNewUserForm({...newUserForm, organization_id: value})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select organization" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {organizations.map((org) => (
-                            <SelectItem key={org.id} value={org.id}>
-                              {org.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="role">Role</Label>
-                      <Select
-                        value={newUserForm.role}
-                        onValueChange={(value: any) => setNewUserForm({...newUserForm, role: value})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="member">Member</SelectItem>
-                          <SelectItem value="manager">Manager</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="flex justify-end space-x-2">
-                    <DialogTrigger asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogTrigger>
-                    <Button onClick={createUser}>Create User</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-              <Button onClick={loadUsers}>
-                <Download className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
+        <TabsContent value="users" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 w-64"
+                />
+              </div>
+              <Select value={userFilter} onValueChange={setUserFilter}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="member">Member</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+            <Dialog open={showCreateUserModal} onOpenChange={setShowCreateUserModal}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  Create User
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New User</DialogTitle>
+                  <DialogDescription>
+                    Add a new user to an organization.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="user-email">Email</Label>
+                    <Input
+                      id="user-email"
+                      type="email"
+                      value={userForm.email}
+                      onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                      placeholder="user@example.com"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="user-name">Name</Label>
+                    <Input
+                      id="user-name"
+                      value={userForm.name}
+                      onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
+                      placeholder="Full name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="user-role">Role</Label>
+                    <Select value={userForm.role} onValueChange={(value: any) => setUserForm({ ...userForm, role: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="member">Member</SelectItem>
+                        <SelectItem value="manager">Manager</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="user-org">Organization</Label>
+                    <Select value={userForm.organizationId} onValueChange={(value) => setUserForm({ ...userForm, organizationId: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select organization" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {organizations.map((org) => (
+                          <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowCreateUserModal(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={createUser}>
+                    Create User
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <Card>
@@ -927,466 +776,362 @@ export default function AdminPortal() {
                   <TableHead>User</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Organization</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>Plan</TableHead>
+                  <TableHead>Last Login</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.map((user) => (
+                {filteredUsers.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{user.email}</div>
-                        <div className="text-sm text-muted-foreground">{user.name}</div>
+                        <div className="font-medium">{user.name}</div>
+                        <div className="text-sm text-gray-500">{user.email}</div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">
+                      <Badge className={getRoleBadgeColor(user.role)}>
+                        {user.role === 'admin' && <Shield className="h-3 w-3 mr-1" />}
                         {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                       </Badge>
                     </TableCell>
+                    <TableCell>{user.organization_name}</TableCell>
                     <TableCell>
-                      {user.organization ? (
-                        <div>
-                          <div className="font-medium">{user.organization.name}</div>
-                          <Badge className={getPlanBadgeColor(user.organization.plan)}>
-                            {user.organization.plan}
-                          </Badge>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">No organization</span>
-                      )}
+                      <Badge className={getPlanBadgeColor(user.plan)}>
+                        {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
+                      </Badge>
                     </TableCell>
-                    <TableCell>{formatDate(user.created_at)}</TableCell>
                     <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditingUser(user)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Select
-                          value={user.role}
-                          onValueChange={(value) => updateUserRole(user.id, value)}
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="member">Member</SelectItem>
-                            <SelectItem value="manager">Manager</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            if (confirm(`Delete user "${user.email}"?`)) {
-                              deleteUser(user.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={user.is_active ? 'default' : 'secondary'}>
+                        {user.is_active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => {
+                            setSelectedUser(user);
+                            setUserForm({ 
+                              email: user.email, 
+                              name: user.name, 
+                              role: user.role, 
+                              organizationId: user.organization_id 
+                            });
+                            setShowEditUserModal(true);
+                          }}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Mail className="h-4 w-4 mr-2" />
+                            Send Invite
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete User</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will permanently delete "{user.name}" ({user.email}). This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => deleteUser(user.id)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </Card>
-
-          {/* Edit User Dialog */}
-          {editingUser && (
-            <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Edit User</DialogTitle>
-                  <DialogDescription>
-                    Update user details.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-email">Email</Label>
-                    <Input
-                      id="edit-email"
-                      type="email"
-                      value={editingUser.email}
-                      onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-organization">Organization</Label>
-                    <Select
-                      value={editingUser.organization_id}
-                      onValueChange={(value) => setEditingUser({...editingUser, organization_id: value})}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {organizations.map((org) => (
-                          <SelectItem key={org.id} value={org.id}>
-                            {org.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => setEditingUser(null)}>Cancel</Button>
-                  <Button onClick={() => updateUser(editingUser.id, { 
-                    email: editingUser.email, 
-                    organization_id: editingUser.organization_id 
-                  })}>
-                    Update User
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
         </TabsContent>
 
         {/* Financials Tab */}
-        <TabsContent value="financials" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Financial Transactions</h2>
-            <div className="flex space-x-2">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button>
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Add Transaction
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create Manual Transaction</DialogTitle>
-                    <DialogDescription>
-                      Add a manual transaction entry.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="transaction-org">Organization</Label>
-                      <Select
-                        value={newTransactionForm.organization_id}
-                        onValueChange={(value) => setNewTransactionForm({...newTransactionForm, organization_id: value})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select organization" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {organizations.map((org) => (
-                            <SelectItem key={org.id} value={org.id}>
-                              {org.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="transaction-amount">Amount ($)</Label>
-                      <Input
-                        id="transaction-amount"
-                        type="number"
-                        step="0.01"
-                        placeholder="99.00"
-                        value={newTransactionForm.amount}
-                        onChange={(e) => setNewTransactionForm({...newTransactionForm, amount: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="transaction-type">Type</Label>
-                      <Select
-                        value={newTransactionForm.type}
-                        onValueChange={(value: any) => setNewTransactionForm({...newTransactionForm, type: value})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="payment">Payment</SelectItem>
-                          <SelectItem value="refund">Refund</SelectItem>
-                          <SelectItem value="upgrade">Upgrade</SelectItem>
-                          <SelectItem value="downgrade">Downgrade</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="transaction-description">Description</Label>
-                      <Textarea
-                        id="transaction-description"
-                        placeholder="Transaction description..."
-                        value={newTransactionForm.description}
-                        onChange={(e) => setNewTransactionForm({...newTransactionForm, description: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex justify-end space-x-2">
-                    <DialogTrigger asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogTrigger>
-                    <Button onClick={createTransaction}>Create Transaction</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-              <Button onClick={loadTransactions}>
-                <Download className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-            </div>
-          </div>
+        <TabsContent value="financials" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Recent Transactions</CardTitle>
+                <CardDescription>Latest payment and subscription activities</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Organization</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Plan</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {transactions.slice(0, 10).map((transaction) => (
+                      <TableRow key={transaction.id}>
+                        <TableCell className="font-medium">
+                          {transaction.organization_name}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {transaction.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>${transaction.amount}</TableCell>
+                        <TableCell>{transaction.plan}</TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={transaction.status === 'completed' ? 'default' : 'secondary'}
+                          >
+                            {transaction.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(transaction.created_at).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Organization</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Description</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell>{formatDate(transaction.created_at)}</TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{transaction.organization_name}</div>
-                        <Badge className={getPlanBadgeColor(transaction.organization_plan)}>
-                          {transaction.organization_plan}
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-mono">
-                      {formatCurrency(transaction.amount / 100)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">
-                        {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusBadgeColor(transaction.status)}>
-                        {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {transaction.description || '-'}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Revenue Summary</CardTitle>
+                <CardDescription>Monthly performance overview</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">This Month</span>
+                  <span className="text-lg font-bold">${stats?.monthlyRevenue || 0}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Total Revenue</span>
+                  <span className="text-lg font-bold">${stats?.totalRevenue || 0}</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Premium Revenue</span>
+                    <span>65%</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Pro Revenue</span>
+                    <span>25%</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Basic Revenue</span>
+                    <span>10%</span>
+                  </div>
+                </div>
+                <Button className="w-full gap-2">
+                  <FileText className="h-4 w-4" />
+                  Generate Report
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* Analytics Tab */}
-        <TabsContent value="analytics" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Revenue Analytics</h2>
-            <Button onClick={loadRevenueAnalytics}>
-              <LineChart className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
-          </div>
-
-          {revenueAnalytics && (
-            <div className="grid gap-6 lg:grid-cols-2">
-              {/* Plan Revenue */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Revenue by Plan (This Month)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {revenueAnalytics.planRevenue.map((item) => (
-                      <div key={item.plan} className="flex justify-between items-center">
-                        <div className="flex items-center space-x-2">
-                          <Badge className={getPlanBadgeColor(item.plan)}>
-                            {item.plan.charAt(0).toUpperCase() + item.plan.slice(1)}
-                          </Badge>
-                          <span className="text-sm text-muted-foreground">
-                            {item.transactions} transactions
-                          </span>
-                        </div>
-                        <span className="font-mono font-medium">
-                          {formatCurrency(item.revenue)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Top Customers */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Customers by Revenue</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {revenueAnalytics.topCustomers.slice(0, 5).map((customer, index) => (
-                      <div key={customer.name} className="flex justify-between items-center">
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm font-medium">#{index + 1}</span>
-                            <span className="font-medium">{customer.name}</span>
-                            <Badge className={getPlanBadgeColor(customer.plan)}>
-                              {customer.plan}
-                            </Badge>
-                          </div>
-                          <span className="text-sm text-muted-foreground">
-                            {customer.transactions} transactions
-                          </span>
-                        </div>
-                        <span className="font-mono font-medium">
-                          {formatCurrency(customer.revenue)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* Monthly Trend */}
-          {revenueAnalytics && revenueAnalytics.monthlyTrend.length > 0 && (
+        <TabsContent value="analytics" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Monthly Revenue Trend</CardTitle>
-                <CardDescription>Revenue over the last 12 months</CardDescription>
+                <CardTitle>Usage Analytics</CardTitle>
+                <CardDescription>Platform usage trends and metrics</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  {revenueAnalytics.monthlyTrend.map((month) => (
-                    <div key={month.month} className="flex justify-between items-center p-2 border rounded">
-                      <div>
-                        <span className="font-medium">
-                          {new Date(month.month).toLocaleDateString('en-US', { 
-                            year: 'numeric', 
-                            month: 'long' 
-                          })}
-                        </span>
-                        <span className="text-sm text-muted-foreground ml-2">
-                          {month.transactions} transactions
-                        </span>
-                      </div>
-                      <span className="font-mono font-medium">
-                        {formatCurrency(month.revenue)}
-                      </span>
-                    </div>
-                  ))}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Active Organizations</span>
+                    <span className="text-2xl font-bold">{organizations.filter(o => o.status === 'active').length}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Active Users</span>
+                    <span className="text-2xl font-bold">{users.filter(u => u.is_active).length}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Trial Conversions</span>
+                    <span className="text-2xl font-bold">78%</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Churn Rate</span>
+                    <span className="text-2xl font-bold">2.1%</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          )}
-        </TabsContent>
 
-        {/* Settings Tab */}
-        <TabsContent value="settings" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">System Settings</h2>
-            <Button onClick={loadSettings}>
-              <Settings className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
-          </div>
-
-          <div className="grid gap-4">
-            {settings.map((setting) => (
-              <Card key={setting.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{setting.key}</CardTitle>
-                      <CardDescription>{setting.description}</CardDescription>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditingSetting(setting)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
+            <Card>
+              <CardHeader>
+                <CardTitle>Growth Metrics</CardTitle>
+                <CardDescription>Platform growth and expansion data</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">New Signups (30d)</span>
+                    <span className="text-2xl font-bold text-green-600">+{stats?.recentSignups || 0}</span>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="font-mono text-sm bg-gray-50 p-2 rounded">
-                    {setting.key.includes('secret') || setting.key.includes('key') 
-                      ? '••••••••••••••••' 
-                      : setting.value || '(empty)'
-                    }
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Revenue Growth</span>
+                    <span className="text-2xl font-bold text-green-600">+15.2%</span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Last updated: {formatDate(setting.updated_at)}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* Edit Setting Dialog */}
-          {editingSetting && (
-            <Dialog open={!!editingSetting} onOpenChange={() => setEditingSetting(null)}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Edit Setting</DialogTitle>
-                  <DialogDescription>
-                    Update system setting: {editingSetting.key}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="setting-value">Value</Label>
-                    <Input
-                      id="setting-value"
-                      type={editingSetting.key.includes('secret') || editingSetting.key.includes('key') ? 'password' : 'text'}
-                      value={editingSetting.value}
-                      onChange={(e) => setEditingSetting({...editingSetting, value: e.target.value})}
-                    />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">User Growth</span>
+                    <span className="text-2xl font-bold text-green-600">+12.8%</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {editingSetting.description}
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Feature Adoption</span>
+                    <span className="text-2xl font-bold text-blue-600">89%</span>
+                  </div>
                 </div>
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => setEditingSetting(null)}>Cancel</Button>
-                  <Button onClick={() => updateSetting(editingSetting.key, editingSetting.value)}>
-                    Update Setting
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
-
-          {/* Database Status Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Database Status</CardTitle>
-              <CardDescription>
-                Current database connection and system health
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <span>Database Connected</span>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Organization Modal */}
+      <Dialog open={showEditOrgModal} onOpenChange={setShowEditOrgModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Organization</DialogTitle>
+            <DialogDescription>
+              Update organization details and settings.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-org-name">Organization Name</Label>
+              <Input
+                id="edit-org-name"
+                value={orgForm.name}
+                onChange={(e) => setOrgForm({ ...orgForm, name: e.target.value })}
+                placeholder="Enter organization name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-org-plan">Plan</Label>
+              <Select value={orgForm.plan} onValueChange={(value: any) => setOrgForm({ ...orgForm, plan: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="free">Free</SelectItem>
+                  <SelectItem value="basic">Basic</SelectItem>
+                  <SelectItem value="pro">Pro</SelectItem>
+                  <SelectItem value="premium">Premium</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditOrgModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={updateOrganization}>
+              Update Organization
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Modal */}
+      <Dialog open={showEditUserModal} onOpenChange={setShowEditUserModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>
+              Update user details and permissions.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-user-email">Email</Label>
+              <Input
+                id="edit-user-email"
+                type="email"
+                value={userForm.email}
+                onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                placeholder="user@example.com"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-user-name">Name</Label>
+              <Input
+                id="edit-user-name"
+                value={userForm.name}
+                onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
+                placeholder="Full name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-user-role">Role</Label>
+              <Select value={userForm.role} onValueChange={(value: any) => setUserForm({ ...userForm, role: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="edit-user-org">Organization</Label>
+              <Select value={userForm.organizationId} onValueChange={(value) => setUserForm({ ...userForm, organizationId: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select organization" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizations.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditUserModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={updateUser}>
+              Update User
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
-}
+};
+
+export default AdminPortal;
