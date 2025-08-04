@@ -232,6 +232,60 @@ export default function Planning() {
     setScenarios([...scenarios, newScenario]);
   };
 
+  const addBudgetGoal = () => {
+    if (!goalForm.name || !goalForm.targetAmount || !goalForm.timeframe || !goalForm.priority || !goalForm.category) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    const newGoal: BudgetGoal = {
+      id: `BG${String(budgetGoals.length + 1).padStart(3, '0')}`,
+      name: goalForm.name,
+      targetAmount: goalForm.targetAmount,
+      currentAmount: goalForm.currentAmount || 0,
+      timeframe: goalForm.timeframe,
+      priority: goalForm.priority as 'high' | 'medium' | 'low',
+      category: goalForm.category as 'roads' | 'bridges' | 'sidewalks' | 'drainage' | 'general'
+    };
+
+    setBudgetGoals([...budgetGoals, newGoal]);
+    setGoalForm({});
+    setIsAddingGoal(false);
+  };
+
+  const editBudgetGoal = (goal: BudgetGoal) => {
+    setEditingGoal(goal);
+    setGoalForm(goal);
+  };
+
+  const updateBudgetGoal = () => {
+    if (!editingGoal || !goalForm.name || !goalForm.targetAmount || !goalForm.timeframe || !goalForm.priority || !goalForm.category) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    setBudgetGoals(prev => prev.map(goal =>
+      goal.id === editingGoal.id
+        ? { ...goal, ...goalForm } as BudgetGoal
+        : goal
+    ));
+
+    setEditingGoal(null);
+    setGoalForm({});
+  };
+
+  const deleteBudgetGoal = (goalId: string) => {
+    if (confirm('Are you sure you want to delete this budget goal?')) {
+      setBudgetGoals(prev => prev.filter(goal => goal.id !== goalId));
+    }
+  };
+
+  const resetForm = () => {
+    setGoalForm({});
+    setEditingGoal(null);
+    setIsAddingGoal(false);
+  };
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
