@@ -44,12 +44,8 @@ export function createServer() {
   app.use("/api/plans", plansRoutes);
   app.use("/api", initDbRoutes);
   app.use("/api", hashGenRoutes);
-  // Use mock routes if database is disabled, otherwise use real routes
-  if (process.env.DISABLE_DB === 'true') {
-    app.use("/api/admin", mockRoutes);
-  } else {
-    app.use("/api/admin", adminRoutes);
-  }
+  // Always use enhanced admin routes (they include better mock data fallback)
+  app.use("/api/admin", adminRoutes);
   app.use("/api/migrate", migrateRoutes);
   app.use("/api/export", exportRoutes);
 
