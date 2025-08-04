@@ -94,6 +94,7 @@ const App = () => (
             <Route path="/error-test" element={<ErrorTest />} />
             <Route path="/init-database" element={<InitDatabase />} />
             <Route path="/create-demo-users" element={<CreateDemoUsers />} />
+            <Route path="/migration-helper" element={<MigrationHelper />} />
 
             {/* Protected Routes */}
             <Route path="/*" element={
