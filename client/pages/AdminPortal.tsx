@@ -797,7 +797,7 @@ const AdminPortal = () => {
                         {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Member'}
                       </Badge>
                     </TableCell>
-                    <TableCell>{user.organization_name}</TableCell>
+                    <TableCell>{user.organization_name || 'No Organization'}</TableCell>
                     <TableCell>
                       <Badge className={getPlanBadgeColor(user.plan || 'free')}>
                         {user.plan ? user.plan.charAt(0).toUpperCase() + user.plan.slice(1) : 'Free'}
