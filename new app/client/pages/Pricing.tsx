@@ -110,6 +110,8 @@ export default function Pricing() {
   const { currentPlan, upgradePlan, getAllPlans } = usePricing();
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly');
   const [showContactForm, setShowContactForm] = useState(false);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [selectedPlanForPayment, setSelectedPlanForPayment] = useState<PlanType | null>(null);
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
