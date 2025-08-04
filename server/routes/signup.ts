@@ -175,7 +175,7 @@ router.post('/login', async (req: Request, res: Response<ApiResponse>) => {
     }
     
     // Get user with organization data
-    const result = await pool.query(
+    const result = await getPool().query(
       `SELECT u.id, u.email, u.password_hash, u.role, u.organization_id, u.created_at,
               o.name as organization_name, o.plan as organization_plan
        FROM users u
@@ -259,7 +259,7 @@ router.get('/me', async (req: Request, res: Response<ApiResponse>) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
     
     // Get user with organization and subscription data
-    const result = await pool.query(
+    const result = await getPool().query(
       `SELECT u.id, u.email, u.role, u.organization_id, u.created_at,
               o.name as organization_name, o.plan as organization_plan,
               s.status as subscription_status, s.end_date as subscription_end_date
