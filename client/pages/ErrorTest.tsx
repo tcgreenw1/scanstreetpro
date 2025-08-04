@@ -37,8 +37,8 @@ export default function ErrorTest() {
 
   const testConnectionError = async () => {
     try {
-      addResult('Testing Supabase connection...');
-      const result = await testSupabaseConnection();
+      addResult('Testing Neon database connection...');
+      const result = await testNeonConnection();
       if (result.success) {
         addResult('✅ Connection successful');
       } else {
