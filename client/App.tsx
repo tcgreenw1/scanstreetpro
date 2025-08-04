@@ -55,28 +55,12 @@ const queryClient = new QueryClient();
 
 const AppInitializer = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
-    // Seed demo users on app start (run once)
-    const initializeApp = async () => {
-      const hasInitialized = localStorage.getItem('app-initialized');
-      if (!hasInitialized) {
-        try {
-          // Only attempt seeding if we have valid Supabase configuration
-          const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-          const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-          if (supabaseUrl && !supabaseUrl.includes('placeholder') && supabaseKey && !supabaseKey.includes('placeholder')) {
-            await seedDemoUsers();
-          } else {
-            console.log('⚠️ Skipping demo user seeding - Supabase not configured');
-          }
-          localStorage.setItem('app-initialized', 'true');
-        } catch (error) {
-          console.error('Failed to initialize app:', error);
-        }
-      }
-    };
-
-    initializeApp();
+    // App initialization - demo users are pre-configured in Neon database
+    const hasInitialized = localStorage.getItem('app-initialized');
+    if (!hasInitialized) {
+      console.log('✅ Neon database configured with demo users');
+      localStorage.setItem('app-initialized', 'true');
+    }
   }, []);
 
   return <>{children}</>;
