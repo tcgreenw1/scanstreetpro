@@ -43,10 +43,38 @@ import { useOrganization, usePermissions } from "@/contexts/OrganizationContext"
 import { PlanGuard, PlanRestrictedButton, FeatureBadge, UpgradeBanner } from "@/components/PlanGuard";
 
 export default function Expenses() {
+  const { organization, planFeatures } = useOrganization();
+  const { isFeatureUnlocked } = usePermissions();
+
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [yearFilter, setYearFilter] = useState<string>("all");
+
+  const canManageExpenses = isFeatureUnlocked('expenseManagement');
+
+  // Load transactions from database
+  useEffect(() => {
+    const loadTransactions = async () => {
+      if (!organization) return;
+
+      try {
+        setIsLoading(true);
+        const transactionData = await neonService.getTransactions(organization.id, {
+          type: 'expense'
+        });
+        setTransactions(transactionData);
+      } catch (error) {
+        console.error('Failed to load transactions:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadTransactions();
+  }, [organization]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
