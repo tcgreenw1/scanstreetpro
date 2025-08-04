@@ -569,10 +569,12 @@ router.get('/transactions', adminAuth, async (req: Request, res: Response) => {
     `;
 
     const result = await executeQuery(transactionsQuery);
-    
-    if (result.rows.length >= 0) {
+
+    if (result.rows.length > 0) {
       res.json({ success: true, data: { transactions: result.rows, total: result.rows.length } });
     } else {
+      // Database is empty, use mock data
+      console.log('Database empty, using mock transactions');
       res.json({ success: true, data: { transactions: mockTransactions, total: mockTransactions.length } });
     }
   } catch (error) {
