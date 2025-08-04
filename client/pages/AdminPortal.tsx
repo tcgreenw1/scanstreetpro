@@ -485,10 +485,7 @@ export default function AdminPortal() {
 
   const updateOrgPlan = async (orgId: string, plan: string) => {
     try {
-      const { error } = await supabase
-        .from('organizations')
-        .update({ plan })
-        .eq('id', orgId);
+      await mockUpdateOrganizationPlan(orgId, plan);
 
       if (error) throw error;
 
