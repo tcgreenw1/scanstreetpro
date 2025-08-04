@@ -738,14 +738,182 @@ export default function Funding() {
                       )}
                     </div>
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">
-                        <FileText className="w-4 h-4 mr-2" />
-                        Details
-                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <FileText className="w-4 h-4 mr-2" />
+                            Details
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>{grant.name}</DialogTitle>
+                            <DialogDescription>{grant.agency}</DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-2 gap-6">
+                              <div>
+                                <h4 className="font-semibold mb-2">Grant Information</h4>
+                                <div className="space-y-2 text-sm">
+                                  <div className="flex justify-between">
+                                    <span>Award Amount:</span>
+                                    <span className="font-medium">${grant.amount.toLocaleString()}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Deadline:</span>
+                                    <span className="font-medium">{new Date(grant.deadline).toLocaleDateString()}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Category:</span>
+                                    <span className="font-medium">{grant.category}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Match Required:</span>
+                                    <span className="font-medium">{grant.matchRequired ? `Yes - $${grant.matchAmount?.toLocaleString()}` : 'No'}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div>
+                                <h4 className="font-semibold mb-2">Application Status</h4>
+                                <div className="space-y-2">
+                                  {getGrantStatusBadge(grant.status)}
+                                  <div className="text-sm text-slate-600">
+                                    <p>Application documents required:</p>
+                                    <ul className="list-disc list-inside mt-1 space-y-1">
+                                      <li>Project proposal and timeline</li>
+                                      <li>Budget breakdown and justification</li>
+                                      <li>Environmental impact assessment</li>
+                                      <li>Community benefit analysis</li>
+                                      {grant.matchRequired && <li>Match funding documentation</li>}
+                                    </ul>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold mb-2">Description</h4>
+                              <p className="text-sm text-slate-600">{grant.description}</p>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold mb-2">Eligibility Requirements</h4>
+                              <div className="text-sm text-slate-600 space-y-1">
+                                <p>• Municipality or authorized government entity</p>
+                                <p>• Project must serve public infrastructure needs</p>
+                                <p>• Demonstrated project management capability</p>
+                                <p>• Environmental compliance documentation</p>
+                                {grant.matchRequired && <p>• Ability to provide required matching funds</p>}
+                              </div>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                       {grant.status === 'available' && (
-                        <Button size="sm">
-                          Apply Now
-                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button size="sm">
+                              Apply Now
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle>Apply for {grant.name}</DialogTitle>
+                              <DialogDescription>
+                                Submit your application for this grant opportunity
+                              </DialogDescription>
+                            </DialogHeader>
+                            <form className="space-y-6">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <Label htmlFor="project-title">Project Title</Label>
+                                  <Input id="project-title" placeholder="e.g., Main Street Infrastructure Upgrade" required />
+                                </div>
+                                <div>
+                                  <Label htmlFor="requested-amount">Requested Amount</Label>
+                                  <Input id="requested-amount" type="number" placeholder={grant.amount.toString()} max={grant.amount} required />
+                                </div>
+                              </div>
+                              <div>
+                                <Label htmlFor="project-description">Project Description</Label>
+                                <Textarea id="project-description" placeholder="Describe your project, its scope, and expected outcomes..." rows={4} required />
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <Label htmlFor="project-start">Project Start Date</Label>
+                                  <Input id="project-start" type="date" required />
+                                </div>
+                                <div>
+                                  <Label htmlFor="project-end">Project End Date</Label>
+                                  <Input id="project-end" type="date" required />
+                                </div>
+                              </div>
+                              {grant.matchRequired && (
+                                <div>
+                                  <Label htmlFor="match-source">Match Funding Source</Label>
+                                  <Select>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select funding source for match" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {fundingSources.map((source) => (
+                                        <SelectItem key={source.id} value={source.id}>
+                                          {source.name} - ${source.availableAmount.toLocaleString()} available
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              )}
+                              <div>
+                                <Label htmlFor="community-benefit">Community Benefit Statement</Label>
+                                <Textarea id="community-benefit" placeholder="Explain how this project will benefit the community..." rows={3} required />
+                              </div>
+                              <div>
+                                <Label>Required Documents</Label>
+                                <div className="space-y-2 mt-2">
+                                  <div className="flex items-center space-x-2">
+                                    <input type="file" id="proposal-doc" accept=".pdf,.doc,.docx" />
+                                    <Label htmlFor="proposal-doc" className="text-sm">Project Proposal</Label>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <input type="file" id="budget-doc" accept=".pdf,.xlsx,.csv" />
+                                    <Label htmlFor="budget-doc" className="text-sm">Budget Documentation</Label>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <input type="file" id="environmental-doc" accept=".pdf,.doc,.docx" />
+                                    <Label htmlFor="environmental-doc" className="text-sm">Environmental Assessment</Label>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                                <h5 className="font-medium text-blue-800 dark:text-blue-300 mb-2">Application Checklist</h5>
+                                <div className="space-y-1 text-sm text-blue-700 dark:text-blue-400">
+                                  <label className="flex items-center space-x-2">
+                                    <input type="checkbox" required />
+                                    <span>I confirm that all project information is accurate</span>
+                                  </label>
+                                  <label className="flex items-center space-x-2">
+                                    <input type="checkbox" required />
+                                    <span>I have read and understand the grant requirements</span>
+                                  </label>
+                                  <label className="flex items-center space-x-2">
+                                    <input type="checkbox" required />
+                                    <span>I confirm our organization meets eligibility criteria</span>
+                                  </label>
+                                  {grant.matchRequired && (
+                                    <label className="flex items-center space-x-2">
+                                      <input type="checkbox" required />
+                                      <span>I confirm we can provide the required matching funds</span>
+                                    </label>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex justify-end space-x-2">
+                                <Button type="button" variant="outline">Save Draft</Button>
+                                <Button type="submit">Submit Application</Button>
+                              </div>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
                       )}
                     </div>
                   </div>
