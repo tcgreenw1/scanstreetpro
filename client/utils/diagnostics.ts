@@ -1,33 +1,21 @@
-// Diagnostic utilities for debugging connection and auth issues
-
-import { supabase } from '@/lib/neonAuth';
-
-export interface DiagnosticResult {
-  component: string;
-  status: 'pass' | 'fail' | 'warning';
+interface DiagnosticResult {
+  name: string;
+  status: 'success' | 'warning' | 'error';
   message: string;
-  details?: any;
+  details?: string[];
 }
 
-export class Diagnostics {
-  static async runFullDiagnostic(): Promise<DiagnosticResult[]> {
+export class SystemDiagnostics {
+  static async runFullDiagnostics(): Promise<DiagnosticResult[]> {
     const results: DiagnosticResult[] = [];
 
     // Check environment variables
     results.push(this.checkEnvironmentVariables());
 
-    // Check Supabase configuration
-    results.push(this.checkSupabaseConfig());
+    // Check network connectivity
+    results.push(await this.checkNetworkConnectivity());
 
-    // Test network connectivity
-    const networkTest = await this.testNetworkConnectivity();
-    results.push(networkTest);
-
-    // Test Supabase auth service
-    const authTest = await this.testAuthService();
-    results.push(authTest);
-
-    // Test Supabase database service
+    // Check database connection
     const dbTest = await this.testDatabaseService();
     results.push(dbTest);
 
@@ -35,199 +23,171 @@ export class Diagnostics {
   }
 
   static checkEnvironmentVariables(): DiagnosticResult {
-    const url = import.meta.env.VITE_SUPABASE_URL;
-    const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
     const databaseUrl = import.meta.env.VITE_DATABASE_URL;
+    const builderApiKey = import.meta.env.VITE_BUILDER_API_KEY;
 
-    // For Neon system, we can work with placeholder values
-    const hasPlaceholders = url?.includes('placeholder') || key?.includes('placeholder');
-
-    if (hasPlaceholders || databaseUrl) {
-      return {
-        component: 'Environment Variables',
-        status: 'pass',
-        message: 'Neon database configuration detected',
-        details: {
-          VITE_DATABASE_URL: databaseUrl ? 'Set' : 'Missing',
-          Mode: hasPlaceholders ? 'Mock/Development' : 'Production'
-        }
-      };
-    }
-
-    if (!url || !key) {
-      return {
-        component: 'Environment Variables',
-        status: 'warning',
-        message: 'Using mock authentication system',
-        details: {
-          Note: 'Demo users are available without database connection'
-        }
-      };
-    }
-
-    return {
-      component: 'Environment Variables',
-      status: 'pass',
-      message: 'Environment variables are configured'
-    };
-  }
-
-  static checkSupabaseConfig(): DiagnosticResult {
-    const url = import.meta.env.VITE_SUPABASE_URL;
-    const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    const databaseUrl = import.meta.env.VITE_DATABASE_URL;
-
-    // Check if using Neon database
-    if (databaseUrl) {
-      return {
-        component: 'Database Configuration',
-        status: 'pass',
-        message: 'Neon database configured',
-        details: {
-          type: 'Neon PostgreSQL',
-          configured: 'Yes'
-        }
-      };
-    }
-
-    // Check if using placeholder values (mock mode)
-    if (url?.includes('placeholder') || key?.includes('placeholder')) {
-      return {
-        component: 'Database Configuration',
-        status: 'pass',
-        message: 'Running in mock mode with demo data',
-        details: {
-          type: 'Mock/Development',
-          demoUsers: 'Available'
-        }
-      };
-    }
-
-    // Legacy Supabase checks
     const issues: string[] = [];
-    if (url && !url.includes('supabase.co') && !url.includes('placeholder')) {
-      issues.push('Invalid URL format');
-    }
-    if (key && !key.startsWith('eyJ') && !key.includes('placeholder')) {
-      issues.push('Invalid key format (should be JWT)');
+    
+    if (!databaseUrl) {
+      issues.push('DATABASE_URL not configured');
     }
 
-    if (issues.length > 0) {
-      return {
-        component: 'Database Configuration',
-        status: 'warning',
-        message: `Configuration issues: ${issues.join(', ')}`,
-        details: { url, keyLength: key?.length || 0 }
-      };
+    if (!builderApiKey) {
+      issues.push('Builder.io API key not configured');
     }
 
     return {
-      component: 'Database Configuration',
-      status: 'pass',
-      message: 'Configuration appears valid'
+      name: 'Environment Variables',
+      status: issues.length === 0 ? 'success' : 'warning',
+      message: issues.length === 0 
+        ? 'All environment variables configured' 
+        : `${issues.length} configuration issue(s) found`,
+      details: issues
     };
   }
 
-  static async testNetworkConnectivity(): Promise<DiagnosticResult> {
+  static async checkNetworkConnectivity(): Promise<DiagnosticResult> {
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-      const response = await fetch('https://api.github.com/zen', {
-        signal: controller.signal,
-        method: 'GET'
+      const response = await fetch('/api/ping', { 
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
       });
-
-      clearTimeout(timeoutId);
-
+      
       if (response.ok) {
         return {
-          component: 'Network Connectivity',
-          status: 'pass',
-          message: 'Internet connection is working'
+          name: 'Network Connectivity',
+          status: 'success',
+          message: 'Server connectivity confirmed'
         };
       } else {
         return {
-          component: 'Network Connectivity',
-          status: 'warning',
-          message: `Network request returned ${response.status}`
+          name: 'Network Connectivity',
+          status: 'error',
+          message: `Server returned ${response.status}: ${response.statusText}`
         };
       }
     } catch (error: any) {
       return {
-        component: 'Network Connectivity',
-        status: 'fail',
-        message: 'Network connectivity test failed',
-        details: error.message || 'Unknown network error'
-      };
-    }
-  }
-
-  static async testAuthService(): Promise<DiagnosticResult> {
-    try {
-      const { error } = await supabase.auth.getSession();
-
-      if (error) {
-        return {
-          component: 'Neon Auth Service',
-          status: 'fail',
-          message: 'Auth service error',
-          details: error.message || 'Unknown auth error'
-        };
-      }
-
-      return {
-        component: 'Neon Auth Service',
-        status: 'pass',
-        message: 'Auth service is responding'
-      };
-    } catch (error: any) {
-      return {
-        component: 'Neon Auth Service',
-        status: 'fail',
-        message: 'Auth service test failed',
-        details: error.message || 'Unknown error'
+        name: 'Network Connectivity',
+        status: 'error',
+        message: `Network error: ${error.message}`
       };
     }
   }
 
   static async testDatabaseService(): Promise<DiagnosticResult> {
     try {
-      // For Neon database, we'll return success since it's configured
-      return {
-        component: 'Neon Database Service',
-        status: 'pass',
-        message: 'Neon database is configured and working'
-      };
+      const response = await fetch('/api/db/test', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        return {
+          name: 'Database Service',
+          status: 'success',
+          message: 'Database connection successful'
+        };
+      } else {
+        return {
+          name: 'Database Service',
+          status: 'error',
+          message: data.message || 'Database connection failed'
+        };
+      }
     } catch (error: any) {
       return {
-        component: 'Neon Database Service',
-        status: 'fail',
-        message: 'Database service test failed',
-        details: error.message || 'Unknown error'
+        name: 'Database Service',
+        status: 'error',
+        message: `Database service error: ${error.message}`
       };
     }
   }
 
-  static getStatusIcon(status: string): string {
-    switch (status) {
-      case 'pass': return '✅';
-      case 'warning': return '⚠️';
-      case 'fail': return '❌';
-      default: return '❓';
+  static checkLocalStorage(): DiagnosticResult {
+    try {
+      const testKey = 'diagnostic-test';
+      const testValue = 'test-value';
+      
+      localStorage.setItem(testKey, testValue);
+      const retrieved = localStorage.getItem(testKey);
+      localStorage.removeItem(testKey);
+      
+      if (retrieved === testValue) {
+        return {
+          name: 'Local Storage',
+          status: 'success',
+          message: 'Local storage working correctly'
+        };
+      } else {
+        return {
+          name: 'Local Storage',
+          status: 'error',
+          message: 'Local storage test failed'
+        };
+      }
+    } catch (error: any) {
+      return {
+        name: 'Local Storage',
+        status: 'error',
+        message: `Local storage error: ${error.message}`
+      };
     }
   }
 
-  static getStatusColor(status: string): string {
-    switch (status) {
-      case 'pass': return 'text-green-600';
-      case 'warning': return 'text-yellow-600';
-      case 'fail': return 'text-red-600';
-      default: return 'text-gray-600';
+  static checkSessionStorage(): DiagnosticResult {
+    try {
+      const testKey = 'diagnostic-session-test';
+      const testValue = 'session-test-value';
+      
+      sessionStorage.setItem(testKey, testValue);
+      const retrieved = sessionStorage.getItem(testKey);
+      sessionStorage.removeItem(testKey);
+      
+      if (retrieved === testValue) {
+        return {
+          name: 'Session Storage',
+          status: 'success',
+          message: 'Session storage working correctly'
+        };
+      } else {
+        return {
+          name: 'Session Storage',
+          status: 'error',
+          message: 'Session storage test failed'
+        };
+      }
+    } catch (error: any) {
+      return {
+        name: 'Session Storage',
+        status: 'error',
+        message: `Session storage error: ${error.message}`
+      };
     }
+  }
+
+  static getSystemInfo() {
+    return {
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      platform: navigator.platform,
+      cookieEnabled: navigator.cookieEnabled,
+      onLine: navigator.onLine,
+      timestamp: new Date().toISOString(),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      screen: {
+        width: screen.width,
+        height: screen.height,
+        colorDepth: screen.colorDepth
+      },
+      viewport: {
+        width: window.innerWidth,
+        height: window.innerHeight
+      }
+    };
   }
 }
 
-export const runDiagnostics = Diagnostics.runFullDiagnostic.bind(Diagnostics);
-export const getStatusIcon = Diagnostics.getStatusIcon.bind(Diagnostics);
-export const getStatusColor = Diagnostics.getStatusColor.bind(Diagnostics);
+export default SystemDiagnostics;
