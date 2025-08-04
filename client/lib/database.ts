@@ -1,5 +1,4 @@
 // Database client for Neon PostgreSQL
-import bcrypt from 'bcryptjs';
 
 // Database Types
 export interface Database {
