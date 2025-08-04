@@ -751,7 +751,14 @@ export const ensureDemoUsersExist = async () => {
         if (!authResult.error && authResult.data?.user) {
           authData = authResult.data;
           authSuccess = true;
-          console.log(`✅ Auth user created successfully for ${demoUser.email}`);
+
+          // Check if user needs email confirmation
+          if (authResult.data.user.email_confirmed_at) {
+            console.log(`✅ Auth user created and confirmed for ${demoUser.email}`);
+          } else {
+            console.log(`⚠️ Auth user created but requires email confirmation for ${demoUser.email}`);
+            console.log(`User ID: ${authResult.data.user.id}, Confirmation required: ${!authResult.data.user.email_confirmed_at}`);
+          }
         } else if (authResult.error && authResult.error.message.includes('User already registered')) {
           console.log(`ℹ️ User ${demoUser.email} already exists in auth`);
           // For existing users, try to sign them in to get the user ID
