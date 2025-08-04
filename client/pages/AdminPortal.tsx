@@ -666,14 +666,7 @@ export default function AdminPortal() {
 
   const exportOrgData = async () => {
     try {
-      const { data, error } = await supabase
-        .from('organizations')
-        .select(`
-          *,
-          users(count)
-        `);
-
-      if (error) throw error;
+      const data = await mockExportData('organizations');
 
       const csvContent = [
         'ID,Name,Slug,Plan,User Count,Created',
