@@ -329,7 +329,7 @@ const AdminPortal = () => {
     }
   };
 
-  const getRoleBadgeColor = (role: string) => {
+  const getRoleBadgeColor = (role: string | undefined | null) => {
     switch (role) {
       case 'admin': return 'bg-red-100 text-red-800';
       case 'manager': return 'bg-blue-100 text-blue-800';
