@@ -91,56 +91,23 @@ const SignUp = () => {
     setSuccess('');
 
     try {
-      const result = await signUpWithTimeout(formData.email, formData.password);
-      
+      const result = await signUpWithTimeout(
+        formData.email,
+        formData.password,
+        formData.fullName,
+        formData.organizationName || undefined
+      );
+
       if (result.error) {
         throw result.error;
       }
 
-      // Create user profile in database
-      if (result.data.user) {
-        // Try to create organization for the user (free plan)
-        const { data: orgData, error: orgError } = await supabase
-          .from('organizations')
-          .insert({
-            name: `${formData.fullName}'s Organization`,
-            slug: `org-${Date.now()}`,
-            plan: 'free'
-          })
-          .select('id')
-          .single();
+      setSuccess('Account created successfully! You have been automatically signed in.');
 
-        let organizationId = null;
-        if (!orgError && orgData) {
-          organizationId = orgData.id;
-        }
-
-        // Create user profile
-        const { error: profileError } = await supabase
-          .from('users')
-          .insert({
-            id: result.data.user.id,
-            email: formData.email,
-            name: formData.fullName,
-            role: 'manager',
-            organization_id: organizationId,
-            is_active: true,
-          });
-
-        if (profileError) {
-          console.warn('Profile creation failed:', profileError);
-        }
-      }
-
-      setSuccess('Account created successfully! Please check your email to verify your account.');
-      
-      // Clear form
-      setFormData({
-        fullName: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-      });
+      // Navigate to dashboard after successful signup
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
 
     } catch (error: any) {
       setError(error?.message || 'Failed to create account. Please try again.');
