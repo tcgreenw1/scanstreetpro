@@ -455,10 +455,73 @@ export default function Funding() {
         <TabsContent value="sources" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Funding Sources</h2>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Source
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Source
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Add New Funding Source</DialogTitle>
+                  <DialogDescription>
+                    Create a new funding source for infrastructure projects
+                  </DialogDescription>
+                </DialogHeader>
+                <form className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="source-name">Source Name</Label>
+                      <Input id="source-name" placeholder="e.g., Municipal Sales Tax" required />
+                    </div>
+                    <div>
+                      <Label htmlFor="source-type">Source Type</Label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="sales-tax">Sales Tax</SelectItem>
+                          <SelectItem value="federal">Federal Grant</SelectItem>
+                          <SelectItem value="state">State Grant</SelectItem>
+                          <SelectItem value="bond">Bond</SelectItem>
+                          <SelectItem value="assessment">Assessment</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="total-amount">Total Amount</Label>
+                      <Input id="total-amount" type="number" placeholder="2500000" required />
+                    </div>
+                    <div>
+                      <Label htmlFor="available-amount">Available Amount</Label>
+                      <Input id="available-amount" type="number" placeholder="700000" required />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="start-date">Start Date</Label>
+                      <Input id="start-date" type="date" required />
+                    </div>
+                    <div>
+                      <Label htmlFor="end-date">End Date</Label>
+                      <Input id="end-date" type="date" required />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="restrictions">Restrictions</Label>
+                    <Textarea id="restrictions" placeholder="Infrastructure only, Must be spent within fiscal year" rows={3} />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button type="button" variant="outline">Cancel</Button>
+                    <Button type="submit">Add Funding Source</Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
