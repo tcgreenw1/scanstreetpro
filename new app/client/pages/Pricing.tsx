@@ -214,9 +214,11 @@ export default function Pricing() {
                 </CardDescription>
                 
                 <div className="mt-6">
-                  {planKey === 'enterprise' ? (
+                  {(planKey === 'premium' && price > 500) || planKey === 'satellite' || planKey === 'driving' ? (
                     <div>
-                      <p className="text-3xl font-bold text-slate-800 dark:text-white">Custom</p>
+                      <p className="text-3xl font-bold text-slate-800 dark:text-white">
+                        {price === 999 ? '$999/mo' : 'Custom'}
+                      </p>
                       <p className="text-sm text-slate-500">Contact for pricing</p>
                     </div>
                   ) : (
@@ -226,14 +228,12 @@ export default function Pricing() {
                           ${price}
                         </span>
                         {price > 0 && (
-                          <span className="text-slate-500 ml-1">
-                            /{billingPeriod === 'annual' ? 'year' : 'month'}
-                          </span>
+                          <span className="text-slate-500 ml-1">/mo</span>
                         )}
                       </div>
-                      {billingPeriod === 'annual' && price > 0 && (
-                        <p className="text-sm text-green-600 mt-1">
-                          Save ${Math.floor(plans[planKey].price * 0.2 * 12)}/year
+                      {price > 0 && (
+                        <p className="text-sm text-blue-600 mt-1">
+                          Billed annually
                         </p>
                       )}
                     </div>
