@@ -97,25 +97,6 @@ interface AdminStats {
 
 export default function AdminPortal() {
   const { user } = useAuth();
-
-  // Check admin access
-  if (!user || user.role !== 'admin') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center space-y-4 max-w-md">
-          <div className="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center">
-            <Shield className="w-8 h-8 text-red-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900">Access Denied</h2>
-          <p className="text-gray-600">You need administrator privileges to access this page.</p>
-          <Button onClick={() => window.location.href = '/dashboard'} className="mt-4">
-            Return to Dashboard
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   const [selectedTab, setSelectedTab] = useState('overview');
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [users, setUsers] = useState<User[]>([]);
