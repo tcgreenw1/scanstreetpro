@@ -273,41 +273,35 @@ export default function AssetManager() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
-                  placeholder="Search assets..."
+                  placeholder={canManageAssets ? "Search assets..." : "Search disabled - upgrade to unlock"}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
-                  disabled
+                  disabled={!canManageAssets}
                 />
               </div>
             </div>
-            <Select value={selectedType} onValueChange={setSelectedType} disabled>
+            <Select value={selectedType} onValueChange={setSelectedType} disabled={!canManageAssets}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Asset Type" />
               </SelectTrigger>
               <SelectContent>
                 {assetTypes.map(type => (
-                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                  <SelectItem key={type} value={type}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Select value={selectedCondition} onValueChange={setSelectedCondition} disabled>
+            <Select value={selectedCondition} onValueChange={setSelectedCondition} disabled={!canManageAssets}>
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Condition" />
               </SelectTrigger>
               <SelectContent>
                 {conditionTypes.map(condition => (
-                  <SelectItem key={condition} value={condition}>{condition}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus} disabled>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                {statusTypes.map(status => (
-                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                  <SelectItem key={condition} value={condition}>
+                    {condition.charAt(0).toUpperCase() + condition.slice(1)}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
