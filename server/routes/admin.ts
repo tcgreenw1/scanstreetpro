@@ -734,10 +734,17 @@ router.get('/settings', authenticateAdmin, async (req: Request, res: Response<Ap
 
   } catch (error: any) {
     console.error('Get settings error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to get settings'
-    });
+    if (error.code === '42P01') { // Table doesn't exist
+      res.json({
+        success: true,
+        data: []
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get settings'
+      });
+    }
   }
 });
 
