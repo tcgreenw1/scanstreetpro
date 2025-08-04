@@ -42,7 +42,10 @@ import {
   Calendar,
   Building,
   Package,
-  Wrench
+  Wrench,
+  Plus,
+  Edit,
+  Trash2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePricing } from "@/contexts/PricingContext";
