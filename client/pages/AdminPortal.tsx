@@ -225,7 +225,7 @@ const AdminPortal = () => {
       if (result.success) {
         toast({ title: "Success", description: "User created successfully" });
         setShowCreateUserModal(false);
-        setUserForm({ email: '', name: '', role: 'member', organizationId: '' });
+        setUserForm({ email: '', name: '', role: 'viewer', organizationId: '' });
         loadDashboardData();
       } else {
         toast({ title: "Error", description: result.error, variant: "destructive" });
@@ -251,7 +251,7 @@ const AdminPortal = () => {
         toast({ title: "Success", description: "User updated successfully" });
         setShowEditUserModal(false);
         setSelectedUser(null);
-        setUserForm({ email: '', name: '', role: 'member', organizationId: '' });
+        setUserForm({ email: '', name: '', role: 'viewer', organizationId: '' });
         loadDashboardData();
       } else {
         toast({ title: "Error", description: result.error, variant: "destructive" });
