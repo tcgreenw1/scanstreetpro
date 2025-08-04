@@ -52,7 +52,7 @@ router.get('/features', authenticateToken, async (req: Request, res: Response<Ap
     const userId = (req as any).user.userId;
     
     // Get user's organization plan
-    const userResult = await pool.query(
+    const userResult = await getPool().query(
       `SELECT o.plan 
        FROM users u 
        JOIN organizations o ON u.organization_id = o.id 
@@ -70,7 +70,7 @@ router.get('/features', authenticateToken, async (req: Request, res: Response<Ap
     const plan = userResult.rows[0].plan;
     
     // Get plan features
-    const featuresResult = await pool.query(
+    const featuresResult = await getPool().query(
       `SELECT feature_name, value 
        FROM plan_features 
        WHERE plan = $1`,
@@ -105,7 +105,7 @@ router.get('/ui-rules', authenticateToken, async (req: Request, res: Response<Ap
     const userId = (req as any).user.userId;
     
     // Get user's organization plan
-    const userResult = await pool.query(
+    const userResult = await getPool().query(
       `SELECT o.plan 
        FROM users u 
        JOIN organizations o ON u.organization_id = o.id 
@@ -123,7 +123,7 @@ router.get('/ui-rules', authenticateToken, async (req: Request, res: Response<Ap
     const plan = userResult.rows[0].plan;
     
     // Get UI rules
-    const rulesResult = await pool.query(
+    const rulesResult = await getPool().query(
       `SELECT component_name, visible, sample_data, show_crown 
        FROM ui_rules 
        WHERE plan = $1`,
@@ -159,7 +159,7 @@ router.get('/ui-rules', authenticateToken, async (req: Request, res: Response<Ap
 // GET /api/plans/all-features - Get all plan features (for admin)
 router.get('/all-features', authenticateToken, async (req: Request, res: Response<ApiResponse>) => {
   try {
-    const result = await pool.query(
+    const result = await getPool().query(
       `SELECT plan, feature_name, value 
        FROM plan_features 
        ORDER BY plan, feature_name`
@@ -191,7 +191,7 @@ router.get('/all-features', authenticateToken, async (req: Request, res: Respons
 // GET /api/plans/all-ui-rules - Get all UI rules (for admin)
 router.get('/all-ui-rules', authenticateToken, async (req: Request, res: Response<ApiResponse>) => {
   try {
-    const result = await pool.query(
+    const result = await getPool().query(
       `SELECT plan, component_name, visible, sample_data, show_crown 
        FROM ui_rules 
        ORDER BY plan, component_name`
@@ -236,7 +236,7 @@ router.put('/feature', authenticateToken, async (req: Request, res: Response<Api
       });
     }
     
-    const result = await pool.query(
+    const result = await getPool().query(
       `INSERT INTO plan_features (plan, feature_name, value) 
        VALUES ($1, $2, $3) 
        ON CONFLICT (plan, feature_name) 
@@ -272,7 +272,7 @@ router.put('/ui-rule', authenticateToken, async (req: Request, res: Response<Api
       });
     }
     
-    const result = await pool.query(
+    const result = await getPool().query(
       `INSERT INTO ui_rules (plan, component_name, visible, sample_data, show_crown) 
        VALUES ($1, $2, $3, $4, $5) 
        ON CONFLICT (plan, component_name) 
