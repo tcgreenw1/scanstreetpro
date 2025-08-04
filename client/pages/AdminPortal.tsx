@@ -198,6 +198,218 @@ export default function AdminPortal() {
     plan: 'free' as const
   });
 
+  const loadOrganizations = async () => {
+    try {
+      console.log('📊 Loading organizations...');
+
+      // Mock organizations data
+      const mockOrganizations = [
+        {
+          id: '3a16af88-f08f-46c8-8bae-a11470227e90',
+          name: 'Scan Street Pro Admin',
+          slug: 'scan-street-admin',
+          plan: 'enterprise' as const,
+          settings: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          user_count: 1
+        },
+        {
+          id: 'f6e839fc-525a-4348-8fec-4ac1bf8389ff',
+          name: 'City of Springfield (Free)',
+          slug: 'springfield-free',
+          plan: 'free' as const,
+          settings: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          user_count: 1
+        },
+        {
+          id: '9e678560-1f05-4d2f-92d9-106c878c5904',
+          name: 'City of Springfield (Premium)',
+          slug: 'springfield-premium',
+          plan: 'professional' as const,
+          settings: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          user_count: 1
+        }
+      ];
+
+      console.log('Organizations data:', mockOrganizations);
+      setOrganizations(mockOrganizations);
+      return mockOrganizations;
+    } catch (error) {
+      console.error('loadOrganizations failed:', error);
+      setOrganizations([]);
+      throw error;
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      console.log('👥 Loading users...');
+
+      // Mock users data
+      const mockUsers = [
+        {
+          id: '7128c5d7-0fd6-4c3a-9c4a-4ffba4ec955d',
+          organization_id: '3a16af88-f08f-46c8-8bae-a11470227e90',
+          email: 'admin@scanstreetpro.com',
+          name: 'System Administrator',
+          role: 'admin' as const,
+          phone: null,
+          is_active: true,
+          last_login: null,
+          created_at: new Date().toISOString(),
+          organization: {
+            id: '3a16af88-f08f-46c8-8bae-a11470227e90',
+            name: 'Scan Street Pro Admin',
+            slug: 'scan-street-admin',
+            plan: 'enterprise',
+            settings: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        },
+        {
+          id: '7a119669-0ef1-4512-ad39-8d4f28b621b6',
+          organization_id: 'f6e839fc-525a-4348-8fec-4ac1bf8389ff',
+          email: 'test@springfield.gov',
+          name: 'Test User',
+          role: 'manager' as const,
+          phone: null,
+          is_active: true,
+          last_login: null,
+          created_at: new Date().toISOString(),
+          organization: {
+            id: 'f6e839fc-525a-4348-8fec-4ac1bf8389ff',
+            name: 'City of Springfield (Free)',
+            slug: 'springfield-free',
+            plan: 'free',
+            settings: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        },
+        {
+          id: 'f0b3d839-5f55-4d21-84dc-6f0dba46dfae',
+          organization_id: '9e678560-1f05-4d2f-92d9-106c878c5904',
+          email: 'premium@springfield.gov',
+          name: 'Premium User',
+          role: 'manager' as const,
+          phone: null,
+          is_active: true,
+          last_login: null,
+          created_at: new Date().toISOString(),
+          organization: {
+            id: '9e678560-1f05-4d2f-92d9-106c878c5904',
+            name: 'City of Springfield (Premium)',
+            slug: 'springfield-premium',
+            plan: 'professional',
+            settings: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        }
+      ];
+
+      console.log('Users data:', mockUsers);
+      setUsers(mockUsers);
+      return mockUsers;
+    } catch (error) {
+      console.error('loadUsers failed:', error);
+      setUsers([]);
+      throw error;
+    }
+  };
+
+  const loadStats = async () => {
+    try {
+      // Mock stats data
+      const mockOrgs = [
+        { plan: 'enterprise' },
+        { plan: 'free' },
+        { plan: 'professional' }
+      ];
+
+      const userCount = 3;
+
+      // Calculate plan distribution
+      const planDistribution = mockOrgs.reduce((acc, org) => {
+        acc[org.plan] = (acc[org.plan] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Mock revenue calculation
+      const monthlyRevenue = mockOrgs.reduce((total, org) => {
+        const planPricing = {
+          free: 0,
+          starter: 29,
+          professional: 99,
+          enterprise: 299
+        };
+        return total + (planPricing[org.plan] || 0);
+      }, 0);
+
+      setStats({
+        totalOrganizations: mockOrgs.length,
+        totalUsers: userCount,
+        monthlyRevenue,
+        totalAssets: 156, // Mock data
+        planDistribution
+      });
+    } catch (error) {
+      console.error('loadStats failed:', error);
+    }
+  };
+
+  const loadData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      console.log('🔄 Loading admin portal data...');
+
+      const [orgsResult, usersResult, statsResult] = await Promise.allSettled([
+        loadOrganizations(),
+        loadUsers(),
+        loadStats()
+      ]);
+
+      // Handle results
+      if (orgsResult.status === 'rejected') {
+        console.error('Organizations loading failed:', orgsResult.reason);
+      } else {
+        console.log('✅ Organizations loaded:', orgsResult.value?.length || 0);
+      }
+
+      if (usersResult.status === 'rejected') {
+        console.error('Users loading failed:', usersResult.reason);
+      } else {
+        console.log('✅ Users loaded:', usersResult.value?.length || 0);
+      }
+
+      if (statsResult.status === 'rejected') {
+        console.error('Stats loading failed:', statsResult.reason);
+      } else {
+        console.log('✅ Stats loaded');
+      }
+
+      // Only throw error if all failed
+      const failedCount = [orgsResult, usersResult, statsResult].filter(r => r.status === 'rejected').length;
+      if (failedCount === 3) {
+        throw new Error('All data loading operations failed');
+      }
+
+    } catch (error: any) {
+      const errorMessage = getErrorMessage(error);
+      setError(errorMessage || 'Failed to load admin data');
+      console.error('Error loading admin data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const initializeAdminPortal = async () => {
     setLoading(true);
     setError('');
