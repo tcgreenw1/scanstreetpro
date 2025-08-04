@@ -734,12 +734,17 @@ export const ensureDemoUsersExist = async () => {
         // Use regular signup (admin API not available in client)
         console.log(`Creating auth user via signup for ${demoUser.email}`);
 
+        // Try to create user with minimal email verification requirements
         const authResult = await supabase.auth.signUp({
           email: demoUser.email,
           password: demoUser.password,
           options: {
-            data: { name: demoUser.name },
-            emailRedirectTo: undefined // Skip email confirmation for demo users
+            data: {
+              name: demoUser.name,
+              role: demoUser.role
+            },
+            emailRedirectTo: undefined, // Skip email confirmation redirect
+            captchaToken: undefined     // Skip captcha
           }
         });
 
