@@ -81,7 +81,7 @@ interface CostProjection {
   inflationAdjusted: number;
 }
 
-const assetCategories: AssetCategory[] = [
+const initialAssetCategories: AssetCategory[] = [
   {
     id: 'arterial',
     name: 'Arterial Roads',
