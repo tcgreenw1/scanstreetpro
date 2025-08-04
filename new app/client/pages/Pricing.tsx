@@ -139,6 +139,11 @@ export default function Pricing() {
   const plans = getAllPlans();
   const planOrder: PlanType[] = ['free', 'basic', 'pro', 'premium', 'satellite', 'driving'];
 
+  const getPrice = (planKey: PlanType): number => {
+    const planInfo = getPlanInfo(planKey);
+    return planInfo.price;
+  };
+
   const getPlanInfo = (planKey: string) => {
     const planData = {
       free: { name: 'Free', description: 'Perfect for getting started with sample data', price: 0 },
