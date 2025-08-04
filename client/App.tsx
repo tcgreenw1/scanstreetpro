@@ -60,7 +60,15 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
       const hasInitialized = localStorage.getItem('app-initialized');
       if (!hasInitialized) {
         try {
-          await seedDemoUsers();
+          // Only attempt seeding if we have valid Supabase configuration
+          const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+          const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+          if (supabaseUrl && !supabaseUrl.includes('placeholder') && supabaseKey && !supabaseKey.includes('placeholder')) {
+            await seedDemoUsers();
+          } else {
+            console.log('⚠️ Skipping demo user seeding - Supabase not configured');
+          }
           localStorage.setItem('app-initialized', 'true');
         } catch (error) {
           console.error('Failed to initialize app:', error);
