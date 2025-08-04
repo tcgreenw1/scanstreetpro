@@ -631,41 +631,10 @@ const extractErrorMessage = (error: any): string => {
 };
 
 // Helper function to repair demo users if they're in an inconsistent state
+// Disabled because admin APIs are not available in client context
 export const repairDemoUsers = async () => {
-  console.log('🔧 Checking and repairing demo users...');
-
-  const demoUsers = [
-    { email: 'admin@scanstreetpro.com', orgSlug: 'scan-street-admin' },
-    { email: 'test@springfield.gov', orgSlug: 'springfield-free' },
-    { email: 'premium@springfield.gov', orgSlug: 'springfield-premium' }
-  ];
-
-  for (const user of demoUsers) {
-    try {
-      // Check if user exists in database but not in auth (orphaned database user)
-      const { data: dbUser } = await supabase
-        .from('users')
-        .select('id, email')
-        .eq('email', user.email)
-        .maybeSingle();
-
-      if (dbUser) {
-        // Check if auth user exists (admin API may not be available)
-        try {
-          const { data: authUser, error } = await supabase.auth.admin.getUserById(dbUser.id);
-          if (error || !authUser.user) {
-            console.log(`🧹 Removing orphaned database user: ${user.email}`);
-            await supabase.from('users').delete().eq('id', dbUser.id);
-          }
-        } catch (authError) {
-          console.warn(`Cannot verify auth user for ${user.email} - admin API may not be available`);
-          // Don't fail on admin API errors as they might not be available in client
-        }
-      }
-    } catch (error) {
-      console.warn(`Error checking user ${user.email}:`, getErrorMessage(error));
-    }
-  }
+  console.log('🔧 Repair function disabled - admin APIs not available in client context');
+  return;
 };
 
 // Helper function to ensure demo users exist in Supabase Auth
