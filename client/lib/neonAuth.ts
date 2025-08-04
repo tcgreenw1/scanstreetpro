@@ -478,6 +478,41 @@ export const isComponentVisible = (componentName: string): boolean => {
   return neonAuth.isComponentVisible(componentName);
 };
 
+// Test Neon database connection
+export const testNeonConnection = async () => {
+  try {
+    console.log('🔍 Testing Neon database connection...');
+
+    const response = await fetch('/api/db/test', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      return {
+        success: true,
+        message: 'Neon database connection successful',
+        data: data.data
+      };
+    } else {
+      return {
+        success: false,
+        error: data.message || 'Database connection failed'
+      };
+    }
+  } catch (error: any) {
+    console.error('❌ Neon connection test error:', error);
+    return {
+      success: false,
+      error: `Connection failed: ${error.message}`
+    };
+  }
+};
+
 export const getPlanFeature = (featureName: string): string | number | boolean | null => {
   return neonAuth.getPlanFeature(featureName);
 };
