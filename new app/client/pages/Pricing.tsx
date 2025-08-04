@@ -114,6 +114,20 @@ export default function Pricing() {
   const [showContactForm, setShowContactForm] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [selectedPlanForPayment, setSelectedPlanForPayment] = useState<PlanType | null>(null);
+
+  // Check for Stripe checkout result
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+      alert('🎉 Payment successful! Welcome to your new plan!');
+      // Clean up URL
+      window.history.replaceState({}, '', '/pricing');
+    } else if (urlParams.get('canceled') === 'true') {
+      alert('Payment was canceled. You can try again anytime.');
+      // Clean up URL
+      window.history.replaceState({}, '', '/pricing');
+    }
+  }, []);
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
