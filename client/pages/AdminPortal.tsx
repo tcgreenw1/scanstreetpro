@@ -272,26 +272,74 @@ export default function AdminPortal() {
   const loadUsers = async () => {
     try {
       console.log('👥 Loading users...');
-      const { data, error } = await supabase
-        .from('users')
-        .select(`
-          *,
-          organizations (
-            id,
-            name,
-            plan
-          )
-        `)
-        .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Users query error:', error);
-        throw error;
-      }
+      // Mock users data
+      const mockUsers = [
+        {
+          id: '7128c5d7-0fd6-4c3a-9c4a-4ffba4ec955d',
+          organization_id: '3a16af88-f08f-46c8-8bae-a11470227e90',
+          email: 'admin@scanstreetpro.com',
+          name: 'System Administrator',
+          role: 'admin' as const,
+          phone: null,
+          is_active: true,
+          last_login: null,
+          created_at: new Date().toISOString(),
+          organization: {
+            id: '3a16af88-f08f-46c8-8bae-a11470227e90',
+            name: 'Scan Street Pro Admin',
+            slug: 'scan-street-admin',
+            plan: 'enterprise',
+            settings: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        },
+        {
+          id: '7a119669-0ef1-4512-ad39-8d4f28b621b6',
+          organization_id: 'f6e839fc-525a-4348-8fec-4ac1bf8389ff',
+          email: 'test@springfield.gov',
+          name: 'Test User',
+          role: 'manager' as const,
+          phone: null,
+          is_active: true,
+          last_login: null,
+          created_at: new Date().toISOString(),
+          organization: {
+            id: 'f6e839fc-525a-4348-8fec-4ac1bf8389ff',
+            name: 'City of Springfield (Free)',
+            slug: 'springfield-free',
+            plan: 'free',
+            settings: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        },
+        {
+          id: 'f0b3d839-5f55-4d21-84dc-6f0dba46dfae',
+          organization_id: '9e678560-1f05-4d2f-92d9-106c878c5904',
+          email: 'premium@springfield.gov',
+          name: 'Premium User',
+          role: 'manager' as const,
+          phone: null,
+          is_active: true,
+          last_login: null,
+          created_at: new Date().toISOString(),
+          organization: {
+            id: '9e678560-1f05-4d2f-92d9-106c878c5904',
+            name: 'City of Springfield (Premium)',
+            slug: 'springfield-premium',
+            plan: 'professional',
+            settings: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        }
+      ];
 
-      console.log('Users data:', data);
-      setUsers(data || []);
-      return data || [];
+      console.log('Users data:', mockUsers);
+      setUsers(mockUsers);
+      return mockUsers;
     } catch (error) {
       console.error('loadUsers failed:', error);
       setUsers([]);
