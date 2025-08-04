@@ -65,6 +65,19 @@ const mockUsers = [
   }
 ];
 
+// Mock admin user for testing
+const mockAdminUser = {
+  id: 'admin-1',
+  email: 'admin@scanstreetpro.com',
+  name: 'System Administrator',
+  role: 'admin',
+  organization_id: 'admin-org-1',
+  is_active: true,
+  created_at: new Date().toISOString(),
+  org_name: 'Admin Organization',
+  org_plan: 'premium'
+};
+
 // Mock authentication middleware (always passes)
 const mockAuth = (req: Request, res: Response, next: any) => {
   (req as any).user = { id: '1', role: 'admin' };
