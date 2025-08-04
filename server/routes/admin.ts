@@ -87,7 +87,21 @@ router.get('/stats', authenticateAdmin, async (req: Request, res: Response<ApiRe
     }
 
     const pool = getPool();
-    
+
+    if (!pool) {
+      return res.json({
+        success: true,
+        data: {
+          totalOrganizations: 0,
+          totalUsers: 0,
+          monthlyRevenue: 0,
+          totalRevenue: 0,
+          totalTransactions: 0,
+          planDistribution: { free: 0, basic: 0, pro: 0, premium: 0 }
+        }
+      });
+    }
+
     // Get total organizations
     const orgResult = await pool.query('SELECT COUNT(*) as count FROM organizations');
     const totalOrganizations = parseInt(orgResult.rows[0].count);
