@@ -167,15 +167,26 @@ export default function Dashboard() {
       <div className="text-center py-8">
         <div className="inline-flex items-center px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-full text-blue-700 dark:text-blue-300 text-sm font-medium mb-6">
           <Sparkles className="w-4 h-4 mr-2" />
-          Welcome to Scan Street Pro - {currentPlan === 'free' ? 'Free Plan' : 'Premium Plan'}
+          {organization?.name || 'Welcome'} - {organization?.plan.charAt(0).toUpperCase() + organization?.plan.slice(1) || 'Free'} Plan
         </div>
         <h1 className="text-4xl lg:text-5xl font-bold text-slate-800 dark:text-white mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-          Dashboard
+          Infrastructure Dashboard
         </h1>
         <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
-          Advanced PCI scanning and analysis for smarter road maintenance decisions.
-          Choose from satellite, driving, or sample scanning methods based on your needs.
+          {planFeatures?.sampleDataOnly
+            ? 'Explore infrastructure management with sample data. Upgrade for real-time asset tracking and analysis.'
+            : 'Advanced infrastructure management with real-time asset tracking, PCI analysis, and smart maintenance decisions.'
+          }
         </p>
+
+        {shouldShowUpgrade() && (
+          <div className="mt-6">
+            <Button onClick={handleUpgrade} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Crown className="w-4 h-4 mr-2" />
+              Upgrade for Full Access
+            </Button>
+          </div>
+        )}
       </div>
 
 
