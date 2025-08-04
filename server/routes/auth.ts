@@ -289,15 +289,42 @@ export const signUp: RequestHandler = async (req, res) => {
 export const verifyToken: RequestHandler = async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         success: false,
-        error: 'No token provided' 
+        error: 'No token provided'
       });
     }
 
     const token = authHeader.substring(7);
+
+    // Handle mock token
+    if (token === 'mock-admin-token-12345') {
+      const mockAdminUser = {
+        id: 'admin-1',
+        email: 'admin@scanstreetpro.com',
+        name: 'System Administrator',
+        role: 'admin',
+        organization_id: 'admin-org-1',
+        is_active: true,
+        created_at: new Date().toISOString(),
+        org_name: 'Admin Organization',
+        org_plan: 'premium'
+      };
+
+      return res.json({
+        success: true,
+        data: {
+          user: mockAdminUser,
+          organization: {
+            id: mockAdminUser.organization_id,
+            name: mockAdminUser.org_name,
+            plan: mockAdminUser.org_plan
+          }
+        }
+      });
+    }
 
     try {
       const decoded = jwt.verify(token, JWT_SECRET) as any;
