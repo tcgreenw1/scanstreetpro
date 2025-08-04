@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { getErrorMessage } from './errorHandler';
 import { safeError } from './safeLogger';
 
