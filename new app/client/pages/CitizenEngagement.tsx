@@ -658,9 +658,54 @@ export default function CitizenEngagement() {
           {/* Community Impact Stats */}
           <Card className="glass-card border-white/20">
             <CardHeader>
-              <CardTitle className="flex items-center text-slate-800 dark:text-white">
-                <Star className="w-5 h-5 mr-2" />
-                Community Impact
+              <CardTitle className="flex items-center justify-between text-slate-800 dark:text-white">
+                <div className="flex items-center">
+                  <Star className="w-5 h-5 mr-2" />
+                  Community Impact
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    // Export community analytics data
+                    const analyticsData = {
+                      totalReports: submissions.length,
+                      resolvedReports: submissions.filter(s => s.status === 'resolved').length,
+                      avgResponseDays: 5.2,
+                      categoryBreakdown: categoryTrends,
+                      monthlySubmissions: monthlySubmissions,
+                      satisfactionRating: 4.8,
+                      hiddenReports: hiddenReports.length
+                    };
+
+                    // Convert to CSV
+                    const csvData = [
+                      ['Metric', 'Value'],
+                      ['Total Reports', analyticsData.totalReports],
+                      ['Resolved Reports', analyticsData.resolvedReports],
+                      ['Resolution Rate', `${((analyticsData.resolvedReports / analyticsData.totalReports) * 100).toFixed(1)}%`],
+                      ['Avg Response Days', analyticsData.avgResponseDays],
+                      ['Satisfaction Rating', analyticsData.satisfactionRating],
+                      ['Hidden Reports', analyticsData.hiddenReports]
+                    ];
+
+                    const csvContent = csvData.map(row => row.join(',')).join('\\n');
+
+                    // Download CSV
+                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `community-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Analytics
+                </Button>
               </CardTitle>
               <CardDescription>
                 How citizen reports are making a difference
