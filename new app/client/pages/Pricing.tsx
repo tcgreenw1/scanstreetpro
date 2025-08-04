@@ -37,7 +37,9 @@ import {
   ChevronRight,
   Mail,
   Phone,
-  ArrowRight
+  ArrowRight,
+  CreditCard,
+  Lock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePricing, PlanType } from '@/contexts/PricingContext';
