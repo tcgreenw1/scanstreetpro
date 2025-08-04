@@ -4,7 +4,7 @@ import { signInWithTimeout, signUpWithTimeout, signOutWithTimeout } from '@/lib/
 interface AuthUser {
   id: string;
   email: string;
-  role: 'manager' | 'member';
+  role: 'manager' | 'member' | 'admin';
   organizationId: string;
   createdAt: string;
 }
