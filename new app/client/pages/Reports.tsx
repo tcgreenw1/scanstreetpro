@@ -74,9 +74,62 @@ export default function Reports() {
   const { currentPlan } = usePricing();
 
   const handleExport = (format: string) => {
-    // In a real app, this would trigger the actual export
-    console.log(`Exporting report as ${format}`);
-    alert(`${format} export functionality would be implemented here. Upgrade to access full export features.`);
+    const reportData = {
+      title: `Infrastructure Report - ${reportType} - ${selectedYear}`,
+      generatedDate: new Date().toISOString(),
+      pciDistribution,
+      pciTrends,
+      laneMilesByTier,
+      summary: {
+        totalLaneMiles: laneMilesByTier.reduce((sum, tier) => sum + tier.miles, 0),
+        averagePCI: 72,
+        networkCondition: 'Fair',
+        improvementNeeded: laneMilesByTier.filter(tier => tier.tier.includes('Poor') || tier.tier.includes('Failed')).reduce((sum, tier) => sum + tier.miles, 0)
+      }
+    };
+
+    if (format === 'CSV') {
+      // Generate CSV data
+      const csvData = [
+        ['PCI Distribution'],
+        ['Condition', 'Count', 'Percentage', 'Range'],
+        ...pciDistribution.map(item => [item.condition, item.count, `${item.percentage}%`, item.range]),
+        [''],
+        ['Lane Miles by Tier'],
+        ['Tier', 'Miles', 'Percentage'],
+        ...laneMilesByTier.map(item => [item.tier, item.miles, `${item.percentage}%`]),
+        [''],
+        ['Summary'],
+        ['Total Lane Miles', reportData.summary.totalLaneMiles],
+        ['Average PCI', reportData.summary.averagePCI],
+        ['Network Condition', reportData.summary.networkCondition],
+        ['Miles Needing Improvement', reportData.summary.improvementNeeded]
+      ];
+
+      const csvContent = csvData.map(row => row.join(',')).join('\\n');
+
+      // Download CSV
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `infrastructure-report-${selectedYear}-${reportType}-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else if (format === 'Excel') {
+      // For Excel, we'll use CSV format as a fallback
+      handleExport('CSV');
+      alert('Excel export functionality would use a library like SheetJS in a full implementation.');
+    } else if (format === 'PDF') {
+      // PDF export would require a library like jsPDF
+      console.log('PDF export data:', reportData);
+      alert('PDF export functionality would use a library like jsPDF in a full implementation.');
+    } else if (format === 'Print') {
+      // Open print dialog
+      window.print();
+    }
   };
 
   const handleUpgrade = () => {
