@@ -621,12 +621,7 @@ export default function AdminPortal() {
     }
 
     try {
-      const { error } = await supabase
-        .from('organizations')
-        .update({ plan: toPlan })
-        .eq('plan', fromPlan);
-
-      if (error) throw error;
+      await mockSwitchOrganizationPlan(organizations[0]?.id || '', fromPlan, toPlan);
 
       await loadData();
       setError(`Successfully updated organizations from ${fromPlan} to ${toPlan} plan!`);
