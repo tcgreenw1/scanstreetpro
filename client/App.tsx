@@ -50,6 +50,7 @@ import PremiumAnalysis from "./pages/PremiumAnalysis";
 import DebugEnv from "./pages/DebugEnv";
 import ConnectionTest from "./pages/ConnectionTest";
 import ErrorTest from "./pages/ErrorTest";
+import InitDatabase from "./pages/InitDatabase";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
