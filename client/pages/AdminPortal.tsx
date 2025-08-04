@@ -503,20 +503,7 @@ export default function AdminPortal() {
     }
 
     try {
-      // First delete from users table
-      const { error: profileError } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', userId);
-
-      if (profileError) throw profileError;
-
-      // Then delete from auth
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-      if (authError) {
-        console.warn('Failed to delete auth user:', authError.message);
-      }
-
+      await mockDeleteUser(userId);
       await loadData();
       setError('User deleted successfully!');
       setTimeout(() => setError(''), 3000);
