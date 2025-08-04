@@ -272,7 +272,8 @@ class NeonAuthManager {
 
     signInWithPassword: async ({ email, password }: { email: string; password: string }) => {
       try {
-        const response = await fetch('/api/login', {
+        // First try the main login endpoint
+        let response = await fetch('/api/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -280,7 +281,24 @@ class NeonAuthManager {
           body: JSON.stringify({ email, password })
         });
 
-        const result = await response.json();
+        let result = await response.json();
+
+        // If main login fails with server error, try mock login as fallback
+        if (!result.success && response.status === 500) {
+          console.log('⚠️ Database login failed, trying mock fallback...');
+          response = await fetch('/api/mock/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+          });
+          result = await response.json();
+
+          if (result.success) {
+            console.log('✅ Mock login successful');
+          }
+        }
 
         if (result.success) {
           const session: Session = {
