@@ -123,9 +123,11 @@ const initializeAdminDatabase = async () => {
           if (userExists.rows.length === 0) {
             const tempPassword = 'password123';
             const passwordHash = await bcrypt.hash(tempPassword, 12);
+            // Use valid roles: admin, manager, inspector, contractor, viewer
+            const userRole = i === 1 ? 'manager' : (i === 2 ? 'inspector' : 'viewer');
             await client.query(
               'INSERT INTO users (email, password_hash, name, role, organization_id) VALUES ($1, $2, $3, $4, $5)',
-              [userEmail, passwordHash, `User ${i}`, i === 1 ? 'manager' : 'member', result.rows[0].id]
+              [userEmail, passwordHash, `User ${i}`, userRole, result.rows[0].id]
             );
           }
         }
