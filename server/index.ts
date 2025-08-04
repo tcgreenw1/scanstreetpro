@@ -21,5 +21,14 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
+  // Authentication routes
+  app.post("/api/auth/signin", signIn);
+  app.post("/api/auth/signup", signUp);
+  app.get("/api/auth/verify", verifyToken);
+
+  // Database routes
+  app.post("/api/db/query", protectedQueryDatabase);
+  app.get("/api/db/test", testConnection);
+
   return app;
 }
