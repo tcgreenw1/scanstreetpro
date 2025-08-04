@@ -526,43 +526,13 @@ export default function AdminPortal() {
 
       console.log('🔍 Starting user diagnosis for:', email);
 
-      const results: any = {
-        email,
-        timestamp: new Date().toISOString(),
-        tests: {}
-      };
+      const mockResults = await mockDiagnoseUser(email, password);
 
-      // Test 1: Check if user exists in database
-      console.log('Test 1: Checking user in database...');
-      try {
-        const { data: dbUser, error: dbError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('email', email)
-          .single();
-
-        results.tests.database = {
-          exists: !dbError && !!dbUser,
-          user: dbUser,
-          error: dbError?.message || null,
-          status: dbError ? (dbError.code === 'PGRST116' ? 'not_found' : 'error') : 'found'
-        };
-      } catch (dbErr: any) {
-        results.tests.database = { exists: false, error: dbErr.message, status: 'error' };
-      }
-
-      // Test 2: Test Supabase connection
-      console.log('Test 2: Testing Supabase connection...');
-      try {
-        const connectionTest = await testSupabaseConnection();
-        results.tests.connection = {
-          success: connectionTest.success,
-          error: connectionTest.error || null,
-          data: connectionTest.data || null
-        };
-      } catch (connErr: any) {
-        results.tests.connection = { success: false, error: connErr.message };
-      }
+      setUserDiagnosisForm(prev => ({
+        ...prev,
+        loading: false,
+        testResults: mockResults.testResults
+      }));
 
       // Test 3: Try authentication (if password provided)
       if (password) {
