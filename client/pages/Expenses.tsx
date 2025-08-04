@@ -38,6 +38,9 @@ import {
   DollarSign 
 } from "lucide-react";
 import { expenses, type Expense } from "@/lib/mock-data";
+import { neonService, Transaction } from "@/services/neonService";
+import { useOrganization, usePermissions } from "@/contexts/OrganizationContext";
+import { PlanGuard, PlanRestrictedButton, FeatureBadge, UpgradeBanner } from "@/components/PlanGuard";
 
 export default function Expenses() {
   const [searchTerm, setSearchTerm] = useState("");
