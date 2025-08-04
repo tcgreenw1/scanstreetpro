@@ -1,82 +1,67 @@
-// Simple authentication service for Neon database
-import bcrypt from 'bcryptjs';
-
-// Demo users (in a real app, this would come from the database)
-const DEMO_USERS = [
-  {
-    id: '7128c5d7-0fd6-4c3a-9c4a-4ffba4ec955d',
-    email: 'admin@scanstreetpro.com',
-    password: 'AdminPass123!',
-    name: 'System Administrator',
-    role: 'admin',
-    organization_id: '3a16af88-f08f-46c8-8bae-a11470227e90',
-    organization: {
-      id: '3a16af88-f08f-46c8-8bae-a11470227e90',
-      name: 'Scan Street Pro Admin',
-      slug: 'scan-street-admin',
-      plan: 'enterprise'
-    }
-  },
-  {
-    id: '7a119669-0ef1-4512-ad39-8d4f28b621b6',
-    email: 'test@springfield.gov',
-    password: 'TestUser123!',
-    name: 'Test User',
-    role: 'manager',
-    organization_id: 'f6e839fc-525a-4348-8fec-4ac1bf8389ff',
-    organization: {
-      id: 'f6e839fc-525a-4348-8fec-4ac1bf8389ff',
-      name: 'City of Springfield (Free)',
-      slug: 'springfield-free',
-      plan: 'free'
-    }
-  },
-  {
-    id: 'f0b3d839-5f55-4d21-84dc-6f0dba46dfae',
-    email: 'premium@springfield.gov',
-    password: 'Premium123!',
-    name: 'Premium User',
-    role: 'manager',
-    organization_id: '9e678560-1f05-4d2f-92d9-106c878c5904',
-    organization: {
-      id: '9e678560-1f05-4d2f-92d9-106c878c5904',
-      name: 'City of Springfield (Premium)',
-      slug: 'springfield-premium',
-      plan: 'professional'
-    }
-  }
-];
+// Authentication service for Neon database with REST API integration
 
 interface User {
   id: string;
   email: string;
+  role: 'manager' | 'member';
+  organizationId: string;
+  createdAt: string;
+}
+
+interface Organization {
+  id: string;
   name: string;
-  role: string;
-  organization_id: string;
-  organization?: any;
+  plan: 'free' | 'basic' | 'pro' | 'premium' | 'satellite' | 'driving';
+  createdAt: string;
+}
+
+interface Subscription {
+  id?: string;
+  plan: string;
+  status: 'active' | 'trial' | 'canceled';
+  startDate?: string;
+  endDate?: string;
 }
 
 interface Session {
   user: User;
+  organization: Organization;
+  subscription?: Subscription;
   access_token: string;
   expires_at: number;
+}
+
+interface PlanFeatures {
+  [key: string]: string | number | boolean;
+}
+
+interface UIRules {
+  [componentName: string]: {
+    visible: boolean;
+    sample_data: boolean;
+    show_crown: boolean;
+  };
 }
 
 class NeonAuthManager {
   private session: Session | null = null;
   private listeners: ((session: Session | null) => void)[] = [];
+  private planFeatures: PlanFeatures = {};
+  private uiRules: UIRules = {};
 
   constructor() {
     this.loadSession();
+    this.loadUserData();
   }
 
-  private loadSession() {
+  private async loadSession() {
     const sessionData = localStorage.getItem('neon_auth_session');
     if (sessionData) {
       try {
         const session = JSON.parse(sessionData);
         if (session.expires_at > Date.now()) {
           this.session = session;
+          await this.loadPlanData();
         } else {
           localStorage.removeItem('neon_auth_session');
         }
@@ -86,11 +71,156 @@ class NeonAuthManager {
     }
   }
 
+  private async loadUserData() {
+    const token = localStorage.getItem('neon_auth_token');
+    if (token) {
+      try {
+        const response = await fetch('/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            const session: Session = {
+              user: result.data.user,
+              organization: result.data.organization,
+              subscription: result.data.subscription,
+              access_token: token,
+              expires_at: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
+            };
+            this.saveSession(session);
+            await this.loadPlanData();
+          }
+        } else {
+          localStorage.removeItem('neon_auth_token');
+        }
+      } catch (error) {
+        console.error('Failed to load user data:', error);
+      }
+    }
+  }
+
+  private async loadPlanData() {
+    if (!this.session) return;
+
+    try {
+      // Load plan features and UI rules from API or local cache
+      // For now, use default configurations
+      this.planFeatures = this.getDefaultPlanFeatures(this.session.organization.plan);
+      this.uiRules = this.getDefaultUIRules(this.session.organization.plan);
+    } catch (error) {
+      console.error('Failed to load plan data:', error);
+    }
+  }
+
+  private getDefaultPlanFeatures(plan: string): PlanFeatures {
+    const features: { [key: string]: PlanFeatures } = {
+      free: {
+        max_users: 3,
+        max_organizations: 1,
+        max_inspections: 10,
+        support_level: 'community',
+        data_retention_days: 30
+      },
+      basic: {
+        max_users: 10,
+        max_organizations: 1,
+        max_inspections: 100,
+        support_level: 'email',
+        data_retention_days: 90
+      },
+      pro: {
+        max_users: 50,
+        max_organizations: 3,
+        max_inspections: 1000,
+        support_level: 'priority',
+        data_retention_days: 365
+      },
+      premium: {
+        max_users: 'unlimited',
+        max_organizations: 'unlimited',
+        max_inspections: 'unlimited',
+        support_level: 'phone',
+        data_retention_days: 'unlimited'
+      },
+      satellite: {
+        max_users: 100,
+        max_organizations: 10,
+        max_inspections: 'unlimited',
+        support_level: 'priority',
+        data_retention_days: 'unlimited'
+      },
+      driving: {
+        max_users: 'unlimited',
+        max_organizations: 'unlimited',
+        max_inspections: 'unlimited',
+        support_level: 'dedicated',
+        data_retention_days: 'unlimited'
+      }
+    };
+    
+    return features[plan] || features.free;
+  }
+
+  private getDefaultUIRules(plan: string): UIRules {
+    const rules: { [key: string]: UIRules } = {
+      free: {
+        dashboard: { visible: true, sample_data: true, show_crown: true },
+        inspections: { visible: true, sample_data: true, show_crown: true },
+        reports: { visible: true, sample_data: true, show_crown: true },
+        analytics: { visible: false, sample_data: true, show_crown: true },
+        advanced_settings: { visible: false, sample_data: true, show_crown: true }
+      },
+      basic: {
+        dashboard: { visible: true, sample_data: false, show_crown: false },
+        inspections: { visible: true, sample_data: false, show_crown: false },
+        reports: { visible: true, sample_data: false, show_crown: true },
+        analytics: { visible: true, sample_data: true, show_crown: true },
+        advanced_settings: { visible: false, sample_data: true, show_crown: true }
+      },
+      pro: {
+        dashboard: { visible: true, sample_data: false, show_crown: false },
+        inspections: { visible: true, sample_data: false, show_crown: false },
+        reports: { visible: true, sample_data: false, show_crown: false },
+        analytics: { visible: true, sample_data: false, show_crown: true },
+        advanced_settings: { visible: true, sample_data: false, show_crown: true }
+      },
+      premium: {
+        dashboard: { visible: true, sample_data: false, show_crown: false },
+        inspections: { visible: true, sample_data: false, show_crown: false },
+        reports: { visible: true, sample_data: false, show_crown: false },
+        analytics: { visible: true, sample_data: false, show_crown: false },
+        advanced_settings: { visible: true, sample_data: false, show_crown: false }
+      },
+      satellite: {
+        dashboard: { visible: true, sample_data: false, show_crown: false },
+        inspections: { visible: true, sample_data: false, show_crown: false },
+        reports: { visible: true, sample_data: false, show_crown: false },
+        analytics: { visible: true, sample_data: false, show_crown: false },
+        advanced_settings: { visible: true, sample_data: false, show_crown: false }
+      },
+      driving: {
+        dashboard: { visible: true, sample_data: false, show_crown: false },
+        inspections: { visible: true, sample_data: false, show_crown: false },
+        reports: { visible: true, sample_data: false, show_crown: false },
+        analytics: { visible: true, sample_data: false, show_crown: false },
+        advanced_settings: { visible: true, sample_data: false, show_crown: false }
+      }
+    };
+    
+    return rules[plan] || rules.free;
+  }
+
   private saveSession(session: Session | null) {
     if (session) {
       localStorage.setItem('neon_auth_session', JSON.stringify(session));
+      localStorage.setItem('neon_auth_token', session.access_token);
     } else {
       localStorage.removeItem('neon_auth_session');
+      localStorage.removeItem('neon_auth_token');
     }
     this.session = session;
     this.notifyListeners();
@@ -98,6 +228,30 @@ class NeonAuthManager {
 
   private notifyListeners() {
     this.listeners.forEach(listener => listener(this.session));
+  }
+
+  // Plan and UI helper methods
+  public getPlanFeature(featureName: string): string | number | boolean | null {
+    return this.planFeatures[featureName] || null;
+  }
+
+  public getUIRule(componentName: string): { visible: boolean; sample_data: boolean; show_crown: boolean } {
+    return this.uiRules[componentName] || { visible: true, sample_data: false, show_crown: false };
+  }
+
+  public shouldShowCrown(componentName: string): boolean {
+    const rule = this.getUIRule(componentName);
+    return rule.show_crown;
+  }
+
+  public shouldUseSampleData(componentName: string): boolean {
+    const rule = this.getUIRule(componentName);
+    return rule.sample_data;
+  }
+
+  public isComponentVisible(componentName: string): boolean {
+    const rule = this.getUIRule(componentName);
+    return rule.visible;
   }
 
   // Supabase-compatible API
@@ -117,77 +271,102 @@ class NeonAuthManager {
     },
 
     signInWithPassword: async ({ email, password }: { email: string; password: string }) => {
-      const user = DEMO_USERS.find(u => u.email === email);
-      
-      if (!user || user.password !== password) {
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          const session: Session = {
+            user: result.data.user,
+            organization: result.data.organization,
+            access_token: result.data.token,
+            expires_at: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
+          };
+
+          this.saveSession(session);
+          await this.loadPlanData();
+
+          return {
+            data: { user: session.user, session },
+            error: null
+          };
+        } else {
+          return {
+            data: { user: null, session: null },
+            error: { message: result.error || 'Login failed' }
+          };
+        }
+      } catch (error: any) {
         return {
           data: { user: null, session: null },
-          error: { message: 'Invalid login credentials' }
+          error: { message: error.message || 'Network error' }
         };
       }
-
-      const session: Session = {
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          organization_id: user.organization_id,
-          organization: user.organization
-        },
-        access_token: `token_${user.id}_${Date.now()}`,
-        expires_at: Date.now() + (24 * 60 * 60 * 1000)
-      };
-
-      this.saveSession(session);
-
-      return {
-        data: { user: session.user, session },
-        error: null
-      };
     },
 
-    signUp: async ({ email, password }: { email: string; password: string }) => {
-      // Check if user already exists
-      const existingUser = DEMO_USERS.find(u => u.email === email);
-      if (existingUser) {
+    signUp: async ({ email, password, fullName, organizationName }: { 
+      email: string; 
+      password: string; 
+      fullName?: string;
+      organizationName?: string;
+    }) => {
+      try {
+        const response = await fetch('/api/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            email, 
+            password, 
+            fullName: fullName || email.split('@')[0],
+            organizationName 
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          const session: Session = {
+            user: result.data.user,
+            organization: result.data.organization,
+            subscription: result.data.subscription,
+            access_token: result.data.token,
+            expires_at: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
+          };
+
+          this.saveSession(session);
+          await this.loadPlanData();
+
+          return {
+            data: { user: session.user, session },
+            error: null
+          };
+        } else {
+          return {
+            data: { user: null, session: null },
+            error: { message: result.error || 'Signup failed' }
+          };
+        }
+      } catch (error: any) {
         return {
           data: { user: null, session: null },
-          error: { message: 'User already registered' }
+          error: { message: error.message || 'Network error' }
         };
       }
-
-      // For new users, create a basic account
-      const newUser = {
-        id: `user_${Date.now()}`,
-        email,
-        name: email.split('@')[0],
-        role: 'manager',
-        organization_id: 'new_org_id',
-        organization: {
-          id: 'new_org_id',
-          name: `${email.split('@')[0]}'s Organization`,
-          slug: `org-${Date.now()}`,
-          plan: 'free'
-        }
-      };
-
-      const session: Session = {
-        user: newUser,
-        access_token: `token_${newUser.id}_${Date.now()}`,
-        expires_at: Date.now() + (24 * 60 * 60 * 1000)
-      };
-
-      this.saveSession(session);
-
-      return {
-        data: { user: newUser, session },
-        error: null
-      };
     },
 
     signOut: async () => {
       this.saveSession(null);
+      this.planFeatures = {};
+      this.uiRules = {};
       return { error: null };
     },
 
@@ -213,52 +392,22 @@ class NeonAuthManager {
     }
   };
 
-  // Database operations (simplified)
+  // Database operations (simplified for compatibility)
   from(table: string) {
     return {
       select: (fields?: string) => ({
         eq: (column: string, value: any) => ({
           single: async () => {
-            if (table === 'users' && column === 'id' && this.session) {
-              const user = DEMO_USERS.find(u => u.id === value);
-              if (user) {
-                return {
-                  data: {
-                    role: user.role,
-                    organizations: user.organization
-                  },
-                  error: null
-                };
-              }
-            }
-            return { data: null, error: { message: 'Not found' } };
+            return { data: null, error: { message: 'Not implemented' } };
           },
           maybeSingle: async () => {
-            if (table === 'users' && this.session) {
-              const user = DEMO_USERS.find(u => u.id === this.session!.user.id);
-              if (user) {
-                return {
-                  data: {
-                    organization_id: user.organization_id,
-                    organizations: user.organization
-                  },
-                  error: null
-                };
-              }
-            }
             return { data: null, error: null };
           }
         }),
         order: (column: string, options?: any) => ({
           limit: (count: number) => ({
-            // Return mock data for organizations
             then: async (callback: any) => {
-              if (table === 'organizations') {
-                const orgs = DEMO_USERS.map(u => u.organization);
-                callback({ data: orgs, error: null });
-              } else {
-                callback({ data: [], error: null });
-              }
+              callback({ data: [], error: null });
             }
           })
         })
@@ -266,7 +415,6 @@ class NeonAuthManager {
       insert: (data: any) => ({
         select: (fields?: string) => ({
           single: async () => {
-            // Simulate successful insert
             return {
               data: { id: `new_${Date.now()}`, ...data },
               error: null
@@ -289,8 +437,8 @@ export const signInWithTimeout = async (email: string, password: string) => {
   return neonAuth.auth.signInWithPassword({ email, password });
 };
 
-export const signUpWithTimeout = async (email: string, password: string) => {
-  return neonAuth.auth.signUp({ email, password });
+export const signUpWithTimeout = async (email: string, password: string, fullName?: string, organizationName?: string) => {
+  return neonAuth.auth.signUp({ email, password, fullName, organizationName });
 };
 
 export const signOutWithTimeout = async () => {
@@ -308,22 +456,45 @@ export const getCurrentUser = async () => {
 };
 
 export const getUserOrganization = async () => {
-  const user = await getCurrentUser();
-  if (!user) return null;
-  return user.organization || null;
+  const { data } = await neonAuth.auth.getSession();
+  return data.session?.organization || null;
+};
+
+export const getCurrentPlan = async () => {
+  const organization = await getUserOrganization();
+  return organization?.plan || 'free';
+};
+
+// Plan-based UI helpers
+export const shouldShowCrown = (componentName: string): boolean => {
+  return neonAuth.shouldShowCrown(componentName);
+};
+
+export const shouldUseSampleData = (componentName: string): boolean => {
+  return neonAuth.shouldUseSampleData(componentName);
+};
+
+export const isComponentVisible = (componentName: string): boolean => {
+  return neonAuth.isComponentVisible(componentName);
+};
+
+export const getPlanFeature = (featureName: string): string | number | boolean | null => {
+  return neonAuth.getPlanFeature(featureName);
 };
 
 export const testSupabaseConnection = async () => {
   try {
-    // Simulate connection test delay
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Test API connection
+    const response = await fetch('/api/ping');
+    const result = await response.json();
 
     return {
       success: true,
       data: {
-        message: 'Neon database connected successfully',
+        message: 'Neon database API connected successfully',
         auth: { session: null },
-        db: { connected: true, type: 'Neon PostgreSQL' }
+        db: { connected: true, type: 'Neon PostgreSQL' },
+        api: result
       }
     };
   } catch (error: any) {
@@ -335,7 +506,7 @@ export const testSupabaseConnection = async () => {
 };
 
 export const ensureDemoUsersExist = async () => {
-  console.log('Demo users already configured for Neon database');
+  console.log('Demo users managed through database schema');
 };
 
 export default neonAuth;
