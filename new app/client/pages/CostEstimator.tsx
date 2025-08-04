@@ -710,6 +710,228 @@ export default function CostEstimator() {
           </CardContent>
         </Card>
       )}
+
+      {/* Add Asset Category Dialog */}
+      <Dialog open={isAddingAsset} onOpenChange={setIsAddingAsset}>
+        <DialogContent className="max-w-md glass-card border-white/20">
+          <DialogHeader>
+            <DialogTitle>Add Asset Category</DialogTitle>
+            <DialogDescription>
+              Create a new asset category for cost estimation
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Category Name</Label>
+              <Input
+                placeholder="e.g., Highway Roads"
+                value={assetForm.name || ''}
+                onChange={(e) => setAssetForm({...assetForm, name: e.target.value})}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Current PCI Score</Label>
+                <Input
+                  type="number"
+                  placeholder="72"
+                  min="0"
+                  max="100"
+                  value={assetForm.currentPCI || ''}
+                  onChange={(e) => setAssetForm({...assetForm, currentPCI: Number(e.target.value)})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Lane Miles</Label>
+                <Input
+                  type="number"
+                  placeholder="45.2"
+                  min="0"
+                  value={assetForm.laneMiles || ''}
+                  onChange={(e) => setAssetForm({...assetForm, laneMiles: Number(e.target.value)})}
+                />
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Label>Unit Costs (per sq ft)</Label>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-xs">Patching</Label>
+                  <Input
+                    type="number"
+                    placeholder="2.00"
+                    min="0"
+                    step="0.01"
+                    value={assetForm.unitCosts?.patching || ''}
+                    onChange={(e) => setAssetForm({
+                      ...assetForm,
+                      unitCosts: {
+                        ...assetForm.unitCosts,
+                        patching: Number(e.target.value),
+                        overlay: assetForm.unitCosts?.overlay || 6.00,
+                        rebuild: assetForm.unitCosts?.rebuild || 18.00
+                      }
+                    })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Overlay</Label>
+                  <Input
+                    type="number"
+                    placeholder="6.00"
+                    min="0"
+                    step="0.01"
+                    value={assetForm.unitCosts?.overlay || ''}
+                    onChange={(e) => setAssetForm({
+                      ...assetForm,
+                      unitCosts: {
+                        ...assetForm.unitCosts,
+                        patching: assetForm.unitCosts?.patching || 2.00,
+                        overlay: Number(e.target.value),
+                        rebuild: assetForm.unitCosts?.rebuild || 18.00
+                      }
+                    })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Rebuild</Label>
+                  <Input
+                    type="number"
+                    placeholder="18.00"
+                    min="0"
+                    step="0.01"
+                    value={assetForm.unitCosts?.rebuild || ''}
+                    onChange={(e) => setAssetForm({
+                      ...assetForm,
+                      unitCosts: {
+                        ...assetForm.unitCosts,
+                        patching: assetForm.unitCosts?.patching || 2.00,
+                        overlay: assetForm.unitCosts?.overlay || 6.00,
+                        rebuild: Number(e.target.value)
+                      }
+                    })}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetAssetForm}>Cancel</Button>
+            <Button onClick={addAssetCategory}>Add Category</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Asset Category Dialog */}
+      <Dialog open={!!editingAsset} onOpenChange={(open) => !open && resetAssetForm()}>
+        <DialogContent className="max-w-md glass-card border-white/20">
+          <DialogHeader>
+            <DialogTitle>Edit Asset Category</DialogTitle>
+            <DialogDescription>
+              Update the asset category details
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Category Name</Label>
+              <Input
+                placeholder="e.g., Highway Roads"
+                value={assetForm.name || ''}
+                onChange={(e) => setAssetForm({...assetForm, name: e.target.value})}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Current PCI Score</Label>
+                <Input
+                  type="number"
+                  placeholder="72"
+                  min="0"
+                  max="100"
+                  value={assetForm.currentPCI || ''}
+                  onChange={(e) => setAssetForm({...assetForm, currentPCI: Number(e.target.value)})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Lane Miles</Label>
+                <Input
+                  type="number"
+                  placeholder="45.2"
+                  min="0"
+                  value={assetForm.laneMiles || ''}
+                  onChange={(e) => setAssetForm({...assetForm, laneMiles: Number(e.target.value)})}
+                />
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Label>Unit Costs (per sq ft)</Label>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-xs">Patching</Label>
+                  <Input
+                    type="number"
+                    placeholder="2.00"
+                    min="0"
+                    step="0.01"
+                    value={assetForm.unitCosts?.patching || ''}
+                    onChange={(e) => setAssetForm({
+                      ...assetForm,
+                      unitCosts: {
+                        ...assetForm.unitCosts,
+                        patching: Number(e.target.value),
+                        overlay: assetForm.unitCosts?.overlay || 6.00,
+                        rebuild: assetForm.unitCosts?.rebuild || 18.00
+                      }
+                    })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Overlay</Label>
+                  <Input
+                    type="number"
+                    placeholder="6.00"
+                    min="0"
+                    step="0.01"
+                    value={assetForm.unitCosts?.overlay || ''}
+                    onChange={(e) => setAssetForm({
+                      ...assetForm,
+                      unitCosts: {
+                        ...assetForm.unitCosts,
+                        patching: assetForm.unitCosts?.patching || 2.00,
+                        overlay: Number(e.target.value),
+                        rebuild: assetForm.unitCosts?.rebuild || 18.00
+                      }
+                    })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Rebuild</Label>
+                  <Input
+                    type="number"
+                    placeholder="18.00"
+                    min="0"
+                    step="0.01"
+                    value={assetForm.unitCosts?.rebuild || ''}
+                    onChange={(e) => setAssetForm({
+                      ...assetForm,
+                      unitCosts: {
+                        ...assetForm.unitCosts,
+                        patching: assetForm.unitCosts?.patching || 2.00,
+                        overlay: assetForm.unitCosts?.overlay || 6.00,
+                        rebuild: Number(e.target.value)
+                      }
+                    })}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetAssetForm}>Cancel</Button>
+            <Button onClick={updateAssetCategory}>Update Category</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
