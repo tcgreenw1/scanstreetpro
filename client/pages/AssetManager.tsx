@@ -137,10 +137,12 @@ export default function AssetManager() {
     return matchesSearch && matchesType && matchesCondition && matchesStatus;
   });
 
-  const totalValue = mockAssets.reduce((sum, asset) => sum + asset.value, 0);
-  const totalMaintenanceCost = mockAssets.reduce((sum, asset) => sum + asset.maintenanceCost, 0);
-  const assetsNeedingAttention = mockAssets.filter(asset => 
-    asset.condition === 'Poor' || asset.status === 'Needs Repair'
+  // Calculate statistics from real asset data
+  const totalValue = assets.reduce((sum, asset) => sum + (asset.metadata.cost || 0), 0);
+  const averagePCI = assets.length > 0 ?
+    Math.round(assets.reduce((sum, asset) => sum + asset.condition.pci, 0) / assets.length) : 0;
+  const assetsNeedingAttention = assets.filter(asset =>
+    asset.condition.status === 'poor' || asset.condition.status === 'critical'
   ).length;
 
   return (
