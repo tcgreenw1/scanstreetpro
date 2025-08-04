@@ -225,21 +225,43 @@ export default function AssetManager() {
       </div>
 
       {/* Controls */}
-      <Card className="glass-card border-white/20 opacity-60">
+      <Card className={cn("glass-card border-white/20", !canManageAssets && "opacity-75")}>
         <CardHeader>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <CardTitle className="text-slate-800 dark:text-white">Asset Inventory</CardTitle>
-              <CardDescription>Manage and track infrastructure assets</CardDescription>
+              <CardTitle className="text-slate-800 dark:text-white flex items-center gap-2">
+                Asset Inventory
+                {!canManageAssets && <Crown className="w-5 h-5 text-amber-500" />}
+              </CardTitle>
+              <CardDescription>
+                {canManageAssets
+                  ? "Manage and track infrastructure assets"
+                  : planFeatures?.sampleDataOnly
+                    ? "View sample asset data - upgrade for full management"
+                    : "Asset management requires Basic plan or higher"
+                }
+              </CardDescription>
             </div>
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" disabled>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!canManageAssets}
+                className={!canManageAssets ? "opacity-50" : ""}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Asset
+                {!canManageAssets && <Crown className="w-4 h-4 ml-2 text-amber-500" />}
               </Button>
-              <Button variant="outline" size="sm" disabled>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!canManageAssets}
+                className={!canManageAssets ? "opacity-50" : ""}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Export
+                {!canManageAssets && <Crown className="w-4 h-4 ml-2 text-amber-500" />}
               </Button>
             </div>
           </div>
