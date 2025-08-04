@@ -35,33 +35,63 @@ const mockStats = {
 const mockOrganizations = [
   {
     id: '1',
-    name: 'Demo Organization',
-    slug: 'demo-org',
-    plan: 'free',
-    created_at: new Date().toISOString(),
-    user_count: 5,
-    monthly_revenue: 0,
+    name: 'Acme Corporation',
+    slug: 'acme-corp',
+    plan: 'premium',
+    created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    user_count: 15,
+    monthly_revenue: 999,
     status: 'active'
   },
   {
     id: '2',
-    name: 'Sample Company',
-    slug: 'sample-co',
-    plan: 'basic',
-    created_at: new Date().toISOString(),
-    user_count: 10,
-    monthly_revenue: 99,
+    name: 'TechStart Inc',
+    slug: 'techstart',
+    plan: 'pro',
+    created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+    user_count: 8,
+    monthly_revenue: 299,
     status: 'active'
   },
   {
     id: '3',
-    name: 'Pro Business',
-    slug: 'pro-biz',
-    plan: 'pro',
-    created_at: new Date().toISOString(),
-    user_count: 25,
-    monthly_revenue: 299,
+    name: 'Sample Industries',
+    slug: 'sample-ind',
+    plan: 'basic',
+    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    user_count: 4,
+    monthly_revenue: 99,
     status: 'active'
+  },
+  {
+    id: '4',
+    name: 'Demo LLC',
+    slug: 'demo-llc',
+    plan: 'free',
+    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    user_count: 2,
+    monthly_revenue: 0,
+    status: 'trial'
+  },
+  {
+    id: '5',
+    name: 'Beta Testing Co',
+    slug: 'beta-testing',
+    plan: 'basic',
+    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    user_count: 6,
+    monthly_revenue: 99,
+    status: 'active'
+  },
+  {
+    id: '6',
+    name: 'StartupX',
+    slug: 'startupx',
+    plan: 'free',
+    created_at: new Date().toISOString(),
+    user_count: 1,
+    monthly_revenue: 0,
+    status: 'trial'
   }
 ];
 
