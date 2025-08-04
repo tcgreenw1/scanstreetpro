@@ -571,7 +571,7 @@ export default function AdminPortal() {
 
       console.log('Creating user:', { email, role, organizationId });
 
-      const result = await createUserInSupabase(email, password, {
+      const result = await mockCreateUserInSupabase(email, password, {
         name: email.split('@')[0],
         role,
         organization_id: organizationId
