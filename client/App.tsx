@@ -41,6 +41,7 @@ import Settings from "./pages/Settings";
 import TaskDetails from "./pages/TaskDetails";
 import MapView from "./pages/MapView";
 import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
 import DatabaseSetup from "./pages/DatabaseSetup";
 import DatabaseTest from "./pages/DatabaseTest";
 import TestOrgCreation from "./pages/TestOrgCreation";
