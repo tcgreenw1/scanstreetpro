@@ -1,4 +1,4 @@
-import { PlaceholderPage } from './PlaceholderPage';
+import { PlaceholderPage } from '../components/PlaceholderPage';
 
 export default function Applications() {
   const features = [

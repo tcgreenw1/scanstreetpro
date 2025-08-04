@@ -1,4 +1,4 @@
-import { PlaceholderPage } from './PlaceholderPage';
+import { PlaceholderPage } from '../components/PlaceholderPage';
 
 export default function StartGrant() {
   const features = [
