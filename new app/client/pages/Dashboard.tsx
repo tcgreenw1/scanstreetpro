@@ -46,13 +46,13 @@ import { ModifySampleDataModal } from '@/components/ModifySampleDataModal';
 const pciMethodComparison = [
   {
     method: 'Free PCI Scan',
-    type: 'Sample Map',
+    type: 'Sample Demo Map',
     coverage: '~5-10 streets',
-    accuracy: 'Basic visual',
+    accuracy: 'Demo scoring only',
     cost: '$0',
     timeframe: 'Instant',
-    pros: ['Quick preview', 'No cost', 'Immediate access'],
-    cons: ['Limited coverage', 'Basic accuracy', 'Sample data only'],
+    pros: ['Quick preview', 'No cost', 'Example PCI data', 'Platform demo'],
+    cons: ['Sample data only', 'Not real conditions', 'Demo purposes only'],
     color: 'blue',
     available: true
   },
