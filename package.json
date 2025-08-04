@@ -19,7 +19,8 @@
     "test": "vitest --run",
     "format.fix": "prettier --write .",
     "typecheck": "tsc",
-    "setup-admin": "node scripts/setup-admin.js"
+    "setup-admin": "node scripts/setup-admin.js",
+    "test-auth": "node scripts/test-auth.js"
   },
   "dependencies": {
     "@builder.io/sdk-react": "^4.2.3",
