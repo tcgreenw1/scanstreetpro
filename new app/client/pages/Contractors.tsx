@@ -295,19 +295,73 @@ export default function Contractors() {
     }
   };
 
-  const addContractor = async () => {
+  const [newContractorForm, setNewContractorForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    specialties: '',
+    certifications: ''
+  });
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [editingContractor, setEditingContractor] = useState<Contractor | null>(null);
+
+  const addContractor = async (formData: any) => {
     if (currentPlan === 'free' && contractors.length >= 3) {
       alert('Free plan allows only 3 contractors. Upgrade to add unlimited contractors.');
       return;
     }
 
-    // For demo purposes, show upgrade message for free users
-    if (currentPlan === 'free') {
-      alert('This is sample data. Upgrade to add real contractors.');
-      return;
-    }
+    const newContractor: Contractor = {
+      id: (Math.max(...contractors.map(c => parseInt(c.id))) + 1).toString(),
+      name: formData.name,
+      contact: {
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address
+      },
+      rating: 0,
+      certifications: formData.certifications.split(',').map((cert: string) => cert.trim()).filter(Boolean),
+      status: 'pending' as const,
+      activeProjects: 0,
+      completedProjects: 0,
+      totalValue: 0,
+      joinDate: new Date().toISOString().split('T')[0],
+      specialties: formData.specialties.split(',').map((spec: string) => spec.trim()).filter(Boolean)
+    };
 
-    alert('Add contractor functionality would be implemented here.');
+    setContractors([...contractors, newContractor]);
+    setIsAddDialogOpen(false);
+    alert('Contractor added successfully!');
+  };
+
+  const editContractor = async (contractorId: string, formData: any) => {
+    const updatedContractors = contractors.map(contractor =>
+      contractor.id === contractorId
+        ? {
+            ...contractor,
+            name: formData.name,
+            contact: {
+              email: formData.email,
+              phone: formData.phone,
+              address: formData.address
+            },
+            certifications: formData.certifications.split(',').map((cert: string) => cert.trim()).filter(Boolean),
+            specialties: formData.specialties.split(',').map((spec: string) => spec.trim()).filter(Boolean)
+          }
+        : contractor
+    );
+
+    setContractors(updatedContractors);
+    setEditingContractor(null);
+    alert('Contractor updated successfully!');
+  };
+
+  const deleteContractor = (contractorId: string) => {
+    if (confirm('Are you sure you want to delete this contractor?')) {
+      setContractors(contractors.filter(c => c.id !== contractorId));
+      alert('Contractor deleted successfully!');
+    }
   };
 
   const renderStars = (rating: number) => {
