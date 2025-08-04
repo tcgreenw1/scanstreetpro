@@ -32,6 +32,7 @@ export function createServer() {
   // New signup and auth routes
   app.use("/api", signupRoutes);
   app.use("/api/plans", plansRoutes);
+  app.use("/api", initDbRoutes);
 
   // Database routes
   app.post("/api/db/query", protectedQueryDatabase);
