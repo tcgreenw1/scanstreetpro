@@ -838,10 +838,29 @@ export const ensureDemoUsersExist = async () => {
 
         // Create in database with retry logic for foreign key issues
         let dbError = null;
-        let retries = 3;
+        let retries = 5; // Increased retries
 
         while (retries > 0) {
-          console.log(`📝 Attempting database user creation for ${demoUser.email} (${4 - retries}/3)`);
+          console.log(`📝 Attempting database user creation for ${demoUser.email} (${6 - retries}/5)`);
+
+          // First verify the auth user exists before attempting database insert
+          try {
+            const { data: authUsers, error: authCheckError } = await supabase.auth.admin.listUsers();
+            const authUserExists = authUsers?.users?.some(u => u.id === userId);
+
+            if (!authUserExists) {
+              console.warn(`⚠️ Auth user ${userId} not found in auth.users, waiting longer...`);
+              retries--;
+              if (retries > 0) {
+                await new Promise(resolve => setTimeout(resolve, 3000)); // Longer wait
+                continue;
+              } else {
+                throw new Error(`Auth user ${userId} not found after all retries`);
+              }
+            }
+          } catch (authCheckError) {
+            console.warn('Auth user check failed, proceeding with insert attempt...');
+          }
 
           const result = await supabase
             .from('users')
@@ -864,8 +883,8 @@ export const ensureDemoUsersExist = async () => {
           } else if (dbError.message.includes('foreign key constraint') || dbError.code === '23503') {
             retries--;
             if (retries > 0) {
-              console.warn(`⚠️ Foreign key constraint error for ${demoUser.email}, retrying in 2 seconds... (${retries} attempts left)`);
-              await new Promise(resolve => setTimeout(resolve, 2000));
+              console.warn(`⚠️ Foreign key constraint error for ${demoUser.email}, retrying in 3 seconds... (${retries} attempts left)`);
+              await new Promise(resolve => setTimeout(resolve, 3000)); // Longer wait
             } else {
               console.error(`❌ Foreign key constraint persists after all retries for ${demoUser.email}`);
             }
