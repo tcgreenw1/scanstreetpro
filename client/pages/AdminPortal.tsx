@@ -349,28 +349,23 @@ export default function AdminPortal() {
 
   const loadStats = async () => {
     try {
-      // Get organization count and plan distribution
-      const { data: orgData, error: orgError } = await supabase
-        .from('organizations')
-        .select('plan');
+      // Mock stats data
+      const mockOrgs = [
+        { plan: 'enterprise' },
+        { plan: 'free' },
+        { plan: 'professional' }
+      ];
 
-      if (orgError) throw orgError;
-
-      // Get user count
-      const { count: userCount, error: userError } = await supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true });
-
-      if (userError) throw userError;
+      const userCount = 3;
 
       // Calculate plan distribution
-      const planDistribution = orgData.reduce((acc, org) => {
+      const planDistribution = mockOrgs.reduce((acc, org) => {
         acc[org.plan] = (acc[org.plan] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
 
-      // Mock revenue calculation (in real app, would come from billing system)
-      const monthlyRevenue = orgData.reduce((total, org) => {
+      // Mock revenue calculation
+      const monthlyRevenue = mockOrgs.reduce((total, org) => {
         const planPricing = {
           free: 0,
           starter: 29,
@@ -381,10 +376,10 @@ export default function AdminPortal() {
       }, 0);
 
       setStats({
-        totalOrganizations: orgData.length,
-        totalUsers: userCount || 0,
+        totalOrganizations: mockOrgs.length,
+        totalUsers: userCount,
         monthlyRevenue,
-        totalAssets: 156, // Mock data - would come from assets table
+        totalAssets: 156, // Mock data
         planDistribution
       });
     } catch (error) {
