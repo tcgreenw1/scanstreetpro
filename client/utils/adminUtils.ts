@@ -1,133 +1,363 @@
-import { supabase } from '@/lib/neonAuth';
 import { getErrorMessage } from './errorHandler';
-import { safeError } from './safeLogger';
 
-export const refreshAdminData = async () => {
-  try {
-    console.log('🔄 Refreshing admin portal data...');
+// Admin utility functions for user management and system administration
 
-    // Clear any cached queries
-    if (typeof window !== 'undefined') {
-      // Clear localStorage cache if any
+// Get auth token for API calls
+const getAuthToken = () => {
+  return localStorage.getItem('neon_auth_token');
+};
+
+// API call helper
+const apiCall = async (endpoint: string, options: RequestInit = {}) => {
+  const token = getAuthToken();
+  const response = await fetch(endpoint, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      ...options.headers
+    }
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.error || `HTTP ${response.status}`);
+  }
+  
+  return data;
+};
+
+export const adminUtils = {
+  // Clear admin cache and sensitive data
+  clearAdminCache: () => {
+    try {
       const keys = Object.keys(localStorage);
       keys.forEach(key => {
-        if (key.startsWith('admin-') || key.startsWith('supabase-')) {
+        if (key.startsWith('admin-') || key.startsWith('neon-')) {
           localStorage.removeItem(key);
         }
       });
+      console.log('✅ Admin cache cleared');
+    } catch (error) {
+      console.error('❌ Failed to clear admin cache:', getErrorMessage(error));
     }
+  },
 
-    console.log('✅ Neon database connection successful');
+  // Get system health status
+  getSystemHealth: async () => {
+    try {
+      const response = await fetch('/api/health');
+      const data = await response.json();
+      return {
+        success: true,
+        data: {
+          status: data.status || 'unknown',
+          database: data.database || 'unknown',
+          uptime: data.uptime || 0,
+          version: data.version || 'unknown'
+        }
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
 
-    // Mock admin data for now - in a real implementation, this would query the Neon database
-    const mockOrganizations = [
-      {
-        id: '3a16af88-f08f-46c8-8bae-a11470227e90',
-        name: 'Scan Street Pro Admin',
-        slug: 'scan-street-admin',
-        plan: 'enterprise',
-        settings: {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        user_count: 1
-      },
-      {
-        id: 'f6e839fc-525a-4348-8fec-4ac1bf8389ff',
-        name: 'City of Springfield (Free)',
-        slug: 'springfield-free',
-        plan: 'free',
-        settings: {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        user_count: 1
-      },
-      {
-        id: '9e678560-1f05-4d2f-92d9-106c878c5904',
-        name: 'City of Springfield (Premium)',
-        slug: 'springfield-premium',
-        plan: 'professional',
-        settings: {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        user_count: 1
+  // Get all organizations
+  getOrganizations: async () => {
+    try {
+      const result = await apiCall('/api/admin/organizations');
+      return {
+        success: true,
+        data: result.data || []
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
+
+  // Create new organization
+  createOrganization: async (orgData: {
+    name: string;
+    plan: string;
+    settings?: any;
+  }) => {
+    try {
+      const result = await apiCall('/api/admin/organizations', {
+        method: 'POST',
+        body: JSON.stringify(orgData)
+      });
+      return {
+        success: true,
+        data: result.data
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
+
+  // Update organization
+  updateOrganization: async (orgId: string, updates: any) => {
+    try {
+      const result = await apiCall(`/api/admin/organizations/${orgId}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      });
+      return {
+        success: true,
+        data: result.data
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
+
+  // Delete organization
+  deleteOrganization: async (orgId: string) => {
+    try {
+      await apiCall(`/api/admin/organizations/${orgId}`, {
+        method: 'DELETE'
+      });
+      return {
+        success: true,
+        message: 'Organization deleted successfully'
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
+
+  // Get all users
+  getUsers: async () => {
+    try {
+      const result = await apiCall('/api/admin/users');
+      return {
+        success: true,
+        data: result.data || []
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
+
+  // Create new user
+  createUser: async (userData: {
+    email: string;
+    password: string;
+    name?: string;
+    role: string;
+    organization_id: string;
+  }) => {
+    try {
+      const result = await apiCall('/api/admin/users', {
+        method: 'POST',
+        body: JSON.stringify(userData)
+      });
+      return {
+        success: true,
+        data: result.data
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
+
+  // Update user
+  updateUser: async (userId: string, updates: any) => {
+    try {
+      const result = await apiCall(`/api/admin/users/${userId}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      });
+      return {
+        success: true,
+        data: result.data
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
+
+  // Delete user
+  deleteUser: async (userId: string) => {
+    try {
+      await apiCall(`/api/admin/users/${userId}`, {
+        method: 'DELETE'
+      });
+      return {
+        success: true,
+        message: 'User deleted successfully'
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
+
+  // Get admin statistics
+  getAdminStats: async () => {
+    try {
+      const result = await apiCall('/api/admin/stats');
+      return {
+        success: true,
+        data: result.data
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
+
+  // Export data
+  exportData: async (type: string, format: string = 'csv') => {
+    try {
+      const response = await fetch(`/api/export/${type}?format=${format}`, {
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.statusText}`);
       }
-    ];
 
-    const mockUsers = [
-      {
-        id: '7128c5d7-0fd6-4c3a-9c4a-4ffba4ec955d',
-        organization_id: '3a16af88-f08f-46c8-8bae-a11470227e90',
-        email: 'admin@scanstreetpro.com',
-        name: 'System Administrator',
-        role: 'admin',
-        phone: null,
-        is_active: true,
-        last_login: null,
-        created_at: new Date().toISOString(),
-        organizations: mockOrganizations[0]
-      },
-      {
-        id: '7a119669-0ef1-4512-ad39-8d4f28b621b6',
-        organization_id: 'f6e839fc-525a-4348-8fec-4ac1bf8389ff',
-        email: 'test@springfield.gov',
-        name: 'Test User',
-        role: 'manager',
-        phone: null,
-        is_active: true,
-        last_login: null,
-        created_at: new Date().toISOString(),
-        organizations: mockOrganizations[1]
-      },
-      {
-        id: 'f0b3d839-5f55-4d21-84dc-6f0dba46dfae',
-        organization_id: '9e678560-1f05-4d2f-92d9-106c878c5904',
-        email: 'premium@springfield.gov',
-        name: 'Premium User',
-        role: 'manager',
-        phone: null,
-        is_active: true,
-        last_login: null,
-        created_at: new Date().toISOString(),
-        organizations: mockOrganizations[2]
-      }
-    ];
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${type}_export_${Date.now()}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
 
-    console.log('📊 Admin data loaded:', {
-      organizations: mockOrganizations.length,
-      users: mockUsers.length
-    });
+      return {
+        success: true,
+        message: 'Export completed successfully'
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
 
-    return {
-      success: true,
-      data: {
-        organizations: mockOrganizations,
-        users: mockUsers
-      }
-    };
-  } catch (error: any) {
-    safeError('Admin data refresh failed', error);
-    return { success: false, error: getErrorMessage(error) };
+  // Test database connection
+  testDatabaseConnection: async () => {
+    try {
+      const response = await fetch('/api/db/test');
+      const data = await response.json();
+      return {
+        success: data.success,
+        message: data.message,
+        data: data.data
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
+
+  // Apply database migration
+  applyMigration: async (migrationType: string = 'financial') => {
+    try {
+      const result = await apiCall(`/api/migrate/${migrationType}`, {
+        method: 'POST'
+      });
+      return {
+        success: true,
+        message: result.message
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
+
+  // Check user existence in database
+  checkUserExists: async (email: string) => {
+    try {
+      const result = await apiCall(`/api/admin/users/check/${email}`);
+      return {
+        success: true,
+        exists: result.exists,
+        data: result.data
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
+
+  // Reset user password
+  resetUserPassword: async (userId: string, newPassword: string) => {
+    try {
+      const result = await apiCall(`/api/admin/users/${userId}/reset-password`, {
+        method: 'POST',
+        body: JSON.stringify({ password: newPassword })
+      });
+      return {
+        success: true,
+        message: result.message
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
+  },
+
+  // Get system logs
+  getSystemLogs: async (limit: number = 100) => {
+    try {
+      const result = await apiCall(`/api/admin/logs?limit=${limit}`);
+      return {
+        success: true,
+        data: result.data || []
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: getErrorMessage(error)
+      };
+    }
   }
 };
 
-export const testAdminAccess = async (userId: string) => {
-  try {
-    const { data: userData, error } = await supabase
-      .from('users')
-      .select('role, organizations(*)')
-      .eq('id', userId)
-      .single();
-
-    if (error) {
-      return { isAdmin: false, error: error.message };
-    }
-
-    return { 
-      isAdmin: userData?.role === 'admin',
-      userData,
-      organization: userData?.organizations
-    };
-  } catch (error: any) {
-    return { isAdmin: false, error: error.message };
-  }
-};
+export default adminUtils;
