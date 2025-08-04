@@ -14,7 +14,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -60,11 +60,6 @@ const Login = () => {
     setError('');
 
     try {
-      if (isSignUp) {
-        const result = await signUpWithTimeout(email, password);
-        if (result.error) throw result.error;
-        setError('✅ Check your email for verification link!');
-      } else {
         // Try Supabase auth first
         try {
           const { data, error } = await signInWithTimeout(email, password);
@@ -96,7 +91,6 @@ const Login = () => {
             throw authError;
           }
         }
-      }
     } catch (error: any) {
       setError(error?.message || 'Authentication failed. Please try again.');
     } finally {
@@ -123,13 +117,10 @@ const Login = () => {
           <div className="p-8 space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-slate-800">
-                {isSignUp ? 'Create Account' : 'Welcome Back'}
+                Welcome Back
               </h2>
               <p className="text-slate-500 mt-2">
-                {isSignUp
-                  ? 'Join the future of infrastructure management'
-                  : 'Sign in to your infrastructure dashboard'
-                }
+                Sign in to your infrastructure dashboard
               </p>
             </div>
 
@@ -193,7 +184,7 @@ const Login = () => {
                   </div>
                 ) : (
                   <div className="flex items-center space-x-3">
-                    <span>{isSignUp ? 'Create Account' : 'Sign In'}</span>
+                    <span>Sign In</span>
                     <ArrowRight className="h-5 w-5" />
                   </div>
                 )}
