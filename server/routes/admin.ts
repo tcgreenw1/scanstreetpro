@@ -318,7 +318,7 @@ router.get('/organizations', adminAuth, async (req: Request, res: Response) => {
       res.json({ success: true, data: mockOrganizations });
     }
   } catch (error) {
-    console.warn('Database error, using mock organizations:', error);
+    console.warn('Database error, using mock organizations:', error.message);
     res.json({ success: true, data: mockOrganizations });
   }
 });
