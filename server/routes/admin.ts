@@ -21,15 +21,15 @@ const executeQuery = async (sql: string, params?: any[]) => {
   }
 };
 
-// Mock data fallback for when database is unavailable
+// Enhanced mock data that simulates a real admin portal
 const mockStats = {
-  totalOrganizations: 5,
-  totalUsers: 25,
-  monthlyRevenue: 2500,
-  totalRevenue: 15000,
-  planDistribution: { free: 3, basic: 1, pro: 1, premium: 0 },
-  recentSignups: 8,
-  activeTrials: 3
+  totalOrganizations: 12,
+  totalUsers: 47,
+  monthlyRevenue: 4280,
+  totalRevenue: 23450,
+  planDistribution: { free: 7, basic: 3, pro: 2, premium: 0 },
+  recentSignups: 12,
+  activeTrials: 5
 };
 
 const mockOrganizations = [
