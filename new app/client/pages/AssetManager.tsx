@@ -439,33 +439,7 @@ export default function AssetManager() {
       </Card>
 
       {/* Premium Features Showcase */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="glass-card border-amber-200/50 bg-gradient-to-r from-amber-50/30 to-orange-50/30 dark:from-amber-900/10 dark:to-orange-900/10 opacity-75">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-white">
-              <Navigation className="w-5 h-5 text-amber-600" />
-              GPS Asset Tracking
-            </CardTitle>
-            <CardDescription>Real-time location monitoring and route optimization</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                Live GPS tracking for mobile assets
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                Geofencing and alerts
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                Route history and analytics
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
         <Card className="glass-card border-amber-200/50 bg-gradient-to-r from-amber-50/30 to-orange-50/30 dark:from-amber-900/10 dark:to-orange-900/10 opacity-75">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-white">
