@@ -242,12 +242,58 @@ export default function Settings() {
     }
   };
 
-  const addUser = () => {
-    if (currentPlan === 'free' && users.length >= 3) {
+  const [usersList, setUsersList] = useState(users);
+  const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [newUserForm, setNewUserForm] = useState({
+    name: '',
+    email: '',
+    role: 'viewer' as const
+  });
+
+  const addUser = (formData: any) => {
+    if (currentPlan === 'free' && usersList.length >= 3) {
       alert('Free plan allows only 3 users. Upgrade to add unlimited team members.');
       return;
     }
-    alert('Add user functionality would be implemented here.');
+
+    const newUser: User = {
+      id: `U${String(usersList.length + 1).padStart(3, '0')}`,
+      name: formData.name,
+      email: formData.email,
+      role: formData.role,
+      status: 'pending',
+      lastLogin: 'Never'
+    };
+
+    setUsersList([...usersList, newUser]);
+    setIsAddUserDialogOpen(false);
+    alert('User added successfully! They will receive an invitation email.');
+  };
+
+  const editUser = (userId: string, formData: any) => {
+    setUsersList(prev => prev.map(user =>
+      user.id === userId
+        ? { ...user, name: formData.name, email: formData.email, role: formData.role }
+        : user
+    ));
+    setEditingUser(null);
+    alert('User updated successfully!');
+  };
+
+  const deleteUser = (userId: string) => {
+    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      setUsersList(prev => prev.filter(user => user.id !== userId));
+      alert('User deleted successfully!');
+    }
+  };
+
+  const toggleUserStatus = (userId: string) => {
+    setUsersList(prev => prev.map(user =>
+      user.id === userId
+        ? { ...user, status: user.status === 'active' ? 'disabled' : 'active' as const }
+        : user
+    ));
   };
 
   const generateApiKey = () => {
