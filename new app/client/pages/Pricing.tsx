@@ -256,7 +256,7 @@ export default function Pricing() {
         {/* Core Plans */}
         {planOrder.slice(0, 4).map((planKey) => {
           const plan = plans[planKey] || getPlanInfo(planKey);
-          const price = getPrice(planKey);
+          const price = getPlanPrice(planKey);
           const isCurrentPlan = currentPlan === planKey;
           const isPopular = planKey === 'pro';
 
