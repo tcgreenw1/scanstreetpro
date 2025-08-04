@@ -37,7 +37,16 @@ interface ApiResponse<T = any> {
 
 // POST /api/signup - Create user and organization
 router.post('/signup', async (req: Request, res: Response<ApiResponse>) => {
-  const client = await getPool().connect();
+  const pool = getPool();
+
+  if (!pool) {
+    return res.status(503).json({
+      success: false,
+      error: 'Database is currently unavailable'
+    });
+  }
+
+  const client = await pool.connect();
   
   try {
     await client.query('BEGIN');
