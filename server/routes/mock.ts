@@ -146,4 +146,54 @@ router.get('/settings', mockAuth, async (req: Request, res: Response) => {
   });
 });
 
+// POST /api/mock/login - Mock login endpoint
+router.post('/login', async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  // Check for admin credentials
+  if (email === 'admin@scanstreetpro.com' && password === 'zobfig-mirme9-qiMdas') {
+    res.json({
+      success: true,
+      data: {
+        user: mockAdminUser,
+        organization: {
+          id: mockAdminUser.organization_id,
+          name: mockAdminUser.org_name,
+          plan: mockAdminUser.org_plan
+        },
+        token: 'mock-admin-token-12345'
+      }
+    });
+  } else {
+    res.status(401).json({
+      success: false,
+      error: 'Invalid credentials'
+    });
+  }
+});
+
+// GET /api/mock/me - Mock user verification
+router.get('/me', async (req: Request, res: Response) => {
+  const authHeader = req.headers.authorization;
+
+  if (authHeader === 'Bearer mock-admin-token-12345') {
+    res.json({
+      success: true,
+      data: {
+        user: mockAdminUser,
+        organization: {
+          id: mockAdminUser.organization_id,
+          name: mockAdminUser.org_name,
+          plan: mockAdminUser.org_plan
+        }
+      }
+    });
+  } else {
+    res.status(401).json({
+      success: false,
+      error: 'Invalid token'
+    });
+  }
+});
+
 export default router;
