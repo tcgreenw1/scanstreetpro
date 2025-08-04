@@ -9,6 +9,9 @@ const router = Router();
 let pool: Pool | null = null;
 
 function getPool() {
+  if (process.env.DISABLE_DB === 'true') {
+    throw new Error('Database is disabled');
+  }
   if (!pool) {
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
