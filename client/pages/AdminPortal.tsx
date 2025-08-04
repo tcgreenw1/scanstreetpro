@@ -473,10 +473,7 @@ export default function AdminPortal() {
 
   const updateUserStatus = async (userId: string, isActive: boolean) => {
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({ is_active: isActive })
-        .eq('id', userId);
+      await mockToggleUserActive(userId, isActive);
 
       if (error) throw error;
       
