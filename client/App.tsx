@@ -51,6 +51,7 @@ import DebugEnv from "./pages/DebugEnv";
 import ConnectionTest from "./pages/ConnectionTest";
 import ErrorTest from "./pages/ErrorTest";
 import InitDatabase from "./pages/InitDatabase";
+import CreateDemoUsers from "./pages/CreateDemoUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
