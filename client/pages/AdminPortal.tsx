@@ -605,12 +605,7 @@ export default function AdminPortal() {
 
   const updateUserRole = async (userId: string, role: string) => {
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({ role })
-        .eq('id', userId);
-
-      if (error) throw error;
+      await mockUpdateUserRole(userId, role);
 
       await loadUsers();
       setError('User role updated successfully!');
