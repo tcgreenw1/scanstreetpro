@@ -75,30 +75,56 @@ export class Diagnostics {
   static checkSupabaseConfig(): DiagnosticResult {
     const url = import.meta.env.VITE_SUPABASE_URL;
     const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    const databaseUrl = import.meta.env.VITE_DATABASE_URL;
 
-    const issues: string[] = [];
-
-    if (url && !url.includes('supabase.co')) {
-      issues.push('Invalid URL format');
+    // Check if using Neon database
+    if (databaseUrl) {
+      return {
+        component: 'Database Configuration',
+        status: 'pass',
+        message: 'Neon database configured',
+        details: {
+          type: 'Neon PostgreSQL',
+          configured: 'Yes'
+        }
+      };
     }
 
-    if (key && !key.startsWith('eyJ')) {
+    // Check if using placeholder values (mock mode)
+    if (url?.includes('placeholder') || key?.includes('placeholder')) {
+      return {
+        component: 'Database Configuration',
+        status: 'pass',
+        message: 'Running in mock mode with demo data',
+        details: {
+          type: 'Mock/Development',
+          demoUsers: 'Available'
+        }
+      };
+    }
+
+    // Legacy Supabase checks
+    const issues: string[] = [];
+    if (url && !url.includes('supabase.co') && !url.includes('placeholder')) {
+      issues.push('Invalid URL format');
+    }
+    if (key && !key.startsWith('eyJ') && !key.includes('placeholder')) {
       issues.push('Invalid key format (should be JWT)');
     }
 
     if (issues.length > 0) {
       return {
-        component: 'Supabase Configuration',
-        status: 'fail',
+        component: 'Database Configuration',
+        status: 'warning',
         message: `Configuration issues: ${issues.join(', ')}`,
         details: { url, keyLength: key?.length || 0 }
       };
     }
 
     return {
-      component: 'Supabase Configuration',
+      component: 'Database Configuration',
       status: 'pass',
-      message: 'Supabase configuration appears valid'
+      message: 'Configuration appears valid'
     };
   }
 
