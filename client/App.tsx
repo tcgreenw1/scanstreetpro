@@ -35,6 +35,7 @@ import CitizenEngagement from "./pages/CitizenEngagement";
 import MaintenanceScheduler from "./pages/MaintenanceScheduler";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminPortal from "./pages/AdminPortal";
+import AdminOrganizations from "./pages/AdminOrganizations";
 import Integrations from "./pages/Integrations";
 import CostEstimator from "./pages/CostEstimator";
 import Inspections from "./pages/Inspections";
