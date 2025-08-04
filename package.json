@@ -21,7 +21,8 @@
     "typecheck": "tsc",
     "setup-admin": "node scripts/setup-admin.js",
     "test-auth": "node scripts/test-auth.js",
-    "init-admin-db": "node scripts/init-admin-db.js"
+    "init-admin-db": "node scripts/init-admin-db.js",
+    "check-db-schema": "node scripts/check-db-schema.js"
   },
   "dependencies": {
     "@builder.io/sdk-react": "^4.2.3",
