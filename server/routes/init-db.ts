@@ -189,13 +189,13 @@ router.get('/db-status', async (req: Request, res: Response) => {
     const result = await pool.query('SELECT NOW()');
     
     // Check if tables exist
-    const tablesResult = await pool.query(\`
-      SELECT table_name 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public' 
+    const tablesResult = await pool.query(`
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = 'public'
       AND table_type = 'BASE TABLE'
       ORDER BY table_name
-    \`);
+    `);
 
     res.json({
       success: true,
