@@ -5,6 +5,7 @@ import { handleDemo } from "./routes/demo";
 import { signIn, signUp, verifyToken } from "./routes/auth";
 import { protectedQueryDatabase, testConnection } from "./routes/database";
 import signupRoutes from "./routes/signup";
+import plansRoutes from "./routes/plans";
 
 export function createServer() {
   const app = express();
