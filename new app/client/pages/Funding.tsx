@@ -604,10 +604,77 @@ export default function Funding() {
                 <Search className="w-4 h-4 mr-2" />
                 Search Grants
               </Button>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Grant
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Grant
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Add New Grant Opportunity</DialogTitle>
+                    <DialogDescription>
+                      Add a new grant opportunity to track deadlines and requirements
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form className="space-y-4">
+                    <div>
+                      <Label htmlFor="grant-name">Grant Name</Label>
+                      <Input id="grant-name" placeholder="e.g., Resilient Infrastructure Grant" required />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="grant-agency">Agency</Label>
+                        <Input id="grant-agency" placeholder="e.g., Department of Transportation" required />
+                      </div>
+                      <div>
+                        <Label htmlFor="grant-amount">Award Amount</Label>
+                        <Input id="grant-amount" type="number" placeholder="2000000" required />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="grant-deadline">Application Deadline</Label>
+                        <Input id="grant-deadline" type="date" required />
+                      </div>
+                      <div>
+                        <Label htmlFor="grant-category">Category</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="infrastructure">Infrastructure</SelectItem>
+                            <SelectItem value="safety">Safety</SelectItem>
+                            <SelectItem value="environment">Environment</SelectItem>
+                            <SelectItem value="rural">Rural Development</SelectItem>
+                            <SelectItem value="technology">Technology</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="match-required" />
+                        <Label htmlFor="match-required">Match Required</Label>
+                      </div>
+                      <div>
+                        <Label htmlFor="match-amount">Match Amount</Label>
+                        <Input id="match-amount" type="number" placeholder="400000" />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="grant-description">Description</Label>
+                      <Textarea id="grant-description" placeholder="Funding for climate-resilient transportation infrastructure improvements" rows={3} required />
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button type="button" variant="outline">Cancel</Button>
+                      <Button type="submit">Add Grant</Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
