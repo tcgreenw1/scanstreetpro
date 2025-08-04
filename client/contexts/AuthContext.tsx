@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
-import { supabase, signInWithTimeout, signUpWithTimeout, signOutWithTimeout } from '@/lib/neonAuth';
+import { signInWithTimeout, signUpWithTimeout, signOutWithTimeout } from '@/lib/neonAuth';
 
 interface AuthUser {
   id: string;
@@ -58,57 +58,54 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         console.log('🔄 Checking existing session...');
 
-        // Check for existing session
-        const { data: { session }, error } = await supabase.auth.getSession();
-
-        if (!mounted.current) return;
-
-        if (error) {
-          console.warn('Session error:', error.message);
-          setLoading(false);
-          return;
-        }
-
-        if (session?.user) {
-          console.log('✅ Session found:', session.user.email);
-          setUser(session.user);
-          setOrganization(session.organization || null);
+        // Check for existing token
+        const token = localStorage.getItem('neon_auth_token');
+        
+        if (token) {
+          try {
+            const response = await fetch('/api/me', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (response.ok) {
+              const result = await response.json();
+              if (result.success && result.data.user) {
+                console.log('✅ Session found:', result.data.user.email);
+                setUser(result.data.user);
+                setOrganization(result.data.organization || null);
+              }
+            } else {
+              // Token is invalid, remove it
+              localStorage.removeItem('neon_auth_token');
+              localStorage.removeItem('neon_auth_session');
+            }
+          } catch (error) {
+            console.warn('Failed to verify token:', error);
+            localStorage.removeItem('neon_auth_token');
+            localStorage.removeItem('neon_auth_session');
+          }
         } else {
-          console.log('ℹ️ No session found');
+          console.log('ℹ️ No token found');
         }
 
-        setLoading(false);
+        if (mounted.current) {
+          setLoading(false);
+        }
 
       } catch (error: any) {
         console.error('Auth initialization failed:', error.message);
-        setLoading(false);
+        if (mounted.current) {
+          setLoading(false);
+        }
       }
     };
 
     initialize();
 
-    // Auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (!mounted.current) return;
-        
-        console.log('🔄 Auth event:', event);
-        
-        if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setOrganization(null);
-        } else if (event === 'SIGNED_IN' && session) {
-          setUser(session.user);
-          setOrganization(session.organization || null);
-        }
-        
-        setLoading(false);
-      }
-    );
-
     return () => {
       mounted.current = false;
-      subscription.unsubscribe();
     };
   }, []);
 
@@ -151,11 +148,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOut = async () => {
     try {
       setLoading(true);
-      const result = await signOutWithTimeout();
+      await signOutWithTimeout();
       setUser(null);
       setOrganization(null);
+      localStorage.removeItem('neon_auth_token');
+      localStorage.removeItem('neon_auth_session');
       setLoading(false);
-      return result;
+      return { error: null };
     } catch (error: any) {
       setLoading(false);
       return { error };
