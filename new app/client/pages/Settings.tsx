@@ -323,7 +323,7 @@ export default function Settings() {
           Manage your organization settings, user permissions, security preferences, and system configuration.
         </p>
         <Badge variant="outline" className="mt-4 bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300">
-          {users.length}/3 Users {currentPlan === 'free' ? '(Free Plan)' : '(Unlimited)'}
+          {usersList.length}/3 Users {currentPlan === 'free' ? '(Free Plan)' : '(Unlimited)'}
         </Badge>
       </div>
 
