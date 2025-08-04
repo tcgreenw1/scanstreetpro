@@ -8,6 +8,7 @@ import signupRoutes from "./routes/signup";
 import plansRoutes from "./routes/plans";
 import initDbRoutes from "./routes/init-db";
 import hashGenRoutes from "./routes/hash-generator";
+import adminRoutes from "./routes/admin";
 
 export function createServer() {
   const app = express();
