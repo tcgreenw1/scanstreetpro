@@ -212,6 +212,64 @@ export default function CostEstimator() {
     window.location.href = '/pricing';
   };
 
+  const addAssetCategory = () => {
+    if (!assetForm.name || !assetForm.currentPCI || !assetForm.laneMiles) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    const newAsset: AssetCategory = {
+      id: `asset_${assetCategories.length + 1}`,
+      name: assetForm.name!,
+      currentPCI: assetForm.currentPCI!,
+      laneMiles: assetForm.laneMiles!,
+      unitCosts: {
+        patching: assetForm.unitCosts?.patching || 2.00,
+        overlay: assetForm.unitCosts?.overlay || 6.00,
+        rebuild: assetForm.unitCosts?.rebuild || 18.00
+      }
+    };
+
+    setAssetCategories([...assetCategories, newAsset]);
+    setAssetForm({});
+    setIsAddingAsset(false);
+  };
+
+  const editAssetCategory = (asset: AssetCategory) => {
+    setEditingAsset(asset);
+    setAssetForm(asset);
+  };
+
+  const updateAssetCategory = () => {
+    if (!editingAsset || !assetForm.name || !assetForm.currentPCI || !assetForm.laneMiles) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    setAssetCategories(prev => prev.map(asset =>
+      asset.id === editingAsset.id
+        ? { ...asset, ...assetForm } as AssetCategory
+        : asset
+    ));
+
+    setEditingAsset(null);
+    setAssetForm({});
+  };
+
+  const deleteAssetCategory = (assetId: string) => {
+    if (confirm('Are you sure you want to delete this asset category?')) {
+      setAssetCategories(prev => prev.filter(asset => asset.id !== assetId));
+      // Remove from selected categories if it was selected
+      setSelectedCategories(prev => prev.filter(id => id !== assetId));
+    }
+  };
+
+  const resetAssetForm = () => {
+    setAssetForm({});
+    setEditingAsset(null);
+    setIsAddingAsset(false);
+  };
+
   const calculateROI = () => {
     const preventiveCost = projections.filter(p => p.year <= new Date().getFullYear() + 3)
       .reduce((sum, p) => sum + p.patchingCost + p.overlayCost, 0);
