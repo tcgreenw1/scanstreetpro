@@ -18,8 +18,6 @@ interface PlanContextType {
   isBasicPlan: boolean;
   isProPlan: boolean;
   isPremiumPlan: boolean;
-  isSatellitePlan: boolean;
-  isDrivingPlan: boolean;
 }
 
 const PlanContext = createContext<PlanContextType | null>(null);
