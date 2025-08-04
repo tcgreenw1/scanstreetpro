@@ -8,6 +8,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TYPE user_role AS ENUM ('manager', 'member');
 CREATE TYPE organization_plan AS ENUM ('free', 'basic', 'pro', 'premium', 'satellite', 'driving');
 CREATE TYPE subscription_status AS ENUM ('active', 'trial', 'canceled');
+CREATE TYPE transaction_type AS ENUM ('payment', 'refund', 'upgrade', 'downgrade');
+CREATE TYPE transaction_status AS ENUM ('pending', 'completed', 'failed', 'canceled');
 
 -- Organizations table
 CREATE TABLE organizations (
@@ -146,9 +148,47 @@ INSERT INTO ui_rules (plan, component_name, visible, sample_data, show_crown) VA
 ('driving', 'analytics', true, false, false),
 ('driving', 'advanced_settings', true, false, false);
 
+-- Transactions table for financial tracking
+CREATE TABLE transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+    subscription_id UUID REFERENCES subscriptions(id) ON DELETE SET NULL,
+    amount INTEGER NOT NULL, -- Amount in cents
+    currency TEXT NOT NULL DEFAULT 'USD',
+    type transaction_type NOT NULL,
+    status transaction_status NOT NULL DEFAULT 'pending',
+    stripe_payment_id TEXT,
+    description TEXT,
+    metadata JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    completed_at TIMESTAMP WITH TIME ZONE
+);
+
+-- Settings table for admin configuration
+CREATE TABLE system_settings (
+    id SERIAL PRIMARY KEY,
+    key TEXT UNIQUE NOT NULL,
+    value TEXT NOT NULL,
+    description TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Insert default settings
+INSERT INTO system_settings (key, value, description) VALUES
+('stripe_public_key', '', 'Stripe publishable key for payments'),
+('stripe_secret_key', '', 'Stripe secret key for payments'),
+('maintenance_mode', 'false', 'Enable/disable maintenance mode'),
+('max_organizations_per_user', '5', 'Maximum organizations a user can create'),
+('trial_duration_days', '14', 'Default trial duration in days'),
+('email_notifications', 'true', 'Enable email notifications');
+
 -- Create indexes for better performance
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_organization_id ON users(organization_id);
 CREATE INDEX idx_subscriptions_organization_id ON subscriptions(organization_id);
 CREATE INDEX idx_plan_features_plan ON plan_features(plan);
 CREATE INDEX idx_ui_rules_plan ON ui_rules(plan);
+CREATE INDEX idx_transactions_organization_id ON transactions(organization_id);
+CREATE INDEX idx_transactions_created_at ON transactions(created_at);
+CREATE INDEX idx_transactions_status ON transactions(status);
+CREATE INDEX idx_system_settings_key ON system_settings(key);
