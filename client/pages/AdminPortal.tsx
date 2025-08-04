@@ -319,7 +319,7 @@ const AdminPortal = () => {
     }
   };
 
-  const getPlanBadgeColor = (plan: string) => {
+  const getPlanBadgeColor = (plan: string | undefined | null) => {
     switch (plan) {
       case 'free': return 'bg-gray-100 text-gray-800';
       case 'basic': return 'bg-blue-100 text-blue-800';
