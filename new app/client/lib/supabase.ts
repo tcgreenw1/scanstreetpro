@@ -1020,6 +1020,10 @@ export const signUpWithTimeout = async (email: string, password: string) => {
         throw new Error('Password must be at least 6 characters long.');
       } else if (errorMessage.includes('Network request failed')) {
         throw new Error('Network connection failed. Please check your internet connection.');
+      } else if (errorMessage.includes('invalid') && errorMessage.includes('email')) {
+        throw new Error('Invalid email address. Please check the email format and try again.');
+      } else if (errorMessage.includes('Email address') && errorMessage.includes('invalid')) {
+        throw new Error('This email address is not allowed. Please use a work email or contact support.');
       } else {
         throw new Error(errorMessage || 'Sign up failed');
       }
@@ -1035,7 +1039,7 @@ export const signUpWithTimeout = async (email: string, password: string) => {
 
 export const signOutWithTimeout = async () => {
   try {
-    console.log('🚪 Signing out...');
+    console.log('��� Signing out...');
 
     const result = await withTimeout(
       supabase.auth.signOut(),
