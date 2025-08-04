@@ -780,9 +780,27 @@ export const ensureDemoUsersExist = async () => {
           console.log(`✅ Auth user created successfully for ${demoUser.email}`);
         } else if (authResult.error && authResult.error.message.includes('User already registered')) {
           console.log(`ℹ️ User ${demoUser.email} already exists in auth`);
-          // For existing users, we'll create the database entry if it doesn't exist
-          authSuccess = true;
-          authData = { user: { id: 'existing-user', email: demoUser.email } };
+          // For existing users, try to sign them in to get the user ID
+          try {
+            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+              email: demoUser.email,
+              password: demoUser.password
+            });
+
+            if (!signInError && signInData.user) {
+              authData = signInData;
+              authSuccess = true;
+              console.log(`✅ Retrieved existing user ${demoUser.email}`);
+              // Sign out immediately to not affect current session
+              await supabase.auth.signOut();
+            } else {
+              console.warn(`Cannot sign in existing user ${demoUser.email}, skipping`);
+              continue;
+            }
+          } catch (signInErr) {
+            console.warn(`Error signing in existing user ${demoUser.email}:`, getErrorMessage(signInErr));
+            continue;
+          }
         } else if (authResult.error) {
           const errorMessage = getErrorMessage(authResult.error);
           console.error(`❌ Auth creation failed for ${demoUser.email}:`, errorMessage);
