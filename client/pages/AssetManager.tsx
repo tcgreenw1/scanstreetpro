@@ -173,54 +173,78 @@ export default function AssetManager() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="glass-card border-white/20 opacity-60">
+        <Card className={cn("glass-card border-white/20", !canManageAssets && "opacity-75")}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Total Assets</p>
-                <p className="text-2xl font-bold text-slate-800 dark:text-white">{mockAssets.length}</p>
-              </div>
-              <Building2 className="w-8 h-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card border-white/20 opacity-60">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Total Value</p>
-                <p className="text-2xl font-bold text-slate-800 dark:text-white">
-                  ${totalValue.toLocaleString()}
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Total Assets</p>
+                  {!canManageAssets && <Crown className="w-4 h-4 text-amber-500" />}
+                </div>
+                <p className={cn("text-2xl font-bold",
+                  canManageAssets ? "text-slate-800 dark:text-white" : "text-slate-400"
+                )}>
+                  {canManageAssets ? assets.length : '••••'}
                 </p>
               </div>
-              <DollarSign className="w-8 h-8 text-green-600" />
+              <Building2 className={cn("w-8 h-8", canManageAssets ? "text-blue-600" : "text-slate-300")} />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="glass-card border-white/20 opacity-60">
+        <Card className={cn("glass-card border-white/20", !canManageAssets && "opacity-75")}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Maintenance Cost</p>
-                <p className="text-2xl font-bold text-slate-800 dark:text-white">
-                  ${totalMaintenanceCost.toLocaleString()}
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Average PCI</p>
+                  {!canManageAssets && <Crown className="w-4 h-4 text-amber-500" />}
+                </div>
+                <p className={cn("text-2xl font-bold",
+                  canManageAssets ? "text-slate-800 dark:text-white" : "text-slate-400"
+                )}>
+                  {canManageAssets ? averagePCI : '••••'}
                 </p>
               </div>
-              <Wrench className="w-8 h-8 text-orange-600" />
+              <BarChart3 className={cn("w-8 h-8", canManageAssets ? "text-green-600" : "text-slate-300")} />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="glass-card border-white/20 opacity-60">
+        <Card className={cn("glass-card border-white/20", !canManageAssets && "opacity-75")}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Need Attention</p>
-                <p className="text-2xl font-bold text-slate-800 dark:text-white">{assetsNeedingAttention}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Total Value</p>
+                  {!canManageAssets && <Crown className="w-4 h-4 text-amber-500" />}
+                </div>
+                <p className={cn("text-2xl font-bold",
+                  canManageAssets ? "text-slate-800 dark:text-white" : "text-slate-400"
+                )}>
+                  {canManageAssets ? `$${Math.round(totalValue / 1000)}K` : '••••'}
+                </p>
               </div>
-              <AlertTriangle className="w-8 h-8 text-red-600" />
+              <DollarSign className={cn("w-8 h-8", canManageAssets ? "text-green-600" : "text-slate-300")} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className={cn("glass-card border-white/20", !canManageAssets && "opacity-75")}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Need Attention</p>
+                  {!canManageAssets && <Crown className="w-4 h-4 text-amber-500" />}
+                </div>
+                <p className={cn("text-2xl font-bold",
+                  canManageAssets ? "text-slate-800 dark:text-white" : "text-slate-400"
+                )}>
+                  {canManageAssets ? assetsNeedingAttention : '••••'}
+                </p>
+              </div>
+              <AlertTriangle className={cn("w-8 h-8", canManageAssets ? "text-red-600" : "text-slate-300")} />
             </div>
           </CardContent>
         </Card>
