@@ -37,6 +37,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { usePricing } from '@/contexts/PricingContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOrganization, usePermissions } from '@/contexts/OrganizationContext';
 import { GlobalSearch } from './GlobalSearch';
 import { ConnectionStatus } from './ConnectionStatus';
 import {
