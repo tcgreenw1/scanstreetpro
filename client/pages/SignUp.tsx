@@ -199,6 +199,24 @@ const SignUp = () => {
                   </div>
                 </div>
 
+                {/* Organization Name */}
+                <div className="space-y-3">
+                  <Label htmlFor="organizationName" className="text-slate-700 dark:text-slate-300 font-medium">
+                    Organization Name <span className="text-slate-400">(optional)</span>
+                  </Label>
+                  <div className="relative">
+                    <Building2 className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+                    <Input
+                      id="organizationName"
+                      type="text"
+                      placeholder="Your company or organization name"
+                      value={formData.organizationName}
+                      onChange={(e) => handleInputChange('organizationName', e.target.value)}
+                      className="pl-12 h-14 glass-card border-slate-200/50 dark:border-slate-600/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm rounded-xl text-slate-800 dark:text-slate-200 placeholder:text-slate-400 transition-all duration-300"
+                    />
+                  </div>
+                </div>
+
                 {/* Email */}
                 <div className="space-y-3">
                   <Label htmlFor="email" className="text-slate-700 dark:text-slate-300 font-medium">
