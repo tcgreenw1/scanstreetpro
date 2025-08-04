@@ -1102,7 +1102,39 @@ export default function Funding() {
                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                   Complete overview of all funding sources and utilization
                 </p>
-                <Button size="sm" className="w-full">
+                <Button
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    // Generate and download PDF report
+                    const reportData = {
+                      title: 'Funding Summary Report',
+                      date: new Date().toLocaleDateString(),
+                      totalFunding: totalFunding,
+                      availableFunding: totalAvailableFunding,
+                      allocatedFunding: totalAllocatedFunding,
+                      sources: fundingSources,
+                      grants: availableGrants,
+                      scenarios: scenarios
+                    };
+
+                    // In a real implementation, this would call a service to generate PDF
+                    console.log('Generating PDF report...', reportData);
+
+                    // Mock download
+                    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `funding-summary-${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    alert('PDF report functionality would be implemented with a proper PDF library like jsPDF or server-side generation.');
+                  }}
+                >
                   <Download className="w-4 h-4 mr-2" />
                   Export PDF
                 </Button>
