@@ -22,7 +22,7 @@ import {
   Shield,
   Users,
   Database,
-  Support
+  HelpCircle
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePlan } from "@/hooks/usePlan";
