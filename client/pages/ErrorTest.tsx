@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getErrorMessage } from '@/utils/errorHandler';
-import { testSupabaseConnection } from '@/lib/neonAuth';
+import { testNeonConnection } from '@/lib/neonAuth';
 
 export default function ErrorTest() {
   const [testResults, setTestResults] = useState<string[]>([]);
