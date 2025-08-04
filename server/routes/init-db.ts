@@ -171,7 +171,7 @@ router.post('/init-db', async (req: Request, res: Response) => {
     console.log('Initializing database schema...');
     
     // Execute the schema
-    await pool.query(SCHEMA_SQL);
+    await getPool().query(SCHEMA_SQL);
 
     console.log('Database schema initialized successfully');
 
@@ -193,10 +193,10 @@ router.post('/init-db', async (req: Request, res: Response) => {
 router.get('/db-status', async (req: Request, res: Response) => {
   try {
     // Test connection
-    const result = await pool.query('SELECT NOW()');
+    const result = await getPool().query('SELECT NOW()');
     
     // Check if tables exist
-    const tablesResult = await pool.query(`
+    const tablesResult = await getPool().query(`
       SELECT table_name
       FROM information_schema.tables
       WHERE table_schema = 'public'
