@@ -88,7 +88,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Show content if user has access
-  if (user && (!requireAdmin || user.role === 'admin')) {
+  if (user && (!requireAdmin || user.role === 'manager')) {
     return <>{children}</>;
   }
 
