@@ -513,7 +513,7 @@ export const testSupabaseConnection = async () => {
         );
       } catch (extendedDbError: any) {
         const errorMessage = extractErrorMessage(extendedDbError);
-        console.error('�� Database service completely failed:', errorMessage);
+        console.error('❌ Database service completely failed:', errorMessage);
         return { success: false, error: `Database unavailable: ${errorMessage}. Using offline mode.` };
       }
     }
@@ -1070,14 +1070,8 @@ export const createUserInSupabase = async (email: string, password: string, user
     if (dbError) {
       const errorMessage = getErrorMessage(dbError);
       console.error('❌ Failed to create user in database:', errorMessage);
-      // Try to clean up the auth user if database insert failed
-      try {
-        await supabase.auth.admin.deleteUser(authData.user.id);
-        console.log('🧹 Cleaned up Auth user after database failure');
-      } catch (cleanupError) {
-        const cleanupErrorMessage = getErrorMessage(cleanupError);
-        console.warn('Failed to cleanup Auth user:', cleanupErrorMessage);
-      }
+      // Cannot clean up auth user with client API - user will remain in auth
+      console.warn('⚠️ Database user creation failed but auth user remains (cannot cleanup with client API)');
       throw new Error(`Failed to create user in database: ${errorMessage}`);
     }
 
