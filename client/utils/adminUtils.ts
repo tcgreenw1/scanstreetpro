@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/neonAuth';
 import { getErrorMessage } from './errorHandler';
 import { safeError } from './safeLogger';
 
