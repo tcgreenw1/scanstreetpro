@@ -364,14 +364,14 @@ export default function Pricing() {
                   className={cn(
                     "w-full",
                     isCurrentPlan ? "bg-gray-400 cursor-not-allowed" :
-                    planKey === 'enterprise' ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700" :
+                    planKey === 'premium' || planKey === 'satellite' || planKey === 'driving' ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700" :
                     isPopular ? "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700" :
                     "bg-blue-600 hover:bg-blue-700"
                   )}
                 >
                   {isCurrentPlan ? "Current Plan" :
                    planKey === 'free' ? "Start Free" :
-                   planKey === 'enterprise' ? "Contact Sales" :
+                   planKey === 'premium' || planKey === 'satellite' || planKey === 'driving' ? "Contact Sales" :
                    `Upgrade to ${plan.name}`}
                   {!isCurrentPlan && <ArrowRight className="w-4 h-4 ml-2" />}
                 </Button>
