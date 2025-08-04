@@ -23,7 +23,6 @@
   },
   "dependencies": {
     "@builder.io/sdk-react": "^4.2.3",
-    "@supabase/supabase-js": "^2.53.0",
     "@types/bcrypt": "^6.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
