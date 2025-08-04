@@ -800,6 +800,113 @@ export default function Contractors() {
                                 </Tabs>
                               </DialogContent>
                             </Dialog>
+
+                            {/* Edit Button */}
+                            <Dialog open={editingContractor?.id === contractor.id} onOpenChange={(open) => !open && setEditingContractor(null)}>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm" onClick={() => setEditingContractor(contractor)}>
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                  <DialogTitle>Edit Contractor</DialogTitle>
+                                  <DialogDescription>
+                                    Update contractor information and details
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <form
+                                  className="space-y-4"
+                                  onSubmit={(e) => {
+                                    e.preventDefault();
+                                    const formData = new FormData(e.target as HTMLFormElement);
+                                    editContractor(contractor.id, {
+                                      name: formData.get('name'),
+                                      email: formData.get('email'),
+                                      phone: formData.get('phone'),
+                                      address: formData.get('address'),
+                                      specialties: formData.get('specialties'),
+                                      certifications: formData.get('certifications')
+                                    });
+                                  }}
+                                >
+                                  <div>
+                                    <Label htmlFor="edit-contractor-name">Company Name</Label>
+                                    <Input
+                                      id="edit-contractor-name"
+                                      name="name"
+                                      defaultValue={contractor.name}
+                                      required
+                                    />
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label htmlFor="edit-contractor-email">Email</Label>
+                                      <Input
+                                        id="edit-contractor-email"
+                                        name="email"
+                                        type="email"
+                                        defaultValue={contractor.contact.email}
+                                        required
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="edit-contractor-phone">Phone</Label>
+                                      <Input
+                                        id="edit-contractor-phone"
+                                        name="phone"
+                                        type="tel"
+                                        defaultValue={contractor.contact.phone}
+                                        required
+                                      />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="edit-contractor-address">Address</Label>
+                                    <Textarea
+                                      id="edit-contractor-address"
+                                      name="address"
+                                      defaultValue={contractor.contact.address}
+                                      rows={2}
+                                      required
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="edit-contractor-specialties">Specialties (comma-separated)</Label>
+                                    <Input
+                                      id="edit-contractor-specialties"
+                                      name="specialties"
+                                      defaultValue={contractor.specialties.join(', ')}
+                                      required
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="edit-contractor-certifications">Certifications (comma-separated)</Label>
+                                    <Input
+                                      id="edit-contractor-certifications"
+                                      name="certifications"
+                                      defaultValue={contractor.certifications.join(', ')}
+                                    />
+                                  </div>
+                                  <div className="flex justify-end space-x-2">
+                                    <Button type="button" variant="outline" onClick={() => setEditingContractor(null)}>
+                                      Cancel
+                                    </Button>
+                                    <Button type="submit">Update Contractor</Button>
+                                  </div>
+                                </form>
+                              </DialogContent>
+                            </Dialog>
+
+                            {/* Delete Button */}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => deleteContractor(contractor.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
