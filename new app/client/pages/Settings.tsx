@@ -573,10 +573,89 @@ export default function Settings() {
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          <Button variant="outline" size="sm">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
+                          <Dialog open={editingUser?.id === user.id} onOpenChange={(open) => !open && setEditingUser(null)}>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm" onClick={() => setEditingUser(user)}>
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>Edit User</DialogTitle>
+                                <DialogDescription>
+                                  Update user information and permissions
+                                </DialogDescription>
+                              </DialogHeader>
+                              <form
+                                className="space-y-4"
+                                onSubmit={(e) => {
+                                  e.preventDefault();
+                                  const formData = new FormData(e.target as HTMLFormElement);
+                                  editUser(user.id, {
+                                    name: formData.get('name'),
+                                    email: formData.get('email'),
+                                    role: formData.get('role')
+                                  });
+                                }}
+                              >
+                                <div>
+                                  <Label htmlFor="edit-user-name">Full Name</Label>
+                                  <Input
+                                    id="edit-user-name"
+                                    name="name"
+                                    defaultValue={user.name}
+                                    required
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor="edit-user-email">Email Address</Label>
+                                  <Input
+                                    id="edit-user-email"
+                                    name="email"
+                                    type="email"
+                                    defaultValue={user.email}
+                                    required
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor="edit-user-role">Role</Label>
+                                  <Select name="role" defaultValue={user.role} required>
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="admin">Admin</SelectItem>
+                                      <SelectItem value="manager">Manager</SelectItem>
+                                      <SelectItem value="inspector">Inspector</SelectItem>
+                                      <SelectItem value="viewer">Viewer</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => toggleUserStatus(user.id)}
+                                  >
+                                    {user.status === 'active' ? 'Disable User' : 'Enable User'}
+                                  </Button>
+                                </div>
+                                <div className="flex justify-end space-x-2">
+                                  <Button type="button" variant="outline" onClick={() => setEditingUser(null)}>
+                                    Cancel
+                                  </Button>
+                                  <Button type="submit">Update User</Button>
+                                </div>
+                              </form>
+                            </DialogContent>
+                          </Dialog>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => deleteUser(user.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
