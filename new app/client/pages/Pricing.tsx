@@ -381,6 +381,134 @@ export default function Pricing() {
         })}
       </div>
 
+      {/* Enterprise Plans */}
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-4">Enterprise Data Collection Plans</h2>
+        <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+          Advanced scanning solutions with AI assistance and dedicated engineering support
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        {/* Satellite Enterprise */}
+        <Card className="glass-card border-white/20 hover:shadow-2xl transition-all duration-300">
+          <CardHeader className="text-center pb-8">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center">
+              <Globe className="w-8 h-8 text-white" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-slate-800 dark:text-white">
+              Satellite Enterprise
+            </CardTitle>
+            <CardDescription className="text-slate-600 dark:text-slate-300 mt-2">
+              AI-powered satellite-based data collection
+            </CardDescription>
+            <div className="mt-6">
+              <p className="text-3xl font-bold text-slate-800 dark:text-white">Custom</p>
+              <p className="text-sm text-slate-500">Contact for pricing</p>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-slate-800 dark:text-white">Key Features:</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Everything in Pro plus:
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  AI & Engineer Help
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Scan up to 5x/year
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Fast Rescans
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Council Reports
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Basic Citizen Reports
+                </li>
+              </ul>
+            </div>
+            <Button
+              onClick={() => setShowContactForm(true)}
+              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+            >
+              Contact Sales
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Driving Enterprise */}
+        <Card className="glass-card border-white/20 hover:shadow-2xl transition-all duration-300">
+          <CardHeader className="text-center pb-8">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center">
+              <Building2 className="w-8 h-8 text-white" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-slate-800 dark:text-white">
+              Driving Enterprise
+            </CardTitle>
+            <CardDescription className="text-slate-600 dark:text-slate-300 mt-2">
+              High-precision driving-based data collection
+            </CardDescription>
+            <div className="mt-6">
+              <p className="text-3xl font-bold text-slate-800 dark:text-white">Custom</p>
+              <p className="text-sm text-slate-500">Contact for pricing</p>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-slate-800 dark:text-white">Key Features:</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Same as Satellite Enterprise
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  AI & Engineer Help
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Scan up to 5x/year
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Fast Rescans
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Council Reports
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Basic Citizen Reports
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  Driving-based data collection
+                </li>
+              </ul>
+            </div>
+            <Button
+              onClick={() => setShowContactForm(true)}
+              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+            >
+              Contact Sales
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Feature Comparison Table */}
       <div className="mt-16">
         <h2 className="text-3xl font-bold text-center text-slate-800 dark:text-white mb-8">
