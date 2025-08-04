@@ -147,27 +147,50 @@ export default function AssetManager() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Premium Header */}
-      <div className="glass-card border-amber-200/50 bg-gradient-to-r from-amber-50/50 to-orange-50/50 dark:from-amber-900/20 dark:to-orange-900/20 p-6 rounded-xl">
+      {/* Header */}
+      <div className={cn(
+        "glass-card p-6 rounded-xl",
+        !canManageAssets
+          ? "border-amber-200/50 bg-gradient-to-r from-amber-50/50 to-orange-50/50 dark:from-amber-900/20 dark:to-orange-900/20"
+          : "border-white/20"
+      )}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
-              <Crown className="w-6 h-6 text-white" />
+            <div className={cn(
+              "w-12 h-12 rounded-xl flex items-center justify-center",
+              !canManageAssets
+                ? "bg-gradient-to-r from-amber-500 to-orange-500"
+                : "bg-gradient-to-r from-blue-500 to-purple-500"
+            )}>
+              {!canManageAssets ? (
+                <Crown className="w-6 h-6 text-white" />
+              ) : (
+                <Building2 className="w-6 h-6 text-white" />
+              )}
             </div>
             <div>
               <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Asset Manager</h1>
-              <p className="text-slate-600 dark:text-slate-300">Premium Feature - Upgrade Required</p>
+              <p className="text-slate-600 dark:text-slate-300">
+                {canManageAssets
+                  ? `Managing ${assets.length} infrastructure assets`
+                  : planFeatures?.sampleDataOnly
+                    ? "Viewing sample data - upgrade for full management"
+                    : "Asset management requires Basic plan or higher"
+                }
+              </p>
             </div>
           </div>
-          <Link to="/pricing">
-            <Button
-              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
-              title="See pricing and included features"
-            >
-              <Crown className="w-4 h-4 mr-2" />
-              Upgrade to Access
-            </Button>
-          </Link>
+          {!canManageAssets && (
+            <Link to="/pricing">
+              <Button
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                title="See pricing and included features"
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade to Access
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
