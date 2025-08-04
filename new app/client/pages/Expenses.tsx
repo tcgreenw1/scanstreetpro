@@ -115,14 +115,163 @@ export default function Expenses() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => {
+              // Generate CSV export of filtered expenses
+              const csvData = filteredExpenses.map(expense => ({
+                'Date': formatDate(expense.date),
+                'Category': expense.category,
+                'Description': expense.description,
+                'Contractor': expense.contractor,
+                'Amount': expense.amount,
+                'Status': expense.status
+              }));
+
+              const headers = Object.keys(csvData[0] || {});
+              const csvContent = [
+                headers.join(','),
+                ...csvData.map(row =>
+                  headers.map(header => `"${row[header as keyof typeof row]}"`).join(',')
+                )
+              ].join('\n');
+
+              // Download CSV
+              const blob = new Blob([csvContent], { type: 'text/csv' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `expenses-export-${new Date().toISOString().split('T')[0]}.csv`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            }}
+          >
             <Download className="w-4 h-4" />
             Export
           </Button>
-          <Button className="gap-2">
-            <Plus className="w-4 h-4" />
-            Add Expense
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                Add Expense
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Add New Expense</DialogTitle>
+                <DialogDescription>
+                  Record a new infrastructure maintenance expense
+                </DialogDescription>
+              </DialogHeader>
+              <form
+                className="space-y-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.target as HTMLFormElement);
+                  const newExpense = {
+                    id: (Math.max(...expenses.map(e => parseInt(e.id))) + 1).toString(),
+                    date: formData.get('date') as string,
+                    category: formData.get('category') as string,
+                    description: formData.get('description') as string,
+                    contractor: formData.get('contractor') as string,
+                    amount: parseInt(formData.get('amount') as string),
+                    status: formData.get('status') as string
+                  };
+
+                  console.log('New expense:', newExpense);
+                  alert('Expense added successfully! In a real application, this would be saved to the database.');
+                  (e.target as HTMLFormElement).reset();
+                }}
+              >
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="expense-date">Date</Label>
+                    <Input
+                      id="expense-date"
+                      name="date"
+                      type="date"
+                      required
+                      defaultValue={new Date().toISOString().split('T')[0]}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="expense-category">Category</Label>
+                    <Select name="category" required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map(category => (
+                          <SelectItem key={category} value={category}>{category}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="expense-description">Description</Label>
+                  <Input
+                    id="expense-description"
+                    name="description"
+                    placeholder="e.g., Pothole repair on Main Street"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="expense-contractor">Contractor</Label>
+                    <Input
+                      id="expense-contractor"
+                      name="contractor"
+                      placeholder="e.g., ABC Construction"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="expense-amount">Amount ($)</Label>
+                    <Input
+                      id="expense-amount"
+                      name="amount"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="1500.00"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="expense-status">Status</Label>
+                  <Select name="status" required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Paid">Paid</SelectItem>
+                      <SelectItem value="Unpaid">Unpaid</SelectItem>
+                      <SelectItem value="Upcoming">Upcoming</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="expense-notes">Additional Notes (Optional)</Label>
+                  <Textarea
+                    id="expense-notes"
+                    name="notes"
+                    placeholder="Any additional details about this expense..."
+                    rows={3}
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button type="button" variant="outline">Cancel</Button>
+                  <Button type="submit">Add Expense</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
