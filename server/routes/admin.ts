@@ -304,17 +304,19 @@ router.get('/organizations', adminAuth, async (req: Request, res: Response) => {
     `;
 
     const result = await executeQuery(orgsQuery);
-    
-    if (result.rows.length >= 0) {
+
+    if (result.rows.length > 0) {
       const organizations = result.rows.map(row => ({
         ...row,
         status: 'active', // Add default status
         monthly_revenue: parseFloat(row.monthly_revenue) || 0,
         user_count: parseInt(row.user_count) || 0
       }));
-      
+
       res.json({ success: true, data: organizations });
     } else {
+      // Database is empty, use mock data
+      console.log('Database empty, using mock organizations');
       res.json({ success: true, data: mockOrganizations });
     }
   } catch (error) {
