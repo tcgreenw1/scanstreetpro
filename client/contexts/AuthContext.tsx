@@ -2,7 +2,10 @@ import React, { createContext, useContext, useEffect, useState, ReactNode, useRe
 import { supabase, signInWithTimeout, signUpWithTimeout, signOutWithTimeout } from '@/lib/neonAuth';
 import { getErrorMessage } from '@/utils/errorHandler';
 
-interface AuthUser extends User {
+interface AuthUser {
+  id: string;
+  email: string;
+  name?: string;
   role?: string;
   organization_id?: string;
   organization?: {
