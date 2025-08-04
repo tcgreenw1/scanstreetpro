@@ -224,35 +224,44 @@ export default function AdminPortal() {
   const loadOrganizations = async () => {
     try {
       console.log('📊 Loading organizations...');
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('*')
-        .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Organizations query error:', error);
-        throw error;
-      }
+      // Mock organizations data
+      const mockOrganizations = [
+        {
+          id: '3a16af88-f08f-46c8-8bae-a11470227e90',
+          name: 'Scan Street Pro Admin',
+          slug: 'scan-street-admin',
+          plan: 'enterprise' as const,
+          settings: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          user_count: 1
+        },
+        {
+          id: 'f6e839fc-525a-4348-8fec-4ac1bf8389ff',
+          name: 'City of Springfield (Free)',
+          slug: 'springfield-free',
+          plan: 'free' as const,
+          settings: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          user_count: 1
+        },
+        {
+          id: '9e678560-1f05-4d2f-92d9-106c878c5904',
+          name: 'City of Springfield (Premium)',
+          slug: 'springfield-premium',
+          plan: 'professional' as const,
+          settings: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          user_count: 1
+        }
+      ];
 
-      console.log('Organizations data:', data);
-
-      // Get user counts separately to avoid complex joins
-      const orgsWithCounts = await Promise.all(
-        (data || []).map(async (org) => {
-          const { count } = await supabase
-            .from('users')
-            .select('*', { count: 'exact', head: true })
-            .eq('organization_id', org.id);
-
-          return {
-            ...org,
-            user_count: count || 0
-          };
-        })
-      );
-
-      setOrganizations(orgsWithCounts);
-      return orgsWithCounts;
+      console.log('Organizations data:', mockOrganizations);
+      setOrganizations(mockOrganizations);
+      return mockOrganizations;
     } catch (error) {
       console.error('loadOrganizations failed:', error);
       setOrganizations([]);
