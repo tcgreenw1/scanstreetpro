@@ -448,13 +448,104 @@ export default function Contractors() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button 
-                  onClick={addContractor}
-                  disabled={currentPlan === 'free' && contractors.length >= 3}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Contractor
-                </Button>
+                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      disabled={currentPlan === 'free' && contractors.length >= 3}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Contractor
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Add New Contractor</DialogTitle>
+                      <DialogDescription>
+                        Add a new contractor to your approved vendors list
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form
+                      className="space-y-4"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.target as HTMLFormElement);
+                        addContractor({
+                          name: formData.get('name'),
+                          email: formData.get('email'),
+                          phone: formData.get('phone'),
+                          address: formData.get('address'),
+                          specialties: formData.get('specialties'),
+                          certifications: formData.get('certifications')
+                        });
+                      }}
+                    >
+                      <div>
+                        <Label htmlFor="contractor-name">Company Name</Label>
+                        <Input
+                          id="contractor-name"
+                          name="name"
+                          placeholder="e.g., Premier Paving Co."
+                          required
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="contractor-email">Email</Label>
+                          <Input
+                            id="contractor-email"
+                            name="email"
+                            type="email"
+                            placeholder="contact@company.com"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="contractor-phone">Phone</Label>
+                          <Input
+                            id="contractor-phone"
+                            name="phone"
+                            type="tel"
+                            placeholder="(555) 123-4567"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="contractor-address">Address</Label>
+                        <Textarea
+                          id="contractor-address"
+                          name="address"
+                          placeholder="1234 Industrial Blvd, City, ST 12345"
+                          rows={2}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="contractor-specialties">Specialties (comma-separated)</Label>
+                        <Input
+                          id="contractor-specialties"
+                          name="specialties"
+                          placeholder="Asphalt Paving, Road Reconstruction, Parking Lots"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="contractor-certifications">Certifications (comma-separated)</Label>
+                        <Input
+                          id="contractor-certifications"
+                          name="certifications"
+                          placeholder="DOT Certified, OSHA 30, MBE"
+                        />
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button type="submit">Add Contractor</Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardContent>
           </Card>
