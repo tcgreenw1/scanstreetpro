@@ -48,80 +48,54 @@ import { cn } from '@/lib/utils';
 import { neonService, Asset } from '@/services/neonService';
 import { useOrganization, usePermissions } from '@/contexts/OrganizationContext';
 
-// Mock asset data
-const mockAssets = [
-  {
-    id: 'A001',
-    name: 'Main Street Bridge',
-    type: 'Bridge',
-    location: { lat: 40.7128, lng: -74.0060, address: '123 Main St' },
-    condition: 'Good',
-    status: 'Active',
-    lastInspection: '2024-01-15',
-    nextInspection: '2024-07-15',
-    assignedContractor: 'Bridge Works Inc.',
-    installDate: '2018-05-15',
-    value: 250000,
-    maintenanceCost: 12500,
-    priority: 'Medium'
-  },
-  {
-    id: 'A002',
-    name: 'Oak Avenue Traffic Light',
-    type: 'Traffic Signal',
-    location: { lat: 40.7589, lng: -73.9851, address: '456 Oak Ave' },
-    condition: 'Excellent',
-    status: 'Active',
-    lastInspection: '2024-01-10',
-    nextInspection: '2024-04-10',
-    assignedContractor: 'Signal Tech LLC',
-    installDate: '2022-03-20',
-    value: 15000,
-    maintenanceCost: 800,
-    priority: 'Low'
-  },
-  {
-    id: 'A003',
-    name: 'Pine Road Storm Drain',
-    type: 'Drainage',
-    location: { lat: 40.6892, lng: -74.0445, address: '789 Pine Rd' },
-    condition: 'Poor',
-    status: 'Needs Repair',
-    lastInspection: '2024-01-20',
-    nextInspection: '2024-02-20',
-    assignedContractor: 'Drain Masters',
-    installDate: '2015-09-10',
-    value: 8500,
-    maintenanceCost: 3200,
-    priority: 'High'
-  },
-  {
-    id: 'A004',
-    name: 'City Hall Lighting System',
-    type: 'Street Light',
-    location: { lat: 40.7250, lng: -74.0000, address: 'City Hall Plaza' },
-    condition: 'Good',
-    status: 'Active',
-    lastInspection: '2024-01-05',
-    nextInspection: '2024-06-05',
-    assignedContractor: 'Bright Lights Co.',
-    installDate: '2020-11-12',
-    value: 25000,
-    maintenanceCost: 1500,
-    priority: 'Low'
-  }
-];
-
-const assetTypes = ['All', 'Bridge', 'Traffic Signal', 'Drainage', 'Street Light', 'Signage', 'Pavement'];
-const conditionTypes = ['All', 'Excellent', 'Good', 'Fair', 'Poor', 'Critical'];
-const statusTypes = ['All', 'Active', 'Needs Repair', 'Under Maintenance', 'Decommissioned'];
+const assetTypes = ['All', 'road', 'bridge', 'sidewalk', 'drainage', 'lighting', 'signage'];
+const conditionTypes = ['All', 'excellent', 'good', 'fair', 'poor', 'critical'];
 
 export default function AssetManager() {
+  const { organization, planFeatures } = useOrganization();
+  const { isFeatureUnlocked } = usePermissions();
+
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('All');
   const [selectedCondition, setSelectedCondition] = useState('All');
-  const [selectedStatus, setSelectedStatus] = useState('All');
   const [viewMode, setViewMode] = useState<'table' | 'map'>('table');
+
+  // Check if asset management is unlocked
+  const canManageAssets = isFeatureUnlocked('assetManagement');
+
+  // Load assets from database
+  useEffect(() => {
+    const loadAssets = async () => {
+      if (!organization) return;
+
+      try {
+        setIsLoading(true);
+        const assetData = await neonService.getAssets(
+          organization.id,
+          planFeatures?.sampleDataOnly || false
+        );
+        setAssets(assetData);
+      } catch (error) {
+        console.error('Failed to load assets:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAssets();
+  }, [organization, planFeatures]);
+
+  // Filter assets based on search and filters
+  const filteredAssets = assets.filter(asset => {
+    const matchesSearch = asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         asset.location.address?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = selectedType === 'All' || asset.type === selectedType;
+    const matchesCondition = selectedCondition === 'All' || asset.condition.status === selectedCondition;
+
+    return matchesSearch && matchesType && matchesCondition;
+  });
 
   const getConditionColor = (condition: string) => {
     switch (condition) {
