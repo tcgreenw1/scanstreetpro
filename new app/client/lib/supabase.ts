@@ -15,7 +15,7 @@ console.log('🔧 Supabase Configuration:', {
 });
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('❌ Supabase configuration missing! Check environment variables.');
+  console.error('��� Supabase configuration missing! Check environment variables.');
 } else if (!supabaseUrl.includes('supabase.co')) {
   console.error('❌ Invalid Supabase URL format! Should be https://xxx.supabase.co');
 } else if (!supabaseAnonKey.startsWith('eyJ')) {
@@ -762,30 +762,17 @@ export const ensureDemoUsersExist = async () => {
         let authData = null;
         let authSuccess = false;
 
-        // Try multiple methods to create auth user
-        const authMethods = [
-          // Method 1: Regular signup
-          async () => {
-            console.log(`Trying regular signup for ${demoUser.email}`);
-            return await supabase.auth.signUp({
-              email: demoUser.email,
-              password: demoUser.password,
-              options: {
-                data: { name: demoUser.name }
-              }
-            });
-          },
-          // Method 2: Admin create
-          async () => {
-            console.log(`Trying admin create for ${demoUser.email}`);
-            return await supabase.auth.admin.createUser({
-              email: demoUser.email,
-              password: demoUser.password,
-              email_confirm: true,
-              user_metadata: { name: demoUser.name }
-            });
+        // Use regular signup (admin API not available in client)
+        console.log(`Creating auth user via signup for ${demoUser.email}`);
+
+        const authResult = await supabase.auth.signUp({
+          email: demoUser.email,
+          password: demoUser.password,
+          options: {
+            data: { name: demoUser.name },
+            emailRedirectTo: undefined // Skip email confirmation for demo users
           }
-        ];
+        });
 
         for (const method of authMethods) {
           try {
