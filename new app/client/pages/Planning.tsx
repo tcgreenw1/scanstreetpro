@@ -47,7 +47,11 @@ import {
   Building,
   Package,
   Wrench,
-  Shield
+  Shield,
+  Plus,
+  Edit,
+  Trash2,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePricing } from "@/contexts/PricingContext";
