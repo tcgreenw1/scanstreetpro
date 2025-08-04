@@ -81,7 +81,8 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <PlanProvider>
+      <OrganizationProvider>
+        <PlanProvider>
         <PricingProvider>
           <TooltipProvider>
         <AppInitializer>
@@ -170,7 +171,8 @@ const App = () => (
         </AppInitializer>
           </TooltipProvider>
         </PricingProvider>
-      </PlanProvider>
+        </PlanProvider>
+      </OrganizationProvider>
     </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
