@@ -40,6 +40,7 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminFinancials from "./pages/AdminFinancials";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminSettings from "./pages/AdminSettings";
+import AdminDatabase from "./pages/AdminDatabase";
 import Integrations from "./pages/Integrations";
 import CostEstimator from "./pages/CostEstimator";
 import Inspections from "./pages/Inspections";
