@@ -54,10 +54,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         }
       }
 
-      // Check admin access
-      if (user && requireAdmin && user.role !== 'admin') {
+      // Check admin access (managers are admins in our system)
+      if (user && requireAdmin && user.role !== 'manager') {
         if (location.pathname !== '/dashboard') {
-          console.log('🚫 Non-admin user, redirecting to dashboard via window.location');
+          console.log('🚫 Non-manager user, redirecting to dashboard via window.location');
           window.location.replace('/dashboard');
           return;
         }
