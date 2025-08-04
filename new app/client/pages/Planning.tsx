@@ -759,6 +759,176 @@ export default function Planning() {
           </CardContent>
         </Card>
       )}
+
+      {/* Add Goal Dialog */}
+      <Dialog open={isAddingGoal} onOpenChange={setIsAddingGoal}>
+        <DialogContent className="max-w-md glass-card border-white/20">
+          <DialogHeader>
+            <DialogTitle>Add New Budget Goal</DialogTitle>
+            <DialogDescription>
+              Create a new capital improvement goal for tracking
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Goal Name</Label>
+              <Input
+                placeholder="e.g., Main Street Reconstruction"
+                value={goalForm.name || ''}
+                onChange={(e) => setGoalForm({...goalForm, name: e.target.value})}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Target Amount</Label>
+                <Input
+                  type="number"
+                  placeholder="2500000"
+                  value={goalForm.targetAmount || ''}
+                  onChange={(e) => setGoalForm({...goalForm, targetAmount: Number(e.target.value)})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Current Funding</Label>
+                <Input
+                  type="number"
+                  placeholder="850000"
+                  value={goalForm.currentAmount || ''}
+                  onChange={(e) => setGoalForm({...goalForm, currentAmount: Number(e.target.value)})}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Timeline (years)</Label>
+                <Input
+                  type="number"
+                  placeholder="3"
+                  value={goalForm.timeframe || ''}
+                  onChange={(e) => setGoalForm({...goalForm, timeframe: Number(e.target.value)})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select value={goalForm.priority || ''} onValueChange={(value) => setGoalForm({...goalForm, priority: value as 'high' | 'medium' | 'low'})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select value={goalForm.category || ''} onValueChange={(value) => setGoalForm({...goalForm, category: value as 'roads' | 'bridges' | 'sidewalks' | 'drainage' | 'general'})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="roads">Roads</SelectItem>
+                  <SelectItem value="bridges">Bridges</SelectItem>
+                  <SelectItem value="sidewalks">Sidewalks</SelectItem>
+                  <SelectItem value="drainage">Drainage</SelectItem>
+                  <SelectItem value="general">General</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetForm}>Cancel</Button>
+            <Button onClick={addBudgetGoal}>Add Goal</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Goal Dialog */}
+      <Dialog open={!!editingGoal} onOpenChange={(open) => !open && resetForm()}>
+        <DialogContent className="max-w-md glass-card border-white/20">
+          <DialogHeader>
+            <DialogTitle>Edit Budget Goal</DialogTitle>
+            <DialogDescription>
+              Update the budget goal details
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Goal Name</Label>
+              <Input
+                placeholder="e.g., Main Street Reconstruction"
+                value={goalForm.name || ''}
+                onChange={(e) => setGoalForm({...goalForm, name: e.target.value})}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Target Amount</Label>
+                <Input
+                  type="number"
+                  placeholder="2500000"
+                  value={goalForm.targetAmount || ''}
+                  onChange={(e) => setGoalForm({...goalForm, targetAmount: Number(e.target.value)})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Current Funding</Label>
+                <Input
+                  type="number"
+                  placeholder="850000"
+                  value={goalForm.currentAmount || ''}
+                  onChange={(e) => setGoalForm({...goalForm, currentAmount: Number(e.target.value)})}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Timeline (years)</Label>
+                <Input
+                  type="number"
+                  placeholder="3"
+                  value={goalForm.timeframe || ''}
+                  onChange={(e) => setGoalForm({...goalForm, timeframe: Number(e.target.value)})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select value={goalForm.priority || ''} onValueChange={(value) => setGoalForm({...goalForm, priority: value as 'high' | 'medium' | 'low'})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select value={goalForm.category || ''} onValueChange={(value) => setGoalForm({...goalForm, category: value as 'roads' | 'bridges' | 'sidewalks' | 'drainage' | 'general'})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="roads">Roads</SelectItem>
+                  <SelectItem value="bridges">Bridges</SelectItem>
+                  <SelectItem value="sidewalks">Sidewalks</SelectItem>
+                  <SelectItem value="drainage">Drainage</SelectItem>
+                  <SelectItem value="general">General</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetForm}>Cancel</Button>
+            <Button onClick={updateBudgetGoal}>Update Goal</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
