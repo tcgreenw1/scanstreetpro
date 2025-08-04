@@ -61,10 +61,11 @@ const pciTrends = [
 ];
 
 const laneMilesByTier = [
-  { tier: 'Good (80-100)', miles: 52.7, percentage: 33.1 },
-  { tier: 'Fair (60-79)', miles: 66.4, percentage: 41.7 },
-  { tier: 'Poor (40-59)', miles: 26.6, percentage: 16.7 },
-  { tier: 'Failed (0-39)', miles: 13.7, percentage: 8.6 }
+  { tier: 'Great (85-100)', miles: 39.8, percentage: 25.0 },
+  { tier: 'Good (70-84)', miles: 53.0, percentage: 33.3 },
+  { tier: 'Fair (55-69)', miles: 39.8, percentage: 25.0 },
+  { tier: 'Poor (40-54)', miles: 13.2, percentage: 8.3 },
+  { tier: 'Failed (0-39)', miles: 13.2, percentage: 8.3 }
 ];
 
 export default function Reports() {
