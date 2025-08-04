@@ -1150,7 +1150,43 @@ export default function Funding() {
                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                   Deadlines and application schedules for all grants
                 </p>
-                <Button size="sm" className="w-full">
+                <Button
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    // Generate grant calendar data
+                    const calendarData = availableGrants.map(grant => ({
+                      'Grant Name': grant.name,
+                      'Agency': grant.agency,
+                      'Amount': grant.amount,
+                      'Deadline': grant.deadline,
+                      'Status': grant.status,
+                      'Category': grant.category,
+                      'Match Required': grant.matchRequired ? 'Yes' : 'No',
+                      'Match Amount': grant.matchAmount || 0
+                    }));
+
+                    // Convert to CSV format
+                    const headers = Object.keys(calendarData[0] || {});
+                    const csvContent = [
+                      headers.join(','),
+                      ...calendarData.map(row =>
+                        headers.map(header => `"${row[header as keyof typeof row]}"`).join(',')
+                      )
+                    ].join('\n');
+
+                    // Download CSV
+                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `grant-calendar-${new Date().toISOString().split('T')[0]}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}
+                >
                   <Download className="w-4 h-4 mr-2" />
                   Export Calendar
                 </Button>
