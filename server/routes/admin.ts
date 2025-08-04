@@ -30,18 +30,26 @@ interface ApiResponse<T = any> {
 
 // Middleware to verify admin access
 const authenticateAdmin = (req: Request, res: Response, next: any) => {
+  // Check if database is disabled
+  if (process.env.DISABLE_DB === 'true') {
+    return res.status(503).json({
+      success: false,
+      error: 'Database is currently unavailable'
+    });
+  }
+
   const token = req.headers.authorization?.replace('Bearer ', '');
-  
+
   if (!token) {
     return res.status(401).json({
       success: false,
       error: 'No token provided'
     });
   }
-  
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
-    
+
     // Check if user is admin or manager (both have admin access)
     if (decoded.role !== 'admin' && decoded.role !== 'manager') {
       return res.status(403).json({
@@ -49,7 +57,7 @@ const authenticateAdmin = (req: Request, res: Response, next: any) => {
         error: 'Admin access required'
       });
     }
-    
+
     (req as any).user = decoded;
     next();
   } catch (error) {
