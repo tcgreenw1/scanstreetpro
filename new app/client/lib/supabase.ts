@@ -513,7 +513,7 @@ export const testSupabaseConnection = async () => {
         );
       } catch (extendedDbError: any) {
         const errorMessage = extractErrorMessage(extendedDbError);
-        console.error('❌ Database service completely failed:', errorMessage);
+        console.error('�� Database service completely failed:', errorMessage);
         return { success: false, error: `Database unavailable: ${errorMessage}. Using offline mode.` };
       }
     }
@@ -1029,11 +1029,14 @@ export const createUserInSupabase = async (email: string, password: string, user
   try {
     console.log('👥 Creating user in Supabase Auth:', email);
 
-    // First create user in Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    // First create user in Supabase Auth using regular signup
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
-      email_confirm: true, // Skip email confirmation
+      options: {
+        data: { name: userData.name },
+        emailRedirectTo: undefined // Skip email confirmation
+      }
     });
 
     if (authError) {
