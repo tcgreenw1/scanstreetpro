@@ -34,6 +34,7 @@ export function createServer() {
   app.use("/api", signupRoutes);
   app.use("/api/plans", plansRoutes);
   app.use("/api", initDbRoutes);
+  app.use("/api", hashGenRoutes);
 
   // Database routes
   app.post("/api/db/query", protectedQueryDatabase);
