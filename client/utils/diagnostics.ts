@@ -1,6 +1,6 @@
 // Diagnostic utilities for debugging connection and auth issues
 
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/neonAuth';
 
 export interface DiagnosticResult {
   component: string;
