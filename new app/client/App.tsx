@@ -27,7 +27,7 @@ import Contractors from "./pages/Contractors";
 import CitizenHistory from "./pages/CitizenHistory";
 import Expenses from "./pages/Expenses";
 import Planning from "./pages/Planning";
-import VerifyPage from "./pages/VerifyPage";
+
 import MapPage from "./pages/MapPage";
 import Reports from "./pages/Reports";
 import CitizenEngagement from "./pages/CitizenEngagement";
