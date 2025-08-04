@@ -27,6 +27,9 @@ export function createServer() {
   app.post("/api/auth/signup", signUp);
   app.get("/api/auth/verify", verifyToken);
 
+  // New signup and auth routes
+  app.use("/api", signupRoutes);
+
   // Database routes
   app.post("/api/db/query", protectedQueryDatabase);
   app.get("/api/db/test", testConnection);
