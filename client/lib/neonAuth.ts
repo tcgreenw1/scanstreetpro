@@ -75,7 +75,7 @@ class NeonAuthManager {
     const token = localStorage.getItem('neon_auth_token');
     if (token) {
       try {
-        const response = await fetch('/api/auth/me', {
+        const response = await fetch('/api/me', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
