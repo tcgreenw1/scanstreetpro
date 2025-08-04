@@ -602,9 +602,9 @@ const AdminPortal = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={getPlanBadgeColor(org.plan)}>
+                      <Badge className={getPlanBadgeColor(org.plan || 'free')}>
                         {org.plan === 'premium' && <Crown className="h-3 w-3 mr-1" />}
-                        {org.plan.charAt(0).toUpperCase() + org.plan.slice(1)}
+                        {org.plan ? org.plan.charAt(0).toUpperCase() + org.plan.slice(1) : 'Free'}
                       </Badge>
                     </TableCell>
                     <TableCell>{org.user_count}</TableCell>
