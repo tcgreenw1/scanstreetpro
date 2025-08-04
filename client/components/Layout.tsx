@@ -662,13 +662,15 @@ function MobileSidebar({
   isActive,
   onClose,
   isDarkMode,
-  toggleTheme
+  toggleTheme,
+  user
 }: {
   navSections: NavSection[],
   isActive: (href: string) => boolean,
   onClose: () => void,
   isDarkMode: boolean,
-  toggleTheme: () => void
+  toggleTheme: () => void,
+  user: any
 }) {
   return (
     <div className="flex flex-col h-full">
