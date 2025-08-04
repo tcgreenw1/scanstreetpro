@@ -1,6 +1,6 @@
 import { createContext, useContext, ReactNode, useState } from 'react';
 
-export type PlanType = 'free' | 'standard' | 'pro' | 'enterprise';
+export type PlanType = 'free' | 'basic' | 'pro' | 'premium' | 'satellite' | 'driving';
 
 export interface PlanFeatures {
   maxAssets: number;
