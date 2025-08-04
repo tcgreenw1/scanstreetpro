@@ -580,10 +580,22 @@ router.get('/transactions', authenticateAdmin, async (req: Request, res: Respons
 
   } catch (error: any) {
     console.error('Get transactions error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to get transactions'
-    });
+    if (error.code === '42P01') { // Table doesn't exist
+      res.json({
+        success: true,
+        data: {
+          transactions: [],
+          total: 0,
+          page: parseInt(page as string),
+          limit: parseInt(limit as string)
+        }
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get transactions'
+      });
+    }
   }
 });
 
