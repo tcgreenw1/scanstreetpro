@@ -113,13 +113,6 @@ const App = () => (
 
                     {/* Admin Only Routes */}
                     <Route path="/admin-portal" element={<AdminPortal />} />
-                    <Route path="/admin-builder/*" element={
-                      <iframe
-                        src="/admin-builder"
-                        className="w-full h-screen border-0"
-                        title="Builder.io Admin Portal"
-                      />
-                    } />
 
                     {/* Infrastructure Management */}
                     <Route path="/assets" element={<AssetManager />} />
