@@ -70,47 +70,103 @@ interface NavSection {
   items: NavItem[];
 }
 
-const navSections: NavSection[] = [
+// Function to generate navigation sections based on plan permissions
+const getNavSections = (isFeatureUnlocked: (feature: string) => boolean, isAdminUser: boolean): NavSection[] => [
   {
     title: "Dashboard",
     items: [
       { name: 'Dashboard', href: '/dashboard', icon: Home, description: 'Main overview and metrics' },
-      { name: 'Road Inspection', href: '/inspection-dashboard', icon: Search, description: 'AI-powered road monitoring', isPremium: true }
+      {
+        name: 'Road Inspection',
+        href: '/inspection-dashboard',
+        icon: Search,
+        description: 'AI-powered road monitoring',
+        isPremium: !isFeatureUnlocked('roadInspectionDashboard')
+      }
     ]
   },
   {
     title: "Infrastructure",
     items: [
-      { name: 'Asset Manager', href: '/assets', icon: Building2, description: 'Track infrastructure assets', isPremium: true },
-      { name: 'Maintenance', href: '/maintenance', icon: Calendar, description: 'Schedule and track maintenance', isPremium: true },
-      { name: 'Inspections', href: '/inspections', icon: ClipboardCheck, description: 'Inspection workflows', isPremium: true },
+      {
+        name: 'Asset Manager',
+        href: '/assets',
+        icon: Building2,
+        description: 'Track infrastructure assets',
+        isPremium: !isFeatureUnlocked('assetManagement')
+      },
+      {
+        name: 'Maintenance',
+        href: '/maintenance',
+        icon: Calendar,
+        description: 'Schedule and track maintenance',
+        isPremium: !isFeatureUnlocked('maintenanceScheduling')
+      },
+      { name: 'Inspections', href: '/inspections', icon: ClipboardCheck, description: 'Inspection workflows' },
       { name: 'Map View', href: '/map', icon: MapPin, description: 'Geographic asset view' }
     ]
   },
   {
     title: "Financial",
     items: [
-      { name: 'Budget Planning', href: '/budget', icon: TrendingUp, description: '5-year budget projections' },
-      { name: 'Cost Estimator', href: '/estimates', icon: Calculator, description: 'PCI-based cost projections', isPremium: true },
-      { name: 'Funding Center', href: '/funding', icon: DollarSign, description: 'Grants and funding sources', isPremium: true },
-      { name: 'Expenses', href: '/expenses', icon: FileText, description: 'Track spending and costs', isPremium: true }
+      {
+        name: 'Budget Planning',
+        href: '/budget',
+        icon: TrendingUp,
+        description: '5-year budget projections',
+        isPremium: !isFeatureUnlocked('budgetSimulations')
+      },
+      { name: 'Cost Estimator', href: '/estimates', icon: Calculator, description: 'PCI-based cost projections' },
+      {
+        name: 'Funding Center',
+        href: '/funding',
+        icon: DollarSign,
+        description: 'Grants and funding sources',
+        isPremium: !isFeatureUnlocked('fundingCenter')
+      },
+      {
+        name: 'Expenses',
+        href: '/expenses',
+        icon: FileText,
+        description: 'Track spending and costs',
+        isPremium: !isFeatureUnlocked('expenseManagement')
+      }
     ]
   },
   {
     title: "Operations",
     items: [
-      { name: 'Contractors', href: '/contractors', icon: Users, description: 'Contractor management portal', isPremium: true },
-      { name: 'Citizen Reports', href: '/citizen-reports', icon: MessageSquare, description: 'Fix My Road submissions', isPremium: true },
-      { name: 'Verification', href: '/verify', icon: ClipboardCheck, description: 'Issue verification workflow' },
-      { name: 'Reports', href: '/reports', icon: FileText, description: 'Generate public reports', isPremium: true }
+      {
+        name: 'Contractors',
+        href: '/contractors',
+        icon: Users,
+        description: 'Contractor management portal',
+        isPremium: !isFeatureUnlocked('contractorManagement')
+      },
+      {
+        name: 'Citizen Reports',
+        href: '/citizen-reports',
+        icon: MessageSquare,
+        description: 'Public reporting platform',
+        isPremium: !isFeatureUnlocked('citizenEngagement')
+      },
+      { name: 'Reports', href: '/reports', icon: FileText, description: 'Generate reports' }
     ]
   },
   {
     title: "System",
     items: [
-      { name: 'Admin Portal', href: '/admin-portal', icon: Shield, description: 'System administration and management' },
+      ...(isAdminUser ? [
+        { name: 'Admin Portal', href: '/admin-portal', icon: Shield, description: 'System administration' },
+      ] : []),
       { name: 'Pricing', href: '/pricing', icon: Crown, description: 'View plans and upgrade' },
-      { name: 'Integrations', href: '/integrations', icon: Settings, description: 'System integrations', isPremium: true },
+      {
+        name: 'Integrations',
+        href: '/integrations',
+        icon: Settings,
+        description: 'System integrations',
+        isPremium: !isFeatureUnlocked('fullIntegrations')
+      },
       { name: 'Settings', href: '/settings', icon: Settings, description: 'Account and billing settings' }
     ]
   }
