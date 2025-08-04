@@ -54,6 +54,7 @@ import InitDatabase from "./pages/InitDatabase";
 import CreateDemoUsers from "./pages/CreateDemoUsers";
 import MigrationHelper from "./pages/MigrationHelper";
 import Setup from "./pages/Setup";
+import BuilderTest from "./pages/BuilderTest";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
