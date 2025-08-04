@@ -181,20 +181,20 @@ const Login = () => {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+              <Button
+                type="submit"
+                className="w-full h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg backdrop-blur-sm border border-blue-400/20 transition-all duration-200 hover:shadow-xl hover:scale-[1.02]"
                 disabled={loading}
               >
                 {loading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     <span>Signing in...</span>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3">
                     <span>{isSignUp ? 'Create Account' : 'Sign In'}</span>
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-5 w-5" />
                   </div>
                 )}
               </Button>
@@ -204,7 +204,7 @@ const Login = () => {
               <button
                 type="button"
                 onClick={() => setIsSignUp(!isSignUp)}
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                className="text-slate-600 hover:text-slate-800 font-medium transition-colors"
               >
                 {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
               </button>
@@ -213,7 +213,7 @@ const Login = () => {
         </div>
 
         {/* Help Text */}
-        <div className="text-center text-sm text-gray-500">
+        <div className="text-center text-slate-400">
           Need help? Contact your system administrator
         </div>
       </div>
