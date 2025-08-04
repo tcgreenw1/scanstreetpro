@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Crown, Zap, Lock, Check, X } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { adminUtils } from "@/utils/adminUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePricing } from "@/contexts/PricingContext";
 
