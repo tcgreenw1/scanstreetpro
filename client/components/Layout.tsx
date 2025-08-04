@@ -199,6 +199,9 @@ export function Layout({ children }: LayoutProps) {
   const { organization, planFeatures } = useOrganization();
   const { getPagePermissions, isFeatureUnlocked } = usePermissions();
 
+  // Generate navigation sections based on current user's plan and role
+  const navSections = getNavSections(isFeatureUnlocked, isAdmin);
+
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/';
     return location.pathname.startsWith(href);
