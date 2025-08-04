@@ -15,7 +15,7 @@ function getPool() {
   return pool;
 }
 
-// POST /api/migrate/financial - Apply financial tracking migration
+// POST /api/migrate/financial - Apply financial tracking migration (public for setup)
 router.post('/financial', async (req: Request, res: Response) => {
   try {
     const pool = getPool();
