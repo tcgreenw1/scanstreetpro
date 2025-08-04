@@ -427,23 +427,103 @@ export default function Pricing() {
                 </div>
 
                 {/* CTA Button */}
-                <Button
-                  onClick={() => handleUpgrade(planKey)}
-                  disabled={isCurrentPlan}
-                  className={cn(
-                    "w-full",
-                    isCurrentPlan ? "bg-gray-400 cursor-not-allowed" :
-                    planKey === 'premium' || planKey === 'satellite' || planKey === 'driving' ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700" :
-                    isPopular ? "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700" :
-                    "bg-blue-600 hover:bg-blue-700"
-                  )}
-                >
-                  {isCurrentPlan ? "Current Plan" :
-                   planKey === 'free' ? "Start Free" :
-                   planKey === 'premium' || planKey === 'satellite' || planKey === 'driving' ? "Contact Sales" :
-                   `Upgrade to ${plan.name}`}
-                  {!isCurrentPlan && <ArrowRight className="w-4 h-4 ml-2" />}
-                </Button>
+                {planKey === 'free' || isCurrentPlan ? (
+                  <Button
+                    onClick={() => handleUpgrade(planKey)}
+                    disabled={isCurrentPlan}
+                    className={cn(
+                      "w-full",
+                      isCurrentPlan ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                    )}
+                  >
+                    {isCurrentPlan ? "Current Plan" : "Start Free"}
+                    {!isCurrentPlan && <ArrowRight className="w-4 h-4 ml-2" />}
+                  </Button>
+                ) : planKey === 'premium' || planKey === 'satellite' || planKey === 'driving' ? (
+                  <Button
+                    onClick={() => setShowContactForm(true)}
+                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                  >
+                    Contact Sales
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                ) : (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        onClick={() => setSelectedPlanForPayment(planKey)}
+                        disabled={isProcessingPayment}
+                        className={cn(
+                          "w-full",
+                          isPopular ? "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700" : "bg-blue-600 hover:bg-blue-700"
+                        )}
+                      >
+                        {isProcessingPayment ? 'Processing...' : `Upgrade to ${plan.name}`}
+                        {!isProcessingPayment && <ArrowRight className="w-4 h-4 ml-2" />}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Complete Your Upgrade</DialogTitle>
+                        <DialogDescription>
+                          Upgrade to {plan.name} plan for ${getPrice(planKey)}/{billingPeriod === 'annual' ? 'year' : 'month'}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Payment Method</Label>
+                          <Select value={paymentMethod} onValueChange={(value: any) => setPaymentMethod(value)}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="card">💳 Credit/Debit Card</SelectItem>
+                              <SelectItem value="ach">🏦 Bank Transfer (ACH)</SelectItem>
+                              <SelectItem value="invoice">📄 Invoice (Enterprise)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg">
+                          <h4 className="font-medium mb-2">Order Summary</h4>
+                          <div className="space-y-1 text-sm">
+                            <div className="flex justify-between">
+                              <span>{plan.name} Plan</span>
+                              <span>${getPrice(planKey)}/{billingPeriod === 'annual' ? 'year' : 'month'}</span>
+                            </div>
+                            {billingPeriod === 'annual' && (
+                              <div className="flex justify-between text-green-600">
+                                <span>Annual Discount (20%)</span>
+                                <span>-${(getPrice(planKey) * 12 * 0.2).toFixed(0)}</span>
+                              </div>
+                            )}
+                            <div className="flex justify-between font-medium border-t pt-1">
+                              <span>Total {billingPeriod === 'annual' ? 'Annual' : 'Monthly'}</span>
+                              <span>${billingPeriod === 'annual' ? (getPrice(planKey) * 12 * 0.8).toFixed(0) : getPrice(planKey)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-sm">
+                          <p className="text-blue-800 dark:text-blue-300">
+                            🔒 Secure payment powered by Stripe. Cancel anytime.
+                          </p>
+                        </div>
+
+                        <div className="flex space-x-2">
+                          <Button variant="outline" className="flex-1">Cancel</Button>
+                          <Button
+                            onClick={() => handleUpgrade(selectedPlanForPayment!)}
+                            disabled={isProcessingPayment}
+                            className="flex-1"
+                          >
+                            {isProcessingPayment ? 'Processing...' : 'Complete Payment'}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
               </CardContent>
             </Card>
           );
