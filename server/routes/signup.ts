@@ -34,7 +34,7 @@ interface ApiResponse<T = any> {
 
 // POST /api/signup - Create user and organization
 router.post('/signup', async (req: Request, res: Response<ApiResponse>) => {
-  const client = await pool.connect();
+  const client = await getPool().connect();
   
   try {
     await client.query('BEGIN');
