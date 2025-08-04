@@ -1,5 +1,9 @@
-const { Pool } = require('pg');
-const bcrypt = require('bcryptjs');
+import { Pool } from 'pg';
+import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 const setupAdmin = async () => {
   console.log('🚀 Setting up admin user...');
