@@ -35,7 +35,7 @@ const PLAN_CONFIGS: Record<PlanType, PlanDetails> = {
     name: 'Free',
     price: 0,
     period: 'forever',
-    description: 'Perfect for small organizations getting started',
+    description: 'Sample Data, OpenStreetMap PCI Example, 1 export/month, basic dashboard',
     features: {
       maxAssets: 20,
       maxCitizenSubmissions: 10,
@@ -55,11 +55,11 @@ const PLAN_CONFIGS: Record<PlanType, PlanDetails> = {
       removeBranding: false
     }
   },
-  standard: {
-    name: 'Standard',
+  basic: {
+    name: 'Basic',
     price: 99,
     period: 'month',
-    description: 'Great for growing organizations',
+    description: 'Unlimited Asset Management, Budget Simulations, Expense Management, 3 team members, interactive calendar',
     features: {
       maxAssets: -1, // unlimited
       maxCitizenSubmissions: -1,
@@ -70,9 +70,9 @@ const PLAN_CONFIGS: Record<PlanType, PlanDetails> = {
       hasSatelliteScans: false,
       hasDrivingScans: false,
       hasMaintenanceCalendar: true,
-      hasInspectionTools: true,
-      hasContractorDatabase: true,
-      hasBudgetPlanner: false,
+      hasInspectionTools: false,
+      hasContractorDatabase: false,
+      hasBudgetPlanner: true,
       hasIntegrations: false,
       hasAPIAccess: false,
       hasWhiteLabeling: false,
@@ -81,9 +81,9 @@ const PLAN_CONFIGS: Record<PlanType, PlanDetails> = {
   },
   pro: {
     name: 'Pro',
-    price: 249,
+    price: 199,
     period: 'month',
-    description: 'Advanced features for larger organizations',
+    description: 'Everything in Basic plus Maintenance Scheduling, Unlimited Exports, Full Integrations, Funding Center, Road Inspection Dashboard, Contractor Dashboard, Custom Reports, Citizen Engagement, 10 team members',
     popular: true,
     features: {
       maxAssets: -1,
@@ -98,17 +98,65 @@ const PLAN_CONFIGS: Record<PlanType, PlanDetails> = {
       hasInspectionTools: true,
       hasContractorDatabase: true,
       hasBudgetPlanner: true,
-      hasIntegrations: false,
+      hasIntegrations: true,
       hasAPIAccess: false,
       hasWhiteLabeling: false,
       removeBranding: true
     }
   },
-  enterprise: {
-    name: 'Enterprise',
+  premium: {
+    name: 'Premium',
+    price: 999,
+    period: 'month',
+    description: 'Everything in Pro plus Personalized Mobile & Web App, Website Integration, Dedicated IT Setup',
+    features: {
+      maxAssets: -1,
+      maxCitizenSubmissions: -1,
+      maxExportsPerMonth: -1,
+      maxTeamMembers: -1,
+      hasAdvancedDashboard: true,
+      hasAssetManagement: true,
+      hasSatelliteScans: true,
+      hasDrivingScans: false,
+      hasMaintenanceCalendar: true,
+      hasInspectionTools: true,
+      hasContractorDatabase: true,
+      hasBudgetPlanner: true,
+      hasIntegrations: true,
+      hasAPIAccess: true,
+      hasWhiteLabeling: true,
+      removeBranding: true
+    }
+  },
+  satellite: {
+    name: 'Satellite Enterprise',
     price: 0, // Contact sales
     period: 'custom',
-    description: 'Complete solution for large organizations',
+    description: 'Everything in Pro + AI & Engineer Help, Scan up to 5x/year, Fast Rescans, Council Reports, Basic Citizen Reports',
+    features: {
+      maxAssets: -1,
+      maxCitizenSubmissions: -1,
+      maxExportsPerMonth: -1,
+      maxTeamMembers: -1,
+      hasAdvancedDashboard: true,
+      hasAssetManagement: true,
+      hasSatelliteScans: true,
+      hasDrivingScans: false,
+      hasMaintenanceCalendar: true,
+      hasInspectionTools: true,
+      hasContractorDatabase: true,
+      hasBudgetPlanner: true,
+      hasIntegrations: true,
+      hasAPIAccess: true,
+      hasWhiteLabeling: true,
+      removeBranding: true
+    }
+  },
+  driving: {
+    name: 'Driving Enterprise',
+    price: 0, // Contact sales
+    period: 'custom',
+    description: 'Same as Satellite Enterprise but for driving-based data collection',
     features: {
       maxAssets: -1,
       maxCitizenSubmissions: -1,
