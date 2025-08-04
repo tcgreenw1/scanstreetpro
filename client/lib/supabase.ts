@@ -641,6 +641,12 @@ export const repairDemoUsers = async () => {
 
 // Helper function to ensure demo users exist in Supabase Auth
 export const ensureDemoUsersExist = async () => {
+  // Check if we have valid Supabase configuration
+  if (supabaseUrl.includes('placeholder') || supabaseAnonKey.includes('placeholder')) {
+    console.log('⚠️ Skipping demo user creation - Supabase not configured');
+    return;
+  }
+
   // Temporarily disable repair function to prevent load issues
   // await repairDemoUsers();
 
