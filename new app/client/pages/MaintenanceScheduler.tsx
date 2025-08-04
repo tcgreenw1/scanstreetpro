@@ -41,7 +41,10 @@ import {
   CheckCircle,
   FileText,
   MapPin,
-  Package
+  Package,
+  Share2,
+  Upload,
+  Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePricing } from "@/contexts/PricingContext";
