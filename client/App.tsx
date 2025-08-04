@@ -71,8 +71,9 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <PricingProvider>
-        <TooltipProvider>
+      <PlanProvider>
+        <PricingProvider>
+          <TooltipProvider>
         <AppInitializer>
         <Toaster />
         <Sonner />
@@ -148,8 +149,9 @@ const App = () => (
           </Routes>
         </BrowserRouter>
         </AppInitializer>
-        </TooltipProvider>
-      </PricingProvider>
+          </TooltipProvider>
+        </PricingProvider>
+      </PlanProvider>
     </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
