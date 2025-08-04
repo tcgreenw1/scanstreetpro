@@ -43,11 +43,12 @@ import {
 import { cn } from "@/lib/utils";
 import { usePricing } from "@/contexts/PricingContext";
 
-// Sample data for charts
+// Sample data for charts - PCI Scoring (Great, Good, Fair, Poor, Failed)
 const pciDistribution = [
-  { condition: 'Good', count: 4, percentage: 33.3, color: '#10B981', range: '80-100' },
-  { condition: 'Fair', count: 5, percentage: 41.7, color: '#F59E0B', range: '60-79' },
-  { condition: 'Poor', count: 2, percentage: 16.7, color: '#F97316', range: '40-59' },
+  { condition: 'Great', count: 3, percentage: 25.0, color: '#10B981', range: '85-100' },
+  { condition: 'Good', count: 4, percentage: 33.3, color: '#22C55E', range: '70-84' },
+  { condition: 'Fair', count: 3, percentage: 25.0, color: '#F59E0B', range: '55-69' },
+  { condition: 'Poor', count: 1, percentage: 8.3, color: '#F97316', range: '40-54' },
   { condition: 'Failed', count: 1, percentage: 8.3, color: '#EF4444', range: '0-39' }
 ];
 
