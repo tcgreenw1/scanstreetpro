@@ -926,10 +926,88 @@ export default function Funding() {
         <TabsContent value="planning" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Budget Scenario Planning</h2>
-            <Button onClick={createScenario} disabled={currentPlan === 'free' && scenarios.length >= 1}>
-              <Plus className="w-4 h-4 mr-2" />
-              Create Scenario
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button disabled={currentPlan === 'free' && scenarios.length >= 1}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Scenario
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Create Budget Scenario</DialogTitle>
+                  <DialogDescription>
+                    Create a new budget scenario to model different funding strategies
+                  </DialogDescription>
+                </DialogHeader>
+                <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); createScenario(); }}>
+                  <div>
+                    <Label htmlFor="scenario-name">Scenario Name</Label>
+                    <Input id="scenario-name" placeholder="e.g., Aggressive Maintenance Plan" required />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="total-revenue">Total Revenue</Label>
+                      <Input id="total-revenue" type="number" placeholder="8500000" required />
+                    </div>
+                    <div>
+                      <Label htmlFor="total-expenses">Total Expenses</Label>
+                      <Input id="total-expenses" type="number" placeholder="7800000" required />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Select Funding Sources</Label>
+                    <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
+                      {fundingSources.map((source) => (
+                        <label key={source.id} className="flex items-center space-x-2">
+                          <input type="checkbox" value={source.id} />
+                          <span className="text-sm">{source.name} - ${source.availableAmount.toLocaleString()} available</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="scenario-description">Description</Label>
+                    <Textarea id="scenario-description" placeholder="Describe the key assumptions and goals for this scenario..." rows={3} />
+                  </div>
+                  <div>
+                    <Label htmlFor="planning-period">Planning Period</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select planning period" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1-year">1 Year</SelectItem>
+                        <SelectItem value="3-year">3 Years</SelectItem>
+                        <SelectItem value="5-year">5 Years</SelectItem>
+                        <SelectItem value="10-year">10 Years</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg">
+                    <h5 className="font-medium mb-2">Scenario Summary</h5>
+                    <div className="text-sm space-y-1">
+                      <div className="flex justify-between">
+                        <span>Projected Revenue:</span>
+                        <span id="projected-revenue">$0</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Projected Expenses:</span>
+                        <span id="projected-expenses">$0</span>
+                      </div>
+                      <div className="flex justify-between font-medium">
+                        <span>Net Balance:</span>
+                        <span id="net-balance">$0</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button type="button" variant="outline">Cancel</Button>
+                    <Button type="submit">Create Scenario</Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
