@@ -140,6 +140,8 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const { currentPlan, planDetails } = usePricing();
   const { user, signOut, isAdmin } = useAuth();
+  const { organization, planFeatures } = useOrganization();
+  const { getPagePermissions, isFeatureUnlocked } = usePermissions();
 
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/';
