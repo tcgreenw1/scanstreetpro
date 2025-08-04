@@ -82,7 +82,7 @@ interface FundingScenario {
   isActive: boolean;
 }
 
-const budgetGoals: BudgetGoal[] = [
+const initialBudgetGoals: BudgetGoal[] = [
   {
     id: 'BG001',
     name: 'Main Street Reconstruction',
