@@ -337,7 +337,7 @@ export const PlanUpgradeModal = ({
           <p>
             Need help choosing? 
             <Button variant="link" className="p-0 h-auto ml-1">
-              <Support className="h-4 w-4 mr-1" />
+              <HelpCircle className="h-4 w-4 mr-1" />
               Contact our sales team
             </Button>
           </p>
