@@ -75,11 +75,12 @@ router.post('/signup', async (req: Request, res: Response<ApiResponse>) => {
     
     // Create organization
     const orgName = organizationName || `${fullName}'s Organization`;
+    const orgSlug = `org-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const organizationResult = await client.query(
-      `INSERT INTO organizations (name, plan) 
-       VALUES ($1, 'free') 
-       RETURNING id, name, plan, created_at`,
-      [orgName]
+      `INSERT INTO organizations (name, slug, plan)
+       VALUES ($1, $2, 'free')
+       RETURNING id, name, slug, plan, created_at`,
+      [orgName, orgSlug]
     );
     
     const organization = organizationResult.rows[0];
