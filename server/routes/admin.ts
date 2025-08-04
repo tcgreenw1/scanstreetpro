@@ -586,8 +586,8 @@ router.get('/transactions', authenticateAdmin, async (req: Request, res: Respons
         data: {
           transactions: [],
           total: 0,
-          page: parseInt(page as string),
-          limit: parseInt(limit as string)
+          page: parseInt(req.query.page as string || '1'),
+          limit: parseInt(req.query.limit as string || '50')
         }
       });
     } else {
