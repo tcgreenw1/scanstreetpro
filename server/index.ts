@@ -34,6 +34,11 @@ export function createServer() {
   app.post("/api/auth/signup", signUp);
   app.get("/api/auth/verify", verifyToken);
 
+  // Direct auth routes (used by auth context)
+  app.post("/api/login", signIn);
+  app.post("/api/signup", signUp);
+  app.get("/api/me", verifyToken);
+
   // New signup and auth routes
   app.use("/api", signupRoutes);
   app.use("/api/plans", plansRoutes);
