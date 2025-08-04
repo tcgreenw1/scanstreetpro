@@ -167,6 +167,10 @@ export default function Planning() {
   const [targetPCI, setTargetPCI] = useState<number>(75);
   const [selectedScenario, setSelectedScenario] = useState<string>('FS001');
   const [scenarios, setScenarios] = useState<FundingScenario[]>(fundingScenarios);
+  const [budgetGoals, setBudgetGoals] = useState<BudgetGoal[]>(initialBudgetGoals);
+  const [editingGoal, setEditingGoal] = useState<BudgetGoal | null>(null);
+  const [isAddingGoal, setIsAddingGoal] = useState(false);
+  const [goalForm, setGoalForm] = useState<Partial<BudgetGoal>>({});
   const { currentPlan } = usePricing();
 
   const activeScenario = scenarios.find(s => s.id === selectedScenario) || scenarios[0];
