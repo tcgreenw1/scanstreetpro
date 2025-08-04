@@ -691,7 +691,13 @@ function MobileSidebar({
                 {section.title}
               </h3>
               <div className="space-y-1">
-                {section.items.map((item) => {
+                {section.items.filter(item => {
+                  // Only show Admin Portal for admin users
+                  if (item.href === '/admin-portal') {
+                    return user?.role === 'admin';
+                  }
+                  return true;
+                }).map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.href);
                   return (
