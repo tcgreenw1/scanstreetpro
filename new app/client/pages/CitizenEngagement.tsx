@@ -55,7 +55,8 @@ import {
   Wrench,
   Zap,
   Droplets,
-  Construction
+  Construction,
+  Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePricing } from "@/contexts/PricingContext";
