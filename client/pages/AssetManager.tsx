@@ -45,6 +45,8 @@ import {
   History
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { neonService, Asset } from '@/services/neonService';
+import { useOrganization, usePermissions } from '@/contexts/OrganizationContext';
 
 // Mock asset data
 const mockAssets = [
