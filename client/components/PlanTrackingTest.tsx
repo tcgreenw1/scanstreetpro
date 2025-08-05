@@ -88,29 +88,41 @@ export function PlanTrackingTest() {
   return (
     <Card className="w-96 fixed top-4 right-4 z-50 glass-card bg-white/90 dark:bg-black/90">
       <CardHeader>
-        <CardTitle className="text-sm">Plan Tracking System Test</CardTitle>
+        <CardTitle className="text-sm">Feature Matrix Test ({userPlan})</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex gap-2">
-          <Button 
-            size="sm" 
-            onClick={testInit} 
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            size="sm"
+            onClick={testInit}
             disabled={loading}
-            className="flex-1"
           >
             Test Init
           </Button>
-          <Button 
-            size="sm" 
-            onClick={testGetAll} 
+          <Button
+            size="sm"
+            onClick={testGetAll}
             disabled={loading}
-            className="flex-1"
           >
             Test Fetch
           </Button>
+          <Button
+            size="sm"
+            onClick={testFeatureMatrix}
+            disabled={loading}
+          >
+            Matrix API
+          </Button>
+          <Button
+            size="sm"
+            onClick={testFeatureStates}
+            disabled={loading}
+          >
+            Local Matrix
+          </Button>
         </div>
         {result && (
-          <div className="text-xs p-2 bg-slate-100 dark:bg-slate-800 rounded">
+          <div className="text-xs p-2 bg-slate-100 dark:bg-slate-800 rounded max-h-32 overflow-y-auto">
             {result}
           </div>
         )}
