@@ -192,27 +192,29 @@ export default function MapView() {
   const updateTileLayer = () => {
     if (!leafletMapRef.current) return;
 
-    // Remove existing tile layer
-    if (currentTileLayerRef.current) {
-      leafletMapRef.current.removeLayer(currentTileLayerRef.current);
+    try {
+      // Remove existing tile layer
+      if (currentTileLayerRef.current) {
+        leafletMapRef.current.removeLayer(currentTileLayerRef.current);
+      }
+
+      // Add appropriate tile layer based on theme
+      const tileUrl = isDarkMode
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+      const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+      const tileLayer = L.tileLayer(tileUrl, {
+        attribution,
+        maxZoom: 19
+      });
+
+      tileLayer.addTo(leafletMapRef.current);
+      currentTileLayerRef.current = tileLayer;
+    } catch (error) {
+      console.error('Error updating tile layer:', error);
     }
-
-    // Add appropriate tile layer based on theme
-    const tileUrl = isDarkMode 
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-
-    const attribution = isDarkMode
-      ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-      : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
-
-    const tileLayer = L.tileLayer(tileUrl, {
-      attribution,
-      maxZoom: 19
-    });
-
-    tileLayer.addTo(leafletMapRef.current);
-    currentTileLayerRef.current = tileLayer;
   };
 
   const updateRoadLayers = () => {
