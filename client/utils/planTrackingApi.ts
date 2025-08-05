@@ -78,10 +78,15 @@ export const planTrackingApi = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       return await response.json();
     } catch (error) {
       console.error('Failed to update plan tracking data:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error?.message || 'Network error' };
     }
   },
 
