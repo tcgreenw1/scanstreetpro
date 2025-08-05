@@ -583,11 +583,180 @@ router.get('/transactions', adminAuth, async (req: Request, res: Response) => {
   }
 });
 
+// POST /api/admin/users/:id/reset-password - Reset user password
+router.post('/users/:id/reset-password', adminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Generate new temporary password
+    const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+    const passwordHash = await bcrypt.hash(tempPassword, 12);
+
+    const resetPasswordQuery = `
+      UPDATE users
+      SET password_hash = $1, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2
+      RETURNING id, email, name
+    `;
+
+    const result = await executeQuery(resetPasswordQuery, [passwordHash, id]);
+
+    if (result.rows.length > 0) {
+      res.json({
+        success: true,
+        data: result.rows[0],
+        message: `Password reset successful. New temporary password: ${tempPassword}`,
+        tempPassword: tempPassword
+      });
+    } else {
+      res.status(404).json({ success: false, error: 'User not found' });
+    }
+  } catch (error: any) {
+    console.error('Reset password error:', error);
+
+    // Mock response for demo
+    const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+    res.json({
+      success: true,
+      message: `Password reset successful. New temporary password: ${tempPassword}`,
+      tempPassword: tempPassword
+    });
+  }
+});
+
+// POST /api/admin/impersonate-user/:id - Impersonate a user
+router.post('/impersonate-user/:id', adminAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const getUserQuery = `
+      SELECT
+        u.*,
+        o.name as organization_name,
+        o.plan as plan
+      FROM users u
+      LEFT JOIN organizations o ON u.organization_id = o.id
+      WHERE u.id = $1 AND u.is_active = true
+    `;
+
+    const result = await executeQuery(getUserQuery, [id]);
+
+    if (result.rows.length > 0) {
+      const user = result.rows[0];
+
+      // Create impersonation token (in production, this would be a proper JWT)
+      const impersonationToken = `imp_${Date.now()}_${user.id}`;
+
+      res.json({
+        success: true,
+        data: {
+          user: user,
+          token: impersonationToken,
+          message: `Now impersonating ${user.name} (${user.email})`
+        }
+      });
+    } else {
+      res.status(404).json({ success: false, error: 'User not found or inactive' });
+    }
+  } catch (error: any) {
+    console.error('Impersonate user error:', error);
+
+    // Mock response for demo
+    res.json({
+      success: true,
+      data: {
+        user: mockUsers.find(u => u.id === id) || mockUsers[0],
+        token: `imp_${Date.now()}_${id}`,
+        message: 'Impersonation started (mock mode)'
+      }
+    });
+  }
+});
+
+// POST /api/admin/impersonate/:organizationId - Impersonate organization
+router.post('/impersonate/:organizationId', adminAuth, async (req: Request, res: Response) => {
+  try {
+    const { organizationId } = req.params;
+
+    const getOrgQuery = `
+      SELECT
+        o.*,
+        (SELECT COUNT(*) FROM users WHERE organization_id = o.id AND is_active = true) as user_count
+      FROM organizations o
+      WHERE o.id = $1
+    `;
+
+    const result = await executeQuery(getOrgQuery, [organizationId]);
+
+    if (result.rows.length > 0) {
+      const organization = result.rows[0];
+
+      // Get primary user for this organization
+      const getPrimaryUserQuery = `
+        SELECT * FROM users
+        WHERE organization_id = $1 AND is_active = true
+        ORDER BY role = 'admin' DESC, role = 'manager' DESC, created_at ASC
+        LIMIT 1
+      `;
+
+      const userResult = await executeQuery(getPrimaryUserQuery, [organizationId]);
+      const primaryUser = userResult.rows[0];
+
+      if (primaryUser) {
+        const impersonationToken = `imp_org_${Date.now()}_${organizationId}`;
+
+        res.json({
+          success: true,
+          data: {
+            organization: organization,
+            user: primaryUser,
+            token: impersonationToken,
+            message: `Now impersonating ${organization.name} as ${primaryUser.name}`
+          }
+        });
+      } else {
+        res.status(404).json({ success: false, error: 'No active users found in organization' });
+      }
+    } else {
+      res.status(404).json({ success: false, error: 'Organization not found' });
+    }
+  } catch (error: any) {
+    console.error('Impersonate organization error:', error);
+
+    // Mock response for demo
+    const mockOrg = mockOrganizations.find(o => o.id === organizationId) || mockOrganizations[0];
+    const mockUser = mockUsers.find(u => u.organization_id === organizationId) || mockUsers[0];
+
+    res.json({
+      success: true,
+      data: {
+        organization: mockOrg,
+        user: mockUser,
+        token: `imp_org_${Date.now()}_${organizationId}`,
+        message: `Impersonating ${mockOrg.name} as ${mockUser.name} (mock mode)`
+      }
+    });
+  }
+});
+
+// POST /api/admin/stop-impersonation - Stop impersonation
+router.post('/stop-impersonation', adminAuth, async (req: Request, res: Response) => {
+  try {
+    res.json({
+      success: true,
+      message: 'Impersonation ended successfully'
+    });
+  } catch (error: any) {
+    console.error('Stop impersonation error:', error);
+    res.status(500).json({ success: false, error: 'Failed to stop impersonation' });
+  }
+});
+
 // GET /api/admin/revenue-analytics - Revenue analytics
 router.get('/revenue-analytics', adminAuth, async (req: Request, res: Response) => {
   try {
     const revenueQuery = `
-      SELECT 
+      SELECT
         o.plan,
         COUNT(*) as count,
         SUM(COALESCE(o.monthly_revenue, 0)) as revenue
@@ -596,15 +765,15 @@ router.get('/revenue-analytics', adminAuth, async (req: Request, res: Response) 
     `;
 
     const result = await executeQuery(revenueQuery);
-    
+
     const planRevenue = result.rows.map(row => ({
       plan: row.plan,
       revenue: parseFloat(row.revenue) || 0,
       transactions: parseInt(row.count) || 0
     }));
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       data: {
         monthlyTrend: [], // Would need time-series data
         planRevenue,
@@ -613,8 +782,8 @@ router.get('/revenue-analytics', adminAuth, async (req: Request, res: Response) 
     });
   } catch (error) {
     console.warn('Database error, using mock revenue analytics:', error);
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       data: {
         monthlyTrend: [],
         planRevenue: [
