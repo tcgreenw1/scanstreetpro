@@ -60,6 +60,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePricing } from "@/contexts/PricingContext";
+import { useOrganization, usePermissions } from "@/contexts/OrganizationContext";
+import { usePlanBasedUI, useFeatureAccess, useDataVisibility } from "@/hooks/usePlanBasedUI";
+import { Link } from "react-router-dom";
 
 // Sample data
 const recentSubmissions = [
