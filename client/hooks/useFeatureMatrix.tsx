@@ -193,6 +193,18 @@ const FEATURE_MATRIX: Record<PlanType, FeatureMatrix> = {
       integrations: 'shown',
       settings: 'shown',
     },
+    roadInspections: {
+      dataSource: 'shown',
+      upgradeCard: 'not_shown',
+    },
+    assetManager: {
+      assetInventory: 'shown',
+      predictiveMaintenance: 'shown',
+    },
+    maintenanceScheduler: {
+      unlockAdvancedSchedulingCard: 'not_shown',
+      functionality: 'shown',
+    },
   },
   satellite_enterprise: {
     dashboard: {
