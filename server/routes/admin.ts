@@ -472,31 +472,48 @@ router.post('/users', adminAuth, async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: 'Email and organization are required' });
     }
 
-    // Generate temporary password
-    const tempPassword = Math.random().toString(36).slice(-8);
+    // Check if user already exists
+    const existingUserQuery = 'SELECT id FROM users WHERE email = $1';
+    const existingUser = await executeQuery(existingUserQuery, [email]);
+
+    if (existingUser.rows && existingUser.rows.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'A user with this email already exists'
+      });
+    }
+
+    // Generate temporary password (longer and more secure)
+    const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
     const passwordHash = await bcrypt.hash(tempPassword, 12);
 
+    console.log(`Creating user ${email} with temp password: ${tempPassword}`);
+
     const createUserQuery = `
-      INSERT INTO users (email, password_hash, name, role, organization_id, is_active, created_at, updated_at) 
-      VALUES ($1, $2, $3, $4, $5, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) 
+      INSERT INTO users (email, password_hash, name, role, organization_id, is_active, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING id, email, name, role, organization_id, is_active, created_at
     `;
 
     const result = await executeQuery(createUserQuery, [email, passwordHash, name, role, organizationId]);
-    
+
     if (result.rows.length > 0) {
-      res.json({ 
-        success: true, 
+      console.log(`User created successfully: ${email} (ID: ${result.rows[0].id})`);
+
+      res.json({
+        success: true,
         data: result.rows[0],
-        message: `User created with temporary password: ${tempPassword}`
+        message: `User created successfully! Temporary password: ${tempPassword}`,
+        tempPassword: tempPassword
       });
     } else {
       res.status(500).json({ success: false, error: 'Failed to create user' });
     }
   } catch (error: any) {
     console.error('Create user error:', error);
-    
-    // Mock response for demo
+
+    // Enhanced mock response for demo
+    const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
     const newUser = {
       id: Date.now().toString(),
       email: req.body.email,
@@ -509,8 +526,15 @@ router.post('/users', adminAuth, async (req: Request, res: Response) => {
       is_active: true,
       created_at: new Date().toISOString()
     };
-    
-    res.json({ success: true, data: newUser });
+
+    console.log(`Mock user created: ${req.body.email} with temp password: ${tempPassword}`);
+
+    res.json({
+      success: true,
+      data: newUser,
+      message: `User created (mock mode)! Temporary password: ${tempPassword}`,
+      tempPassword: tempPassword
+    });
   }
 });
 
