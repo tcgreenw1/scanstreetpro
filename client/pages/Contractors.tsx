@@ -210,10 +210,10 @@ export default function Contractors() {
   const { useSampleData, userPlan } = useDataVisibility();
 
   // New feature matrix system
-  const { userPlan: currentPlan } = useFeatureMatrix();
+  const { userPlan: matrixCurrentPlan } = useFeatureMatrix();
   const navFeatures = useNavFeatures();
   const contractorsState = navFeatures.contractors?.state || 'shown';
-  const { isPreviewMode, requiredPlan, shouldDisableInteractions } = usePreviewMode(contractorsState, currentPlan);
+  const { isPreviewMode, requiredPlan, shouldDisableInteractions } = usePreviewMode(contractorsState, matrixCurrentPlan);
 
   // Step 3: Apply hardcoded plan logic for Contractors
   // Pro+: Only show if plan is "pro" or higher
