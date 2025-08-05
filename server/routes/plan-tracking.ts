@@ -121,6 +121,23 @@ router.put('/update/:pageId', async (req, res) => {
 router.post('/seed', async (req, res) => {
   try {
     const pool = getPool();
+
+    // Check if table exists first
+    const tableExists = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_name = 'plan_implementation_tracking'
+      );
+    `);
+
+    if (!tableExists.rows[0].exists) {
+      console.log('Plan tracking table does not exist, cannot seed data');
+      return res.status(400).json({
+        success: false,
+        error: 'Table not initialized. Please call /init first.'
+      });
+    }
     
     const pages = [
       {
