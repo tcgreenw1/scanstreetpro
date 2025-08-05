@@ -259,7 +259,7 @@ export default function Inspections() {
       case 'bridge':
         return '🌉';
       case 'drainage':
-        return '🚰';
+        return '����';
       default:
         return '📍';
     }
@@ -289,7 +289,11 @@ export default function Inspections() {
           Infrastructure Inspections
         </h1>
         <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
-          Mobile-optimized inspection forms with offline capability, GPS tagging, and compliance tracking for all municipal assets.
+          <strong>CURRENT PLAN: {userPlan.toUpperCase()}</strong><br/>
+          {userPlan === 'free'
+            ? '📝 BASIC INSPECTIONS AVAILABLE - Mobile-optimized inspection forms with limited features'
+            : '✅ FULL INSPECTION SUITE - Mobile-optimized inspection forms with offline capability, GPS tagging, and compliance tracking for all municipal assets'
+          }
         </p>
         <div className="flex justify-center space-x-4 mt-4">
           <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300">
