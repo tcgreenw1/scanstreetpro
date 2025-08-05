@@ -16,12 +16,12 @@ const PLANS: { value: PlanType; label: string; color: string }[] = [
 
 export function TestPlanSwitcher() {
   const [currentPlan, setCurrentPlan] = useState<PlanType>(
-    (localStorage.getItem('testPlan') as PlanType) || 'free'
+    getPlanOverride() || 'free'
   );
 
   const handlePlanChange = (plan: PlanType) => {
     setCurrentPlan(plan);
-    localStorage.setItem('testPlan', plan);
+    setPlanOverride(plan);
     // Force page reload to apply plan changes
     window.location.reload();
   };
