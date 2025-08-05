@@ -46,11 +46,27 @@ router.post('/init', async (req, res) => {
 router.get('/all', async (req, res) => {
   try {
     const pool = getPool();
+
+    // Check if table exists first
+    const tableExists = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_name = 'plan_implementation_tracking'
+      );
+    `);
+
+    if (!tableExists.rows[0].exists) {
+      // Table doesn't exist, return empty result
+      console.log('Plan tracking table does not exist, returning empty data');
+      return res.json({ success: true, data: [], message: 'Table not initialized' });
+    }
+
     const result = await pool.query(`
-      SELECT * FROM plan_implementation_tracking 
+      SELECT * FROM plan_implementation_tracking
       ORDER BY implementation_status DESC, page_name ASC
     `);
-    
+
     res.json({ success: true, data: result.rows });
   } catch (error) {
     console.error('Error fetching plan tracking data:', error);
