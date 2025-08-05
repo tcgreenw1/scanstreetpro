@@ -217,6 +217,15 @@ const monthlyRevenue = [
 ];
 
 export default function Funding() {
+  // Step 1 & 2: Get plan-based UI state
+  const planState = usePlanBasedUI();
+  const fundingAccess = useFeatureAccess('fundingCenter');
+  const { useSampleData, userPlan } = useDataVisibility();
+
+  // Step 3: Apply hardcoded plan logic for Funding Center
+  // Pro+: Only show if plan is "pro" or higher
+  const canAccessFunding = planState.unlockFundingCenter;
+
   const [selectedTab, setSelectedTab] = useState('overview');
   const [selectedSource, setSelectedSource] = useState<string>('');
   const [scenarios, setScenarios] = useState<BudgetScenario[]>([
