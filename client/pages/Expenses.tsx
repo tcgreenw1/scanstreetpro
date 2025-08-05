@@ -40,7 +40,10 @@ import {
 import { expenses, type Expense } from "@/lib/mock-data";
 import { neonService, Transaction } from "@/services/neonService";
 import { useOrganization, usePermissions } from "@/contexts/OrganizationContext";
+import { usePlanBasedUI, useFeatureAccess, useDataVisibility } from "@/hooks/usePlanBasedUI";
 import { PlanGuard, PlanRestrictedButton, FeatureBadge, UpgradeBanner } from "@/components/PlanGuard";
+import { Crown } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Expenses() {
   const { organization, planFeatures } = useOrganization();
