@@ -521,6 +521,9 @@ export function Layout({ children }: LayoutProps) {
         onClose={() => setIsGlobalSearchOpen(false)}
       />
 
+      {/* Global Plan Indicator - shows page access status */}
+      <GlobalPlanIndicator />
+
       {/* Test Plan Switcher - for immediate testing */}
       <TestPlanSwitcher />
     </div>
