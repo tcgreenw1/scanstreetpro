@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Crown, Eye, Database, Lock, CheckCircle } from 'lucide-react';
 import { useFeatureMatrix, useNavFeatures, useDashboardFeatures } from '@/hooks/useFeatureMatrix';
+import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 
 export function FeatureMatrixDemo() {
