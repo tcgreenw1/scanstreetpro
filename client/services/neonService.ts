@@ -163,11 +163,20 @@ class NeonService {
 
   // Asset Management
   async getAssets(organizationId: string, includeSampleData: boolean = false): Promise<Asset[]> {
+    console.log('getAssets called with:', { organizationId, includeSampleData });
+
+    if (!organizationId) {
+      console.warn('No organizationId provided, using fallback data');
+      return this.getFallbackAssets('default-org', includeSampleData);
+    }
+
     try {
       const assets = await this.makeRequest<any[]>(`/assets`, {
         organizationId,
       });
-      
+
+      console.log('Received assets from API:', assets);
+
       return assets.map(asset => ({
         ...asset,
         condition: {
@@ -179,7 +188,8 @@ class NeonService {
         updatedAt: new Date(asset.updatedAt),
       }));
     } catch (error) {
-      console.error('Failed to fetch assets:', error);
+      console.error('Failed to fetch assets from API:', error);
+      console.log('Falling back to sample data');
       return this.getFallbackAssets(organizationId, includeSampleData);
     }
   }
