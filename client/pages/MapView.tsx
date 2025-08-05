@@ -853,6 +853,30 @@ export default function MapView() {
                     </div>
                   </div>
                 )}
+
+                {!hasPCIAccess && showPCILayer && (
+                  <div className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center rounded-b-lg">
+                    <div className="text-center p-8 max-w-md">
+                      <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-9a2 2 0 00-2-2M6 7V5a6 6 0 1112 0v2M6 7h12l-1 5H7l-1-5z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
+                        Upgrade to Unlock Full Road Condition Data
+                      </h3>
+                      <p className="text-slate-600 dark:text-slate-400 mb-6">
+                        Access detailed PCI scores, road condition analysis, and asset management with Pro, Premium, or Enterprise plans.
+                      </p>
+                      <Button
+                        onClick={() => window.location.href = '/pricing'}
+                        className="bg-amber-600 hover:bg-amber-700 text-white"
+                      >
+                        View Upgrade Options
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
