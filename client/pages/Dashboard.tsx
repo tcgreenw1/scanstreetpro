@@ -126,15 +126,15 @@ export default function Dashboard() {
     loadMetrics();
   }, [organization]);
 
-  // Generate dynamic stats based on plan and real data
+  // Step 3: Generate stats based on plan with hardcoded visibility logic
   const quickStats = [
     {
-      label: planFeatures?.sampleDataOnly ? 'Sample Roads' : 'Total Assets',
+      label: useSampleData ? 'Sample Roads' : 'Total Assets',
       value: isLoading ? '...' : dashboardMetrics.totalAssets,
       icon: MapPin,
       color: 'text-blue-600',
       trend: 'stable',
-      locked: false
+      locked: false // Always show basic metrics
     },
     {
       label: 'Average PCI Score',
@@ -142,7 +142,7 @@ export default function Dashboard() {
       icon: BarChart3,
       color: 'text-green-600',
       trend: 'up',
-      locked: false
+      locked: false // Always show basic metrics
     },
     {
       label: 'Critical Issues',
@@ -150,7 +150,7 @@ export default function Dashboard() {
       icon: AlertCircle,
       color: 'text-red-600',
       trend: 'down',
-      locked: !isFeatureUnlocked('assetManagement')
+      locked: planState.disableAssetManagement && planState.showCrowns
     },
     {
       label: 'Monthly Budget',
@@ -158,7 +158,7 @@ export default function Dashboard() {
       icon: DollarSign,
       color: 'text-orange-600',
       trend: 'stable',
-      locked: !planFeatures?.budgetSimulations
+      locked: !planState.unlockBudgetSimulations && planState.showCrowns
     }
   ];
 
