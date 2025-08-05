@@ -207,9 +207,10 @@ export default function Reports() {
             Export Reports
           </CardTitle>
           <CardDescription>
+            <strong>CURRENT PLAN: {userPlan.toUpperCase()}</strong><br/>
             {exportLimits.canExport
-              ? `Download reports in various formats for sharing with stakeholders. ${exportLimits.isUnlimited ? 'Unlimited' : exportLimits.exportsRemaining} exports remaining this month.`
-              : "Export limit reached this month. Upgrade for unlimited exports."
+              ? `✅ EXPORTS ALLOWED - ${exportLimits.isUnlimited ? 'Unlimited exports' : `${exportLimits.exportsRemaining} exports remaining this month`}`
+              : "🔒 EXPORT LIMIT REACHED - Upgrade for unlimited exports."
             }
           </CardDescription>
         </CardHeader>
