@@ -316,6 +316,67 @@ export default function Funding() {
     return daysUntil <= 30;
   };
 
+  // Update tracking data for this page
+  useEffect(() => {
+    planTrackingApi.markPageCompleted('Funding Center', {
+      free: 'Hidden/locked page with feature preview',
+      basic: 'Hidden/locked page with feature preview',
+      pro: 'Full funding center with grants and revenue tracking',
+      premium: 'Advanced funding analytics + forecasting',
+      enterprise: 'Complete funding platform + API integrations'
+    }, 'Pro+ feature - early return with locked banner for non-Pro users');
+  }, []);
+
+  // Early return with access restriction if not Pro+
+  if (!canAccessFunding) {
+    return (
+      <div className="space-y-8 max-w-7xl mx-auto">
+        {/* Locked Banner for Funding Center */}
+        <div className="glass-card p-8 rounded-xl border-amber-200/50 bg-gradient-to-r from-amber-50/80 to-orange-50/80 dark:from-amber-900/30 dark:to-orange-900/30">
+          <div className="text-center">
+            <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-4">
+              <Crown className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-amber-800 dark:text-amber-200 mb-2">Municipal Funding Center</h1>
+            <p className="text-amber-700 dark:text-amber-300 mb-6 max-w-2xl mx-auto">
+              <strong>CURRENT PLAN: {userPlan.toUpperCase()}</strong><br/>
+              🔒 FUNDING CENTER LOCKED - This feature requires Pro plan or higher.<br/>
+              Advanced grant management, revenue tracking, funding analytics, and multi-year budget planning are available with Pro plans and higher.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/pricing">
+                <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                  <Crown className="w-4 h-4 mr-2" />
+                  {planState.upgradeMessage}
+                </Button>
+              </Link>
+              <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-50">
+                View Funding Features
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Feature Preview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { title: "Grant Management", icon: Target, desc: "Track grant applications, deadlines, and awards" },
+            { title: "Revenue Analytics", icon: TrendingUp, desc: "Monitor funding sources and revenue streams" },
+            { title: "Budget Planning", icon: PiggyBank, desc: "Multi-year funding strategies and forecasts" }
+          ].map((feature, index) => (
+            <Card key={index} className="glass-card border-amber-200/30 opacity-75">
+              <CardContent className="p-6 text-center">
+                <feature.icon className="w-8 h-8 text-amber-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">{feature.title}</h3>
+                <p className="text-sm text-amber-600 dark:text-amber-400">{feature.desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
