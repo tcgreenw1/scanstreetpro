@@ -38,18 +38,30 @@ export const planTrackingApi = {
   // Seed initial data
   async seed() {
     try {
+      console.log('🌱 Client: Seeding plan tracking data to', `${BASE_URL}/seed`);
       const response = await fetch(`${BASE_URL}/seed`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
 
+      console.log('📡 Client: Seed response status:', response.status, response.statusText);
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('📡 Client: Seed error response body:', errorText);
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log('✅ Client: Successfully seeded plan tracking data:', data);
+      return data;
     } catch (error) {
-      console.error('Failed to seed plan tracking data:', error);
+      console.error('❌ Client: Failed to seed plan tracking data:', error);
+      console.error('❌ Client: Seed error details:', {
+        name: error?.name,
+        message: error?.message,
+        stack: error?.stack?.split('\n').slice(0, 3).join('\n')
+      });
       return { success: false, error: error?.message || 'Network error' };
     }
   },
