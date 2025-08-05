@@ -46,6 +46,20 @@ L.Icon.Default.mergeOptions({
 const SPRINGFIELD_CENTER: [number, number] = [39.9250, -83.8067];
 const DEFAULT_ZOOM = 14;
 
+// Simple road segment interface for immediate use
+interface SimpleRoadSegment {
+  id: number;
+  name: string;
+  highway: string;
+  coordinates: [number, number][];
+  centerLat: number;
+  centerLng: number;
+  pci: number;
+  roadType: string;
+  length: number;
+  surface?: string;
+}
+
 export default function MapView() {
   const { user } = useAuth();
   const { userPlan } = useFeatureMatrix();
