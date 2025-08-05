@@ -1,31 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import L, { Map as LeafletMap } from 'leaflet';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { 
-  MapPin, 
-  ArrowLeft, 
-  RotateCcw, 
-  Edit3, 
-  Maximize, 
-  ZoomIn, 
-  ZoomOut, 
-  Layers,
-  Crown,
-  Satellite,
-  Car,
-  Map as MapIcon,
-  Info,
-  BarChart3,
-  Filter
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import { ModifySampleDataModal } from "@/components/ModifySampleDataModal";
-import { usePricing } from "@/contexts/PricingContext";
-import { cn } from "@/lib/utils";
+import { MapPin, ArrowRight, Navigation } from "lucide-react";
 
 // Import Leaflet CSS
 import 'leaflet/dist/leaflet.css';
