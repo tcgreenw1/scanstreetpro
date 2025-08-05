@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import { usePlanBasedUI, useFeatureAccess } from '@/hooks/usePlanBasedUI';
 import { useOrganization } from '@/contexts/OrganizationContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Crown, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getPlanOverride } from '@/utils/planOverride';
