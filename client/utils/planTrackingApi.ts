@@ -57,15 +57,27 @@ export const planTrackingApi = {
   // Get all tracking data
   async getAll() {
     try {
+      console.log('🔍 Client: Fetching plan tracking data from', `${BASE_URL}/all`);
       const response = await fetch(`${BASE_URL}/all`);
 
+      console.log('📡 Client: Response status:', response.status, response.statusText);
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('📡 Client: Error response body:', errorText);
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log('✅ Client: Successfully fetched plan tracking data:', data);
+      return data;
     } catch (error) {
-      console.error('Failed to fetch plan tracking data:', error);
+      console.error('❌ Client: Failed to fetch plan tracking data:', error);
+      console.error('❌ Client: Error details:', {
+        name: error?.name,
+        message: error?.message,
+        stack: error?.stack?.split('\n').slice(0, 3).join('\n')
+      });
       return { success: false, error: error?.message || 'Network error' };
     }
   },
