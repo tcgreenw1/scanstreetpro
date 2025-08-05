@@ -159,11 +159,59 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
 
   // Fetch organization data from database
   const fetchOrganizationData = async (orgId: string): Promise<Organization> => {
-    // For now, return mock data - this would connect to your Neon database
+    try {
+      const authToken = localStorage.getItem('authToken') || localStorage.getItem('neon_auth_token');
+
+      if (authToken) {
+        // First try the main organization endpoint
+        let response = await fetch(`/api/organizations/${orgId}`, {
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+
+        // If main endpoint fails, try mock endpoint
+        if (!response.ok && authToken === 'mock-admin-token-12345') {
+          response = await fetch(`/api/mock/organizations/${orgId}`, {
+            headers: {
+              'Authorization': `Bearer ${authToken}`
+            }
+          });
+        }
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data) {
+            const org = result.data;
+            return {
+              id: org.id,
+              name: org.name,
+              plan: org.plan || 'free', // Ensure we have a plan
+              planExpiry: org.planExpiry ? new Date(org.planExpiry) : new Date('2024-12-31'),
+              isActive: org.isActive !== false,
+              settings: {
+                timezone: org.timezone || 'America/New_York',
+                currency: org.currency || 'USD',
+                logoUrl: org.logoUrl || '/city-logo.png'
+              },
+              usage: {
+                exportsThisMonth: org.exportsThisMonth || 0,
+                teamMembers: org.teamMembers || 1,
+                rescansThisYear: org.rescansThisYear || 0
+              }
+            };
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch organization data:', error);
+    }
+
+    // Fallback to mock data if database fails
     return {
       id: orgId,
       name: 'City of Springfield',
-      plan: 'pro', // This would come from the database
+      plan: 'free', // Default to free plan
       planExpiry: new Date('2024-12-31'),
       isActive: true,
       settings: {
@@ -172,9 +220,9 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
         logoUrl: '/city-logo.png'
       },
       usage: {
-        exportsThisMonth: 5,
-        teamMembers: 7,
-        rescansThisYear: 1
+        exportsThisMonth: 0,
+        teamMembers: 1,
+        rescansThisYear: 0
       }
     };
   };
