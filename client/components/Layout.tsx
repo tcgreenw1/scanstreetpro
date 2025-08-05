@@ -42,6 +42,7 @@ import { usePlanBasedUI } from '@/hooks/usePlanBasedUI';
 import { GlobalSearch } from './GlobalSearch';
 import { ConnectionStatus } from './ConnectionStatus';
 import { TestPlanSwitcher } from './TestPlanSwitcher';
+import { GlobalPlanIndicator } from './GlobalPlanIndicator';
 import {
   DropdownMenu,
   DropdownMenuContent,
