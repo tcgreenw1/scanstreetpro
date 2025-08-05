@@ -13,6 +13,7 @@ import migrateRoutes from "./routes/migrate";
 import exportRoutes from "./routes/export";
 import mockRoutes from "./routes/mock";
 import planTrackingRoutes from "./routes/plan-tracking";
+import featureMatrixRoutes from "./routes/feature-matrix";
 
 export function createServer() {
   const app = express();
