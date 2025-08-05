@@ -14,6 +14,9 @@ import exportRoutes from "./routes/export";
 import mockRoutes from "./routes/mock";
 import planTrackingRoutes from "./routes/plan-tracking";
 import featureMatrixRoutes from "./routes/feature-matrix";
+import assetsRoutes from "./routes/assets";
+import roadInspectionsRoutes from "./routes/road-inspections";
+import maintenanceRoutes from "./routes/maintenance";
 
 export function createServer() {
   const app = express();
