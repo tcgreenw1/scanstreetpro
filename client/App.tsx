@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 // import { seedDemoUsers } from "./utils/seedUsers"; // No longer needed with Neon
 import "./utils/errorTracer"; // Import to initialize error tracing
+import "./utils/initFeatureMatrix"; // Import to make feature matrix utilities available globally
 import { Layout } from "./components/Layout";
 import { PlaceholderPage } from "./components/PlaceholderPage";
 import ErrorBoundary from "./components/ErrorBoundary";
