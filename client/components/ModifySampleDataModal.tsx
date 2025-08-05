@@ -41,7 +41,13 @@ interface ModifySampleDataModalProps {
 }
 
 export function ModifySampleDataModal({ trigger, onDataUpdate }: ModifySampleDataModalProps) {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Only show to admin users
+  if (!['admin', 'superadmin', 'owner'].includes(user?.role)) {
+    return null;
+  }
   const [sampleData, setSampleData] = useState<SampleDataConfig>({
     pciRange: { min: 45, max: 85 },
     roadTypes: ['Arterial', 'Local', 'Collector'],
