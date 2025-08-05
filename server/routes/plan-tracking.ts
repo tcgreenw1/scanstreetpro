@@ -3,6 +3,30 @@ import { getPool } from '../lib/database';
 
 const router = express.Router();
 
+// Health check endpoint
+router.get('/health', async (req, res) => {
+  try {
+    console.log('🏥 Plan tracking health check called');
+
+    // Test database connectivity
+    const pool = getPool();
+    await pool.query('SELECT NOW()');
+
+    res.json({
+      success: true,
+      message: 'Plan tracking service is healthy',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Plan tracking health check failed:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Create tracking table if it doesn't exist
 router.post('/init', async (req, res) => {
   try {
