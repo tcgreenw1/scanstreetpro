@@ -223,6 +223,15 @@ export default function Contractors() {
 
   useEffect(() => {
     loadData();
+
+    // Update tracking data for this page
+    planTrackingApi.markPageCompleted('Contractors', {
+      free: 'Hidden/locked page with feature preview',
+      basic: 'Hidden/locked page with feature preview',
+      pro: 'Full contractor management enabled',
+      premium: 'Full contractor management + advanced analytics',
+      enterprise: 'Complete contractor management + API access'
+    }, 'Pro+ feature - early return with locked banner for non-Pro users');
   }, []);
 
   const loadData = async () => {
