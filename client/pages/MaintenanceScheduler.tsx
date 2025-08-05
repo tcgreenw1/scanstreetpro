@@ -169,12 +169,21 @@ const weatherConditions = [
 ];
 
 export default function MaintenanceScheduler() {
+  // Step 1 & 2: Get plan-based UI state
+  const planState = usePlanBasedUI();
+  const maintenanceAccess = useFeatureAccess('maintenanceScheduling');
+  const { useSampleData, userPlan } = useDataVisibility();
+
   const [tasks, setTasks] = useState<MaintenanceTask[]>(mockTasks);
   const [selectedTask, setSelectedTask] = useState<MaintenanceTask | null>(null);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [selectedDate, setSelectedDate] = useState('2023-12-15');
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const { currentPlan } = usePricing();
+
+  // Step 3: Apply hardcoded plan logic for Maintenance Scheduling
+  // Pro+: Only show if plan is "pro" or higher
+  const canAccessMaintenance = planState.unlockMaintenanceScheduling;
 
   const getDaysInWeek = (startDate: string) => {
     const start = new Date(startDate);
