@@ -49,8 +49,18 @@ export default function Expenses() {
   const { organization, planFeatures } = useOrganization();
   const { isFeatureUnlocked } = usePermissions();
 
+  // Step 1 & 2: Get plan-based UI state
+  const planState = usePlanBasedUI();
+  const expenseAccess = useFeatureAccess('expenseManagement');
+  const { useSampleData, userPlan } = useDataVisibility();
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Step 3: Apply hardcoded plan logic for Budget/Expense Pages
+  // Free: Locked with crown
+  // Basic+: Fully enabled
+  const canManageExpenses = planState.unlockExpenseManagement;
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
