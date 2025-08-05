@@ -13,13 +13,13 @@ export interface PCILevel {
 }
 
 export const PCI_LEVELS: PCILevel[] = [
-  { min: 86, max: 100, label: 'Excellent', color: '#166534', darkColor: '#22c55e' }, // Dark Green
-  { min: 71, max: 85, label: 'Good', color: '#16a34a', darkColor: '#4ade80' },      // Light Green  
-  { min: 56, max: 70, label: 'Satisfactory', color: '#eab308', darkColor: '#facc15' }, // Yellow
-  { min: 41, max: 55, label: 'Fair', color: '#f97316', darkColor: '#fb923c' },      // Orange
-  { min: 26, max: 40, label: 'Poor', color: '#ea580c', darkColor: '#fb7c29' },     // Dark Orange
-  { min: 11, max: 25, label: 'Serious', color: '#dc2626', darkColor: '#f87171' },   // Red
-  { min: 0, max: 10, label: 'Very Poor', color: '#6b7280', darkColor: '#9ca3af' }   // Gray
+  { min: 86, max: 100, label: 'Excellent', color: '#2f9e44', darkColor: '#2f9e44' }, // Dark green
+  { min: 71, max: 85, label: 'Good', color: '#51cf66', darkColor: '#51cf66' },      // Light green
+  { min: 56, max: 70, label: 'Satisfactory', color: '#ffd43b', darkColor: '#ffd43b' }, // Yellow
+  { min: 41, max: 55, label: 'Fair', color: '#fab005', darkColor: '#fab005' },      // Orange
+  { min: 26, max: 40, label: 'Poor', color: '#e8590c', darkColor: '#e8590c' },     // Dark orange
+  { min: 11, max: 25, label: 'Serious', color: '#c92a2a', darkColor: '#c92a2a' },   // Red
+  { min: 0, max: 10, label: 'Failed', color: '#3a3a3a', darkColor: '#3a3a3a' }   // Gray
 ];
 
 interface MapLegendProps {
