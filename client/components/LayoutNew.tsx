@@ -455,8 +455,8 @@ export function Layout({ children }: LayoutProps) {
         </main>
       </div>
 
-      {/* Plan Implementation Status - only in development */}
-      {process.env.NODE_ENV === 'development' && <PlanImplementationStatus />}
+      {/* Plan Implementation Status - only visible to admin users */}
+      <PlanImplementationStatus />
     </div>
   );
 }
