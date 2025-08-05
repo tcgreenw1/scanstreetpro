@@ -57,6 +57,11 @@ export default function AssetManager() {
   const { organization, planFeatures } = useOrganization();
   const { isFeatureUnlocked } = usePermissions();
 
+  // Step 1 & 2: Get plan-based UI state
+  const planState = usePlanBasedUI();
+  const assetAccess = useFeatureAccess('assetManagement');
+  const { useSampleData, userPlan } = useDataVisibility();
+
   const [assets, setAssets] = useState<Asset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,8 +69,10 @@ export default function AssetManager() {
   const [selectedCondition, setSelectedCondition] = useState('All');
   const [viewMode, setViewMode] = useState<'table' | 'map'>('table');
 
-  // Check if asset management is unlocked
-  const canManageAssets = isFeatureUnlocked('assetManagement');
+  // Step 3: Apply hardcoded plan logic for Asset Management
+  // Free: Disable all interaction, show upsell banner
+  // Basic+: Fully editable, live data from Neon
+  const canManageAssets = assetAccess.hasAccess;
 
   // Load assets from database
   useEffect(() => {
