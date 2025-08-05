@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { PlanType, PLAN_FEATURES, PlanFeatures, getPagePermissions, canUseFeature } from '../lib/planPermissions';
 import { useAuth } from './AuthContext';
+import { getPlanOverride } from '../utils/planOverride';
 
 export interface Organization {
   id: string;
