@@ -9,9 +9,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 export function PlanImplementationStatus() {
+  const { user } = useAuth();
   const [trackingData, setTrackingData] = useState<PlanTrackingData[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
+
+  // Only show to admin users
+  if (!['admin', 'superadmin', 'owner'].includes(user?.role)) {
+    return null;
+  }
 
   useEffect(() => {
     loadTrackingData();
