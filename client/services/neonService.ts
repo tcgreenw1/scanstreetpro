@@ -120,6 +120,22 @@ class NeonService {
   constructor() {
     // Use the current domain for API requests
     this.baseUrl = '/api';
+    this.testApiConnection();
+  }
+
+  private async testApiConnection() {
+    try {
+      console.log('Testing API connection...');
+      const response = await fetch('/api/ping');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('API connection successful:', data);
+      } else {
+        console.error('API ping failed:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('API connection test failed:', error);
+    }
   }
 
   private async makeRequest<T>(
