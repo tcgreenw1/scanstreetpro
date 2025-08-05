@@ -47,6 +47,7 @@ import {
   MiniDonutChart
 } from '@/components/FeatureStateComponents';
 import { ModifySampleDataModal } from '@/components/ModifySampleDataModal';
+import { FeatureMatrixDemo } from '@/components/FeatureMatrixDemo';
 import { useState, useEffect } from 'react';
 
 const pciMethodComparison = [
