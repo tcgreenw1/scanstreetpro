@@ -16,9 +16,15 @@ const PLANS: { value: PlanType; label: string; color: string }[] = [
 ];
 
 export function TestPlanSwitcher() {
+  const { user } = useAuth();
   const [currentPlan, setCurrentPlan] = useState<PlanType>(
     getPlanOverride() || 'free'
   );
+
+  // Only show to admin users
+  if (!['admin', 'superadmin', 'owner'].includes(user?.role)) {
+    return null;
+  }
 
   const handlePlanChange = (plan: PlanType) => {
     setCurrentPlan(plan);
