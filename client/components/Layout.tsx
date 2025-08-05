@@ -325,8 +325,10 @@ export function Layout({ children }: LayoutProps) {
                   organization.plan === 'pro' ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800" :
                   "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800"
                 )}>
-                  {organization.plan === 'free' && <Crown className="w-3 h-3" />}
+                  {(organization.plan === 'free' || organization.plan === 'basic') && <Crown className="w-3 h-3" />}
                   {organization.plan.charAt(0).toUpperCase() + organization.plan.slice(1)} Plan
+                  {organization.plan === 'free' && " (Limited)"}
+                  {organization.plan === 'basic' && " (Partial)"}
                 </Badge>
               )}
 
