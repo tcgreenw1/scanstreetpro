@@ -143,29 +143,50 @@ export default function MapView() {
   };
 
   const initializeMap = () => {
-    if (!mapRef.current) return;
+    if (!mapRef.current) {
+      console.error('Map container not found');
+      return;
+    }
 
-    const map = L.map(mapRef.current, {
-      center: SPRINGFIELD_CENTER,
-      zoom: DEFAULT_ZOOM,
-      zoomControl: false,
-      attributionControl: true
-    });
+    console.log('Initializing map...');
 
-    leafletMapRef.current = map;
+    try {
+      const map = L.map(mapRef.current, {
+        center: SPRINGFIELD_CENTER,
+        zoom: DEFAULT_ZOOM,
+        zoomControl: false,
+        attributionControl: true
+      });
 
-    // Add zoom controls to top-right
-    L.control.zoom({
-      position: 'topright'
-    }).addTo(map);
+      leafletMapRef.current = map;
 
-    // Add initial tile layer
-    updateTileLayer();
+      // Add zoom controls to top-right
+      L.control.zoom({
+        position: 'topright'
+      }).addTo(map);
 
-    // Add scale control
-    L.control.scale({
-      position: 'bottomleft'
-    }).addTo(map);
+      // Add initial tile layer
+      const tileUrl = isDarkMode
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+      const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+      L.tileLayer(tileUrl, {
+        attribution,
+        maxZoom: 19
+      }).addTo(map);
+
+      // Add scale control
+      L.control.scale({
+        position: 'bottomleft'
+      }).addTo(map);
+
+      console.log('Map initialized successfully');
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      throw error;
+    }
   };
 
   const updateTileLayer = () => {
