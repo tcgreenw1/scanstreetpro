@@ -100,6 +100,21 @@ export function ConnectionStatus({ show = true }: ConnectionStatusProps) {
 
   const statusInfo = getStatusInfo();
 
+  // For non-admin users, only show a simple status indicator in the header
+  if (!isAdmin) {
+    // Only show if there's a problem
+    if (status === 'connected' || status === 'checking') {
+      return null;
+    }
+
+    return (
+      <Button variant="ghost" size="sm" className="relative" title="Connection issue - Please contact support">
+        {statusInfo.icon}
+      </Button>
+    );
+  }
+
+  // Full detailed status for admin users
   return (
     <Alert className={`${statusInfo.color} mb-4`}>
       <div className="flex items-center justify-between">
@@ -113,7 +128,7 @@ export function ConnectionStatus({ show = true }: ConnectionStatusProps) {
             </span>
           </AlertDescription>
         </div>
-        
+
         {(status === 'degraded' || status === 'offline') && (
           <Button
             size="sm"
