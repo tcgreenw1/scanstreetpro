@@ -79,6 +79,13 @@ export const planTrackingApi = {
     enterprise?: string;
   }, notes?: string) {
     try {
+      // Ensure tracking system is ready first (non-blocking)
+      const readyResult = await ensurePlanTrackingReady();
+      if (!readyResult.success) {
+        console.warn(`⚠️ Plan tracking not available for ${pageName}, continuing anyway`);
+        return { success: false, error: 'Tracking system unavailable' };
+      }
+
       // First get all data to find the page
       const allData = await this.getAll();
       if (!allData.success) {
@@ -112,7 +119,7 @@ export const planTrackingApi = {
       return result;
     } catch (error) {
       console.warn(`⚠️ Error tracking completion for ${pageName}:`, error);
-      return { success: false, error: error.message };
+      return { success: false, error: error?.message || 'Unknown error' };
     }
   }
 };
