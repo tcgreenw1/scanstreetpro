@@ -94,7 +94,7 @@ export default function AssetManager() {
         setIsLoading(true);
         const assetData = await neonService.getAssets(
           organization.id,
-          useSampleData // Use plan-based sample data logic
+          !assetManagerFeatures.assetInventory.useRealData // Use sample data if not real data plan
         );
         setAssets(assetData);
       } catch (error) {
