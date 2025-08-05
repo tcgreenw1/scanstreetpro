@@ -1,0 +1,120 @@
+// Utility functions for plan tracking API
+const BASE_URL = '/api/plan-tracking';
+
+export interface PlanTrackingData {
+  id?: number;
+  page_name: string;
+  page_path: string;
+  implementation_status: 'pending' | 'in_progress' | 'completed';
+  plan_restrictions_implemented: boolean;
+  free_plan_behavior?: string;
+  basic_plan_behavior?: string;
+  pro_plan_behavior?: string;
+  premium_plan_behavior?: string;
+  enterprise_plan_behavior?: string;
+  implementation_notes?: string;
+}
+
+export const planTrackingApi = {
+  // Initialize the tracking table
+  async init() {
+    try {
+      const response = await fetch(`${BASE_URL}/init`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to initialize plan tracking:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Seed initial data
+  async seed() {
+    try {
+      const response = await fetch(`${BASE_URL}/seed`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to seed plan tracking data:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get all tracking data
+  async getAll() {
+    try {
+      const response = await fetch(`${BASE_URL}/all`);
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to fetch plan tracking data:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Update tracking data for a page
+  async updatePage(pageId: number, data: Partial<PlanTrackingData>) {
+    try {
+      const response = await fetch(`${BASE_URL}/update/${pageId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to update plan tracking data:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Log completion of a page implementation
+  async markPageCompleted(pageName: string, behaviors: {
+    free?: string;
+    basic?: string;
+    pro?: string;
+    premium?: string;
+    enterprise?: string;
+  }, notes?: string) {
+    try {
+      // First get all data to find the page
+      const allData = await this.getAll();
+      if (!allData.success) return allData;
+      
+      const page = allData.data.find((p: any) => p.page_name === pageName);
+      if (!page) {
+        console.error(`Page ${pageName} not found in tracking data`);
+        return { success: false, error: 'Page not found' };
+      }
+
+      return await this.updatePage(page.id, {
+        implementation_status: 'completed',
+        plan_restrictions_implemented: true,
+        free_plan_behavior: behaviors.free,
+        basic_plan_behavior: behaviors.basic,
+        pro_plan_behavior: behaviors.pro,
+        premium_plan_behavior: behaviors.premium,
+        enterprise_plan_behavior: behaviors.enterprise,
+        implementation_notes: notes
+      });
+    } catch (error) {
+      console.error('Failed to mark page completed:', error);
+      return { success: false, error: error.message };
+    }
+  }
+};
+
+// Initialize tracking on import
+planTrackingApi.init().then(result => {
+  if (result.success) {
+    console.log('✅ Plan tracking initialized');
+    // Seed data if needed
+    planTrackingApi.seed().then(seedResult => {
+      if (seedResult.success) {
+        console.log('✅ Plan tracking data seeded');
+      }
+    });
+  }
+});
