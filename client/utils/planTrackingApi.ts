@@ -23,10 +23,15 @@ export const planTrackingApi = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       return await response.json();
     } catch (error) {
       console.error('Failed to initialize plan tracking:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error?.message || 'Network error' };
     }
   },
 
