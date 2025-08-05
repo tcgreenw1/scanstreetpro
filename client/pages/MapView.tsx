@@ -83,6 +83,10 @@ export default function MapView() {
   const [showAssetLayer, setShowAssetLayer] = useState(true);
   const [pciFilter, setPciFilter] = useState(0);
   const [selectedAssetTypes, setSelectedAssetTypes] = useState<AssetType[]>([]);
+
+  // Plan-based access control
+  const hasPCIAccess = ['pro', 'premium', 'satellite_enterprise', 'driving_enterprise'].includes(userPlan);
+  const hasExportAccess = ['basic', 'pro', 'premium', 'satellite_enterprise', 'driving_enterprise'].includes(userPlan);
   
   // Layer refs
   const roadLayersRef = useRef<Polyline[]>([]);
