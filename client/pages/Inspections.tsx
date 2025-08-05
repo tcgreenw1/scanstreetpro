@@ -191,6 +191,16 @@ const templates: InspectionTemplate[] = [
 ];
 
 export default function Inspections() {
+  // Step 1 & 2: Get plan-based UI state
+  const planState = usePlanBasedUI();
+  const { useSampleData, userPlan } = useDataVisibility();
+
+  // Step 3: Inspections are available to all plans but with different features
+  // Free: Basic inspection creation with sample data
+  // Basic+: Full inspection workflow with real data
+  const canCreateInspections = true; // Available to all plans
+  const hasAdvancedFeatures = userPlan !== 'free'; // Advanced features for paid plans
+
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [assetTypeFilter, setAssetTypeFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
