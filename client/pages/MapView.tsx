@@ -85,7 +85,7 @@ export default function MapView() {
   const [selectedAssetTypes, setSelectedAssetTypes] = useState<AssetType[]>([]);
   
   // Layer refs
-  const roadLayersRef = useRef<CircleMarker[]>([]);
+  const roadLayersRef = useRef<Polyline[]>([]);
   const assetLayersRef = useRef<Marker[]>([]);
   const currentTileLayerRef = useRef<TileLayer | null>(null);
 
