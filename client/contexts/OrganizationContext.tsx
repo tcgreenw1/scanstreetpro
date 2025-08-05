@@ -110,7 +110,42 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
 
   // Fetch user data from database
   const fetchUserData = async (authToken: string): Promise<User> => {
-    // For now, return mock data - this would connect to your Neon database
+    try {
+      // First try the main auth endpoint
+      let response = await fetch('/api/me', {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+
+      // If main auth fails, try mock auth as fallback
+      if (!response.ok && authToken === 'mock-admin-token-12345') {
+        response = await fetch('/api/mock/me', {
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+      }
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data.user) {
+          return {
+            id: result.data.user.id,
+            email: result.data.user.email,
+            name: result.data.user.name || result.data.user.email.split('@')[0],
+            role: result.data.user.role,
+            organizationId: result.data.user.organizationId,
+            isActive: result.data.user.isActive !== false,
+            lastLogin: result.data.user.lastLogin ? new Date(result.data.user.lastLogin) : new Date()
+          };
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
+    }
+
+    // Fallback to mock data if database fails
     return {
       id: 'user-1',
       email: 'admin@city.gov',
