@@ -26,8 +26,9 @@ import { MapToolbar } from '@/components/map/MapToolbar';
 import { overpassService, RoadSegment } from '@/services/overpassService';
 import { assetsService, CityAsset, ASSET_TYPES, AssetType } from '@/services/assetsService';
 
-// Import Leaflet CSS
+// Import Leaflet CSS and custom map styles
 import 'leaflet/dist/leaflet.css';
+import '@/styles/map-styles.css';
 
 // Fix Leaflet default markers
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
