@@ -65,10 +65,10 @@ export default function AssetManager() {
   const { useSampleData, userPlan } = useDataVisibility();
 
   // New feature matrix system
-  const { userPlan: currentPlan } = useFeatureMatrix();
+  const { userPlan: matrixCurrentPlan } = useFeatureMatrix();
   const navFeatures = useNavFeatures();
   const assetManagerState = navFeatures.assetManager?.state || 'shown';
-  const { isPreviewMode, requiredPlan, shouldDisableInteractions } = usePreviewMode(assetManagerState, currentPlan);
+  const { isPreviewMode, requiredPlan, shouldDisableInteractions } = usePreviewMode(assetManagerState, matrixCurrentPlan);
 
   const [assets, setAssets] = useState<Asset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
