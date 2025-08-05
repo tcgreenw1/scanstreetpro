@@ -450,8 +450,8 @@ export function Dashboard() {
         </Card>
       </ConditionalFeature>
 
-      {/* Feature Matrix Demo - Only visible in development */}
-      {process.env.NODE_ENV === 'development' && <FeatureMatrixDemo />}
+      {/* Feature Matrix Demo - Only visible to admin users */}
+      <FeatureMatrixDemo />
     </div>
   );
 }
