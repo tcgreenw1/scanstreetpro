@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Crown, Zap } from 'lucide-react';
 import { PlanType } from '@/lib/planPermissions';
+import { getPlanOverride, setPlanOverride } from '@/utils/planOverride';
 
 const PLANS: { value: PlanType; label: string; color: string }[] = [
   { value: 'free', label: 'Free Plan', color: 'bg-blue-500' },
