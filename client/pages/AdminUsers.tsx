@@ -383,6 +383,30 @@ const AdminUsers = () => {
           </div>
         </div>
 
+        {/* Debug Section */}
+        <div className="admin-glass-card rounded-2xl p-6 border border-white/20 backdrop-blur-xl">
+          <h3 className="text-lg font-semibold text-slate-800 mb-4">🔧 Debug User Login Issues</h3>
+          <div className="flex gap-4 mb-4">
+            <Input
+              placeholder="Enter email to debug..."
+              value={debugEmail}
+              onChange={(e) => setDebugEmail(e.target.value)}
+              className="admin-glass-input flex-1"
+            />
+            <Button onClick={debugUserStatus} className="admin-glass-button">
+              Check Status
+            </Button>
+          </div>
+          {debugResult && (
+            <div className="mt-4 p-4 bg-slate-50 rounded-lg">
+              <h4 className="font-medium text-slate-800 mb-2">Debug Result:</h4>
+              <pre className="text-sm text-slate-700 overflow-auto">
+                {JSON.stringify(debugResult, null, 2)}
+              </pre>
+            </div>
+          )}
+        </div>
+
         {/* Filters and Actions */}
         <div className="admin-glass-card rounded-2xl p-6 border border-white/20 backdrop-blur-xl">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
