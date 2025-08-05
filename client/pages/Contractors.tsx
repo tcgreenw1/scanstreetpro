@@ -201,6 +201,15 @@ const payments: Payment[] = [
 ];
 
 export default function Contractors() {
+  // Step 1 & 2: Get plan-based UI state
+  const planState = usePlanBasedUI();
+  const contractorAccess = useFeatureAccess('contractorManagement');
+  const { useSampleData, userPlan } = useDataVisibility();
+
+  // Step 3: Apply hardcoded plan logic for Contractors
+  // Pro+: Only show if plan is "pro" or higher
+  const canAccessContractors = planState.unlockContractorManagement;
+
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
