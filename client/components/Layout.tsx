@@ -104,7 +104,7 @@ const NAV_SECTIONS: NavSection[] = [
         featureKey: 'maintenance'
       },
       { name: 'Inspections', href: '/inspections', icon: ClipboardCheck, description: 'Inspection workflows', featureKey: 'inspections' },
-      { name: 'Map View', href: '/map', icon: MapPin, description: 'Geographic asset view', featureKey: 'mapView' }
+      { name: 'Map View', href: '/map-view', icon: MapPin, description: 'Springfield infrastructure map', featureKey: 'mapView' }
     ]
   },
   {
