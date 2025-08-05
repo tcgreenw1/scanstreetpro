@@ -438,7 +438,29 @@ export function Layout({ children }: LayoutProps) {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout} className="text-red-600 dark:text-red-400">
+                    <DropdownMenuItem
+                      onClick={async () => {
+                        try {
+                          // Call the logout API endpoint
+                          await fetch('/api/logout', {
+                            method: 'POST',
+                            credentials: 'include'
+                          });
+
+                          // Clear authentication state
+                          await signOut();
+
+                          // Redirect to login
+                          window.location.href = '/login';
+                        } catch (error) {
+                          console.error('Logout failed:', error);
+                          // Even if API call fails, clear local state and redirect
+                          await signOut();
+                          window.location.href = '/login';
+                        }
+                      }}
+                      className="text-red-600 dark:text-red-400"
+                    >
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
                     </DropdownMenuItem>
