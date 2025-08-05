@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, Clock, AlertCircle, Database } from 'lucide-react';
-import { planTrackingApi, PlanTrackingData } from '@/utils/planTrackingApi';
+import { planTrackingApi, PlanTrackingData, ensurePlanTrackingReady } from '@/utils/planTrackingApi';
 import { cn } from '@/lib/utils';
 
 export function PlanImplementationStatus() {
