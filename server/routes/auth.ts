@@ -194,6 +194,69 @@ export const signIn: RequestHandler = async (req, res) => {
   }
 };
 
+// Debug endpoint to check user status (admin only)
+export const checkUserStatus: RequestHandler = async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email parameter is required'
+      });
+    }
+
+    const userQuery = `
+      SELECT
+        u.id, u.email, u.name, u.role, u.is_active, u.created_at,
+        u.password_hash IS NOT NULL as has_password,
+        o.name as org_name, o.plan as org_plan
+      FROM users u
+      LEFT JOIN organizations o ON u.organization_id = o.id
+      WHERE u.email = $1
+    `;
+
+    const userResult = await executeQuery(userQuery, [email]);
+
+    if (!userResult.rows || userResult.rows.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          exists: false,
+          message: `No user found with email: ${email}`
+        }
+      });
+    }
+
+    const user = userResult.rows[0];
+
+    res.json({
+      success: true,
+      data: {
+        exists: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          is_active: user.is_active,
+          has_password: user.has_password,
+          created_at: user.created_at,
+          org_name: user.org_name,
+          org_plan: user.org_plan
+        }
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Check user status error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to check user status'
+    });
+  }
+};
+
 export const signUp: RequestHandler = async (req, res) => {
   try {
     const { email, password, name } = req.body;
