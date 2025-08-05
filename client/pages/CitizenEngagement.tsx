@@ -303,6 +303,8 @@ export default function CitizenEngagement() {
             </div>
             <h1 className="text-4xl font-bold text-amber-800 dark:text-amber-200 mb-2">Citizen Engagement Portal</h1>
             <p className="text-amber-700 dark:text-amber-300 mb-6 max-w-2xl mx-auto">
+              <strong>CURRENT PLAN: {userPlan.toUpperCase()}</strong><br/>
+              🔒 CITIZEN ENGAGEMENT LOCKED - This feature requires Pro plan or higher.<br/>
               {userPlan === 'free' || userPlan === 'basic'
                 ? 'Advanced citizen engagement features, including public reporting portals, communication management, and engagement analytics are available with Pro plans and higher.'
                 : 'Citizen engagement portal features are available with Pro plans and higher.'
