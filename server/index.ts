@@ -39,6 +39,9 @@ export function createServer() {
   app.post("/api/signup", signUp);
   app.get("/api/me", verifyToken);
 
+  // Debug route (admin only)
+  app.get("/api/debug/user-status", checkUserStatus);
+
   // New signup and auth routes
   app.use("/api", signupRoutes);
   app.use("/api/plans", plansRoutes);
