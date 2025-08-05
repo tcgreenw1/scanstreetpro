@@ -86,6 +86,24 @@ export function PlanTrackingTest() {
     }
   };
 
+  const testPlanTrackingAPI = async () => {
+    setLoading(true);
+    setResult('Testing plan tracking API...');
+
+    try {
+      const result = await testPlanTracking();
+      if (result.success) {
+        setResult(`✅ Plan tracking API: ${result.data.length} entries found`);
+      } else {
+        setResult(`❌ Plan tracking API failed: ${result.error}`);
+      }
+    } catch (error) {
+      setResult(`❌ Error: ${error?.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Card className="w-96 fixed top-4 right-4 z-50 glass-card bg-white/90 dark:bg-black/90">
       <CardHeader>
