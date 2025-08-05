@@ -26,8 +26,15 @@ export interface PlanBasedUIState {
 
 export const usePlanBasedUI = (): PlanBasedUIState => {
   const { organization, planFeatures } = useOrganization();
-  
+
   const userPlan: PlanType = organization?.plan || 'free';
+
+  // Debug logging
+  console.log('🔍 usePlanBasedUI DEBUG:', {
+    userPlan,
+    organization: organization?.name,
+    planFeatures: !!planFeatures
+  });
   
   // Step 2: Hardcode visibility logic as requested
   let showCrowns = true;
