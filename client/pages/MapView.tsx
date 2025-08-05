@@ -70,7 +70,7 @@ export default function MapView() {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   
   // Data state
-  const [roadSegments, setRoadSegments] = useState<RoadSegment[]>([]);
+  const [roadSegments, setRoadSegments] = useState<SimpleRoadSegment[]>([]);
   const [cityAssets, setCityAssets] = useState<CityAsset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
