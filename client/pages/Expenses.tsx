@@ -67,17 +67,23 @@ export default function Expenses() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [yearFilter, setYearFilter] = useState<string>("all");
 
-  // Load transactions from database
+  // Load transactions from database with plan-based logic
   useEffect(() => {
     const loadTransactions = async () => {
       if (!organization) return;
 
       try {
         setIsLoading(true);
-        const transactionData = await neonService.getTransactions(organization.id, {
-          type: 'expense'
-        });
-        setTransactions(transactionData);
+        // Only load real data if expense management is unlocked
+        if (canManageExpenses) {
+          const transactionData = await neonService.getTransactions(organization.id, {
+            type: 'expense'
+          });
+          setTransactions(transactionData);
+        } else {
+          // Free plan gets empty data
+          setTransactions([]);
+        }
       } catch (error) {
         console.error('Failed to load transactions:', error);
       } finally {
@@ -86,7 +92,7 @@ export default function Expenses() {
     };
 
     loadTransactions();
-  }, [organization]);
+  }, [organization, canManageExpenses]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
