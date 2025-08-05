@@ -87,17 +87,21 @@ export default function AssetManager() {
   // Load assets from database with plan-based logic
   useEffect(() => {
     const loadAssets = async () => {
-      if (!organization) return;
-
       try {
         setIsLoading(true);
+        const orgId = organization?.id || 'demo-org';
+        console.log('Loading assets for organization:', orgId);
+
         const assetData = await neonService.getAssets(
-          organization.id,
+          orgId,
           !assetManagerFeatures.assetInventory.useRealData // Use sample data if not real data plan
         );
         setAssets(assetData);
+        console.log('Assets loaded successfully:', assetData.length, 'assets');
       } catch (error) {
         console.error('Failed to load assets:', error);
+        // Ensure we have some fallback data even if everything fails
+        setAssets([]);
       } finally {
         setIsLoading(false);
       }
