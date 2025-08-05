@@ -1,7 +1,9 @@
 import { useLocation } from 'react-router-dom';
 import { usePlanBasedUI, useFeatureAccess } from '@/hooks/usePlanBasedUI';
+import { useOrganization } from '@/contexts/OrganizationContext';
 import { Crown, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getPlanOverride } from '@/utils/planOverride';
 
 const PAGE_RULES: Record<string, { name: string; freeAccess: boolean; basicAccess: boolean; proAccess: boolean }> = {
   '/dashboard': { name: 'Dashboard', freeAccess: true, basicAccess: true, proAccess: true },
