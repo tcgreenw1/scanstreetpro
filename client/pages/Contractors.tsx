@@ -209,6 +209,12 @@ export default function Contractors() {
   const contractorAccess = useFeatureAccess('contractorManagement');
   const { useSampleData, userPlan } = useDataVisibility();
 
+  // New feature matrix system
+  const { userPlan: currentPlan } = useFeatureMatrix();
+  const navFeatures = useNavFeatures();
+  const contractorsState = navFeatures.contractors?.state || 'shown';
+  const { isPreviewMode, requiredPlan, shouldDisableInteractions } = usePreviewMode(contractorsState, currentPlan);
+
   // Step 3: Apply hardcoded plan logic for Contractors
   // Pro+: Only show if plan is "pro" or higher
   const canAccessContractors = planState.unlockContractorManagement;
