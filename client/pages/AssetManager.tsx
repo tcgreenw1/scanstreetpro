@@ -81,9 +81,9 @@ export default function AssetManager() {
   const [viewMode, setViewMode] = useState<'table' | 'map'>('table');
 
   // Step 3: Apply hardcoded plan logic for Asset Management
-  // Free: Disable all interaction, show upsell banner
-  // Basic+: Fully editable, live data from Neon
-  const canManageAssets = assetAccess.hasAccess;
+  // Free: Paywall for both inventory and predictive maintenance
+  // Basic+: Full access to both features with real data
+  const canManageAssets = assetManagerFeatures.assetInventory.useRealData;
 
   // Load assets from database with plan-based logic
   useEffect(() => {
