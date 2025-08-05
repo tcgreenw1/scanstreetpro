@@ -81,15 +81,18 @@ export const planTrackingApi = {
     try {
       // First get all data to find the page
       const allData = await this.getAll();
-      if (!allData.success) return allData;
-      
+      if (!allData.success) {
+        console.warn(`⚠️ Could not track completion for ${pageName}: ${allData.error}`);
+        return { success: false, error: allData.error };
+      }
+
       const page = allData.data.find((p: any) => p.page_name === pageName);
       if (!page) {
-        console.error(`Page ${pageName} not found in tracking data`);
+        console.warn(`⚠️ Page ${pageName} not found in tracking data`);
         return { success: false, error: 'Page not found' };
       }
 
-      return await this.updatePage(page.id, {
+      const result = await this.updatePage(page.id, {
         implementation_status: 'completed',
         plan_restrictions_implemented: true,
         free_plan_behavior: behaviors.free,
@@ -99,8 +102,16 @@ export const planTrackingApi = {
         enterprise_plan_behavior: behaviors.enterprise,
         implementation_notes: notes
       });
+
+      if (result.success) {
+        console.log(`✅ Tracked completion of ${pageName}`);
+      } else {
+        console.warn(`⚠️ Failed to track completion for ${pageName}: ${result.error}`);
+      }
+
+      return result;
     } catch (error) {
-      console.error('Failed to mark page completed:', error);
+      console.warn(`⚠️ Error tracking completion for ${pageName}:`, error);
       return { success: false, error: error.message };
     }
   }
