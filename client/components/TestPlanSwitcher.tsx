@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Crown, Zap } from 'lucide-react';
 import { PlanType } from '@/lib/planPermissions';
 import { getPlanOverride, setPlanOverride } from '@/utils/planOverride';
+import { useAuth } from '@/contexts/AuthContext';
 
 const PLANS: { value: PlanType; label: string; color: string }[] = [
   { value: 'free', label: 'Free Plan', color: 'bg-blue-500' },
