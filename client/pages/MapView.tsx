@@ -690,13 +690,21 @@ export default function MapView() {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-0 h-[calc(100%-80px)]">
+              <CardContent className="p-0 h-[calc(100%-80px)] relative">
                 <div
                   id="map"
                   ref={mapRef}
                   className="w-full h-full rounded-b-lg"
                   style={{ height: '600px', minHeight: '500px', width: '100%' }}
                 />
+                {showLoadingOverlay && (
+                  <div className="absolute inset-0 bg-white/80 dark:bg-black/80 flex items-center justify-center rounded-b-lg">
+                    <div className="text-center">
+                      <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+                      <p className="text-slate-600 dark:text-slate-400">Loading Springfield, OH map data...</p>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
