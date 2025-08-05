@@ -74,7 +74,7 @@ export default function AssetManager() {
   // Basic+: Fully editable, live data from Neon
   const canManageAssets = assetAccess.hasAccess;
 
-  // Load assets from database
+  // Load assets from database with plan-based logic
   useEffect(() => {
     const loadAssets = async () => {
       if (!organization) return;
@@ -83,7 +83,7 @@ export default function AssetManager() {
         setIsLoading(true);
         const assetData = await neonService.getAssets(
           organization.id,
-          planFeatures?.sampleDataOnly || false
+          useSampleData // Use plan-based sample data logic
         );
         setAssets(assetData);
       } catch (error) {
@@ -94,7 +94,7 @@ export default function AssetManager() {
     };
 
     loadAssets();
-  }, [organization, planFeatures]);
+  }, [organization, useSampleData]);
 
   // Filter assets based on search and filters
   const filteredAssets = assets.filter(asset => {
