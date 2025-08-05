@@ -81,12 +81,21 @@ export default function MapView() {
 
   // Initialize map
   useEffect(() => {
-    if (!mapRef.current || leafletMapRef.current) return;
+    // Add a small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      if (!mapRef.current || leafletMapRef.current) return;
 
-    initializeMap();
-    setIsMapLoaded(true);
+      try {
+        initializeMap();
+        setIsMapLoaded(true);
+      } catch (error) {
+        console.error('Failed to initialize map:', error);
+        setError('Failed to initialize map. Please refresh the page.');
+      }
+    }, 100);
 
     return () => {
+      clearTimeout(timer);
       if (leafletMapRef.current) {
         leafletMapRef.current.remove();
         leafletMapRef.current = null;
