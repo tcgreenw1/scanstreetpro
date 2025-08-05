@@ -179,12 +179,17 @@ export default function Dashboard() {
           Infrastructure Dashboard
         </h1>
         <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
+          <strong>CURRENT PLAN: {userPlan.toUpperCase()}</strong><br/>
           {userPlan === 'free'
-            ? 'Explore infrastructure management with sample data and crown-locked features. Upgrade to unlock real asset tracking and analysis.'
+            ? '🔒 FREE PLAN: Sample data only, crowns on locked features, 1 export per month limit'
             : userPlan === 'basic'
-            ? 'Manage your infrastructure with real-time data. Upgrade to Pro for advanced maintenance scheduling and contractor management.'
+            ? '✅ BASIC PLAN: Real data unlocked, asset/budget/expense management enabled, calendar visible'
+            : userPlan === 'pro'
+            ? '🚀 PRO PLAN: Everything unlocked including maintenance scheduling, citizen engagement, unlimited exports'
+            : userPlan === 'premium'
+            ? '💎 PREMIUM PLAN: Full engagement suite + AI data, mobile app, dedicated support'
             : planState.unlockEverything
-            ? 'Advanced infrastructure management with real-time asset tracking, PCI analysis, and smart maintenance decisions.'
+            ? '🏢 ENTERPRISE PLAN: Complete platform access with AI assistance and engineering support'
             : 'Getting started with infrastructure management. Upgrade for more features.'
           }
         </p>
