@@ -195,6 +195,31 @@ export default function AssetManager() {
         </div>
       </div>
 
+      {/* Free Plan Upsell Banner */}
+      {userPlan === 'free' && planState.disableAssetManagement && (
+        <div className="glass-card p-6 rounded-xl border-amber-200/50 bg-gradient-to-r from-amber-50/80 to-orange-50/80 dark:from-amber-900/30 dark:to-orange-900/30">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
+                <Crown className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-200">Asset Management Disabled</h3>
+                <p className="text-amber-700 dark:text-amber-300">
+                  Upgrade to Basic Plan to unlock full asset management, real data tracking, and editing capabilities.
+                </p>
+              </div>
+            </div>
+            <Link to="/pricing">
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade Now
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className={cn("glass-card border-white/20", !canManageAssets && "opacity-75")}>
