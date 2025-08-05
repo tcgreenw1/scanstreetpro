@@ -82,7 +82,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
         setError(null);
         
         // Check if user is logged in
-        const authToken = localStorage.getItem('authToken');
+        const authToken = localStorage.getItem('neon_auth_token') || localStorage.getItem('authToken');
         if (!authToken) {
           setIsLoading(false);
           return;
