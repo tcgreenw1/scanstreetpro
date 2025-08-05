@@ -242,6 +242,39 @@ const AdminUsers = () => {
     }
   };
 
+  const debugUserStatus = async () => {
+    if (!debugEmail) {
+      toast({ title: "Error", description: "Please enter an email to debug", variant: "destructive" });
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/debug/user-status?email=${encodeURIComponent(debugEmail)}`);
+      const result = await response.json();
+
+      if (result.success) {
+        setDebugResult(result.data);
+        if (result.data.exists) {
+          toast({
+            title: "User Found",
+            description: `User exists: ${result.data.user.name || result.data.user.email}`,
+            duration: 5000
+          });
+        } else {
+          toast({
+            title: "User Not Found",
+            description: result.data.message,
+            variant: "destructive"
+          });
+        }
+      } else {
+        toast({ title: "Error", description: result.error, variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to check user status", variant: "destructive" });
+    }
+  };
+
   const impersonateUser = async (userId: string, userName: string) => {
     try {
       const response = await fetch(`/api/admin/impersonate-user/${userId}`, {
@@ -250,10 +283,10 @@ const AdminUsers = () => {
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
-        toast({ 
-          title: "Impersonation Active", 
+        toast({
+          title: "Impersonation Active",
           description: `You are now viewing as ${userName}`,
           duration: 5000
         });
@@ -265,9 +298,10 @@ const AdminUsers = () => {
         }));
         navigate('/dashboard');
       } else {
-        toast({ title: "Error", description: result.error, variant: "destructive" });
+        toast({ title: "Error", description: result.error || "Failed to impersonate user", variant: "destructive" });
       }
     } catch (error) {
+      console.error('Impersonation error:', error);
       toast({ title: "Error", description: "Failed to impersonate user", variant: "destructive" });
     }
   };
