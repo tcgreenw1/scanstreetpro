@@ -200,6 +200,9 @@ export function Layout({ children }: LayoutProps) {
   const { organization, planFeatures } = useOrganization();
   const { getPagePermissions, isFeatureUnlocked } = usePermissions();
 
+  // Step 1 & 2: Get plan-based UI state
+  const planState = usePlanBasedUI();
+
   // Generate navigation sections based on current user's plan and role
   const navSections = getNavSections(isFeatureUnlocked, isAdmin);
 
