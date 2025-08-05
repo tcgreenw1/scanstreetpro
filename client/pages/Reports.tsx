@@ -72,6 +72,11 @@ const laneMilesByTier = [
 ];
 
 export default function Reports() {
+  // Step 1 & 2: Get plan-based UI state
+  const planState = usePlanBasedUI();
+  const exportLimits = useExportLimits();
+  const { useSampleData, userPlan } = useDataVisibility();
+
   const [selectedYear, setSelectedYear] = useState('2023');
   const [reportType, setReportType] = useState('summary');
   const { currentPlan } = usePricing();
