@@ -113,16 +113,26 @@ const AdminUsers = () => {
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
-        toast({ title: "Success", description: "User created successfully" });
+        const message = result.tempPassword ?
+          `User created successfully! Temporary password: ${result.tempPassword}` :
+          result.message || "User created successfully";
+
+        toast({
+          title: "Success",
+          description: message,
+          duration: 10000 // Show for 10 seconds so user can copy password
+        });
+
         setShowCreateModal(false);
         setUserForm({ email: '', name: '', role: 'viewer', organizationId: '', password: '' });
         loadData();
       } else {
-        toast({ title: "Error", description: result.error, variant: "destructive" });
+        toast({ title: "Error", description: result.error || "Failed to create user", variant: "destructive" });
       }
     } catch (error) {
+      console.error('Create user error:', error);
       toast({ title: "Error", description: "Failed to create user", variant: "destructive" });
     }
   };
