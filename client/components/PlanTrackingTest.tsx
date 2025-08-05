@@ -7,6 +7,7 @@ import { useFeatureMatrix } from '@/hooks/useFeatureMatrix';
 export function PlanTrackingTest() {
   const [result, setResult] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const { userPlan, matrix } = useFeatureMatrix();
 
   const testInit = async () => {
     setLoading(true);
