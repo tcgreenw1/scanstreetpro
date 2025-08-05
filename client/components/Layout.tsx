@@ -525,6 +525,9 @@ export function Layout({ children }: LayoutProps) {
       {/* Global Plan Indicator - shows page access status */}
       <GlobalPlanIndicator />
 
+      {/* Plan Implementation Status - shows progress */}
+      <PlanImplementationStatus />
+
       {/* Test Plan Switcher - for immediate testing */}
       <TestPlanSwitcher />
     </div>
