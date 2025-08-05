@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { planTrackingApi, ensurePlanTrackingReady } from '@/utils/planTrackingApi';
 import { useFeatureMatrix } from '@/hooks/useFeatureMatrix';
+import { testPlanTracking } from '@/utils/initFeatureMatrix';
 
 export function PlanTrackingTest() {
   const [result, setResult] = useState<string>('');
