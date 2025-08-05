@@ -82,12 +82,13 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
     lastLogin: new Date()
   } : null;
 
-  // Check for plan override first (for testing)
-  const planOverride = getPlanOverride();
+  // Check for plan override first (for testing) - only if user is admin and impersonating
+  const isAdminImpersonating = user?.role === 'admin' && localStorage.getItem('admin_impersonating');
+  const planOverride = isAdminImpersonating ? getPlanOverride() : null;
 
   const organization: Organization | null = (() => {
-    // If there's a plan override, use it for testing
-    if (planOverride) {
+    // If admin is impersonating AND there's a plan override, use it for testing
+    if (planOverride && isAdminImpersonating) {
       return {
         id: 'test-org',
         name: 'Test Organization',
@@ -152,13 +153,15 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
 
   // Debug logging
   console.log('🔍 OrganizationContext DEBUG:', {
-    planOverride,
+    planOverride: isAdminImpersonating ? planOverride : 'disabled (not admin impersonating)',
+    isAdminImpersonating,
     authUser: authUser ? { email: authUser.email, role: authUser.role } : null,
     authOrganization: authOrganization ? { name: authOrganization.name, plan: authOrganization.plan } : null,
     authLoading,
     finalUser: user ? { email: user.email, role: user.role } : null,
     finalOrganization: organization ? { name: organization.name, plan: organization.plan } : null,
-    finalPlan: organization?.plan
+    finalPlan: organization?.plan,
+    usingUserPlan: !isAdminImpersonating
   });
 
   // Get plan features based on current organization plan
