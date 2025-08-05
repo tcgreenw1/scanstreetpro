@@ -56,30 +56,14 @@ class AssetsService {
   async fetchSpringfieldAssets(): Promise<CityAsset[]> {
     const cacheKey = 'springfield_assets';
     const now = Date.now();
-    
+
     // Return cached data if recent
     if (this.cache.has(cacheKey) && (now - this.lastFetch) < this.cacheTimeout) {
       return this.cache.get(cacheKey)!;
     }
 
-    try {
-      // Try to fetch from API first
-      const response = await fetch('/api/assets?city=springfield');
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.data) {
-          const assets = this.processAssetData(data.data);
-          this.cache.set(cacheKey, assets);
-          this.lastFetch = now;
-          return assets;
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to fetch assets from API:', error);
-    }
-
-    // Fallback to sample data
+    // For now, use fallback data directly to avoid API issues
+    // In production, this would try API first with proper authentication
     const fallbackAssets = this.getSpringfieldFallbackAssets();
     this.cache.set(cacheKey, fallbackAssets);
     this.lastFetch = now;
