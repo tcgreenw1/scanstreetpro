@@ -1,307 +1,622 @@
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import L, { Map as LeafletMap, TileLayer, CircleMarker, Marker } from 'leaflet';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   MapPin, 
-  Search, 
-  Filter, 
-  List,
+  ArrowLeft, 
+  Loader2,
+  AlertCircle,
+  CheckCircle,
   Navigation,
-  Phone,
-  Clock,
-  AlertTriangle
+  Satellite,
+  Map as MapIcon,
+  BarChart3
 } from 'lucide-react';
-import { mockTasks, TaskStatus } from '../../shared/types';
 import { Link } from 'react-router-dom';
-import { cn } from '../lib/utils';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { useFeatureMatrix } from '@/hooks/useFeatureMatrix';
+
+// Import our map components and services
+import { MapLegend, getPCIColor, getPCILabel, PCI_LEVELS } from '@/components/map/MapLegend';
+import { MapToolbar } from '@/components/map/MapToolbar';
+import { overpassService, RoadSegment } from '@/services/overpassService';
+import { assetsService, CityAsset, ASSET_TYPES, AssetType } from '@/services/assetsService';
+
+// Import Leaflet CSS
+import 'leaflet/dist/leaflet.css';
+
+// Fix Leaflet default markers
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import markerIconRetina from 'leaflet/dist/images/marker-icon-2x.png';
+
+// Configure default markers
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIconRetina,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
+// Springfield, OH coordinates
+const SPRINGFIELD_CENTER: [number, number] = [39.9250, -83.8067];
+const DEFAULT_ZOOM = 14;
 
 export default function MapView() {
   const { user } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedTask, setSelectedTask] = useState<string | null>(null);
+  const { userPlan } = useFeatureMatrix();
+  
+  // Map state
+  const mapRef = useRef<HTMLDivElement>(null);
+  const leafletMapRef = useRef<LeafletMap | null>(null);
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
+  
+  // Data state
+  const [roadSegments, setRoadSegments] = useState<RoadSegment[]>([]);
+  const [cityAssets, setCityAssets] = useState<CityAsset[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // UI state
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showPCILayer, setShowPCILayer] = useState(true);
+  const [showAssetLayer, setShowAssetLayer] = useState(true);
+  const [pciFilter, setPciFilter] = useState(0);
+  const [selectedAssetTypes, setSelectedAssetTypes] = useState<AssetType[]>([]);
+  
+  // Layer refs
+  const roadLayersRef = useRef<CircleMarker[]>([]);
+  const assetLayersRef = useRef<Marker[]>([]);
+  const currentTileLayerRef = useRef<TileLayer | null>(null);
 
-  // Filter tasks based on user role
-  const userTasks = user?.role === 'contractor' 
-    ? mockTasks.filter(task => task.assignedTo === user.id)
-    : mockTasks;
+  // Load data on component mount
+  useEffect(() => {
+    loadMapData();
+  }, []);
 
-  // Apply filters
-  const filteredTasks = userTasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         task.location.address.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  // Initialize map
+  useEffect(() => {
+    if (!mapRef.current || leafletMapRef.current) return;
 
-  const getStatusColor = (status: TaskStatus) => {
-    switch (status) {
-      case 'new': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'assigned': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-      case 'accepted': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
-      case 'in_progress': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
-      case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'verified': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300';
-      case 'overdue': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+    initializeMap();
+    setIsMapLoaded(true);
+
+    return () => {
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove();
+        leafletMapRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update map layers when data changes
+  useEffect(() => {
+    if (isMapLoaded && leafletMapRef.current) {
+      updateRoadLayers();
+    }
+  }, [roadSegments, showPCILayer, pciFilter, isDarkMode, isMapLoaded]);
+
+  useEffect(() => {
+    if (isMapLoaded && leafletMapRef.current) {
+      updateAssetLayers();
+    }
+  }, [cityAssets, showAssetLayer, selectedAssetTypes, isDarkMode, isMapLoaded]);
+
+  // Update tile layer when theme changes
+  useEffect(() => {
+    if (isMapLoaded && leafletMapRef.current) {
+      updateTileLayer();
+    }
+  }, [isDarkMode, isMapLoaded]);
+
+  const loadMapData = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const [roads, assets] = await Promise.all([
+        overpassService.fetchSpringfieldRoads(),
+        assetsService.fetchSpringfieldAssets()
+      ]);
+
+      setRoadSegments(roads);
+      setCityAssets(assets);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load map data');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'text-red-600 dark:text-red-400';
-      case 'high': return 'text-orange-600 dark:text-orange-400';
-      case 'medium': return 'text-yellow-600 dark:text-yellow-400';
-      case 'low': return 'text-green-600 dark:text-green-400';
-      default: return 'text-gray-600 dark:text-gray-400';
-    }
+  const initializeMap = () => {
+    if (!mapRef.current) return;
+
+    const map = L.map(mapRef.current, {
+      center: SPRINGFIELD_CENTER,
+      zoom: DEFAULT_ZOOM,
+      zoomControl: false,
+      attributionControl: true
+    });
+
+    leafletMapRef.current = map;
+
+    // Add zoom controls to top-right
+    L.control.zoom({
+      position: 'topright'
+    }).addTo(map);
+
+    // Add initial tile layer
+    updateTileLayer();
+
+    // Add scale control
+    L.control.scale({
+      position: 'bottomleft'
+    }).addTo(map);
   };
 
-  const getTaskIcon = (type: string) => {
-    switch (type) {
-      case 'pothole': return '🕳️';
-      case 'streetlight': return '💡';
-      case 'sign_repair': return '🛑';
-      case 'debris_removal': return '🗑️';
-      case 'crack_sealing': return '🛣️';
-      case 'line_painting': return '🎨';
-      case 'drain_cleaning': return '🌊';
-      default: return '⚙️';
+  const updateTileLayer = () => {
+    if (!leafletMapRef.current) return;
+
+    // Remove existing tile layer
+    if (currentTileLayerRef.current) {
+      leafletMapRef.current.removeLayer(currentTileLayerRef.current);
     }
+
+    // Add appropriate tile layer based on theme
+    const tileUrl = isDarkMode 
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+
+    const attribution = isDarkMode
+      ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+      : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+
+    const tileLayer = L.tileLayer(tileUrl, {
+      attribution,
+      maxZoom: 19
+    });
+
+    tileLayer.addTo(leafletMapRef.current);
+    currentTileLayerRef.current = tileLayer;
   };
 
-  return (
-    <div className="container mx-auto p-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Map View</h1>
-          <p className="text-muted-foreground">
-            View all tasks on an interactive map
-          </p>
+  const updateRoadLayers = () => {
+    if (!leafletMapRef.current) return;
+
+    // Remove existing road layers
+    roadLayersRef.current.forEach(layer => {
+      leafletMapRef.current!.removeLayer(layer);
+    });
+    roadLayersRef.current = [];
+
+    if (!showPCILayer) return;
+
+    // Filter roads based on PCI threshold
+    const filteredRoads = roadSegments.filter(road => road.pci >= pciFilter);
+
+    // Add road segments as circle markers
+    filteredRoads.forEach(road => {
+      const color = getPCIColor(road.pci, isDarkMode);
+      const label = getPCILabel(road.pci);
+      
+      const marker = L.circleMarker([road.centerLat, road.centerLng], {
+        radius: Math.max(6, Math.min(road.length * 3, 15)),
+        fillColor: color,
+        color: isDarkMode ? '#ffffff' : '#000000',
+        weight: 1,
+        opacity: 0.8,
+        fillOpacity: 0.7
+      });
+
+      // Create popup content
+      const popupContent = `
+        <div class="p-3 min-w-[250px] ${isDarkMode ? 'dark' : ''}">
+          <h4 class="font-semibold text-slate-800 dark:text-white mb-2">${road.name}</h4>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-600 dark:text-slate-400">PCI Score:</span>
+              <span class="font-semibold px-2 py-1 rounded text-white text-xs" style="background-color: ${color}">
+                ${road.pci} (${label})
+              </span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-600 dark:text-slate-400">Road Type:</span>
+              <span class="font-medium text-slate-800 dark:text-white">${road.roadType}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-600 dark:text-slate-400">Length:</span>
+              <span class="font-medium text-slate-800 dark:text-white">${road.length} miles</span>
+            </div>
+            ${road.surface ? `
+            <div class="flex justify-between items-center">
+              <span class="text-slate-600 dark:text-slate-400">Surface:</span>
+              <span class="font-medium text-slate-800 dark:text-white">${road.surface}</span>
+            </div>` : ''}
+            ${road.maxspeed ? `
+            <div class="flex justify-between items-center">
+              <span class="text-slate-600 dark:text-slate-400">Speed Limit:</span>
+              <span class="font-medium text-slate-800 dark:text-white">${road.maxspeed}</span>
+            </div>` : ''}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" asChild>
-            <Link to="/dashboard">
-              <List className="w-4 h-4 mr-2" />
-              List View
-            </Link>
-          </Button>
+      `;
+
+      marker.bindPopup(popupContent, {
+        className: isDarkMode ? 'dark-popup' : 'light-popup',
+        maxWidth: 300
+      });
+
+      marker.addTo(leafletMapRef.current!);
+      roadLayersRef.current.push(marker);
+    });
+  };
+
+  const updateAssetLayers = () => {
+    if (!leafletMapRef.current) return;
+
+    // Remove existing asset layers
+    assetLayersRef.current.forEach(layer => {
+      leafletMapRef.current!.removeLayer(layer);
+    });
+    assetLayersRef.current = [];
+
+    if (!showAssetLayer) return;
+
+    // Filter assets by selected types
+    const filteredAssets = selectedAssetTypes.length > 0 
+      ? cityAssets.filter(asset => selectedAssetTypes.includes(asset.type))
+      : cityAssets;
+
+    // Add city assets as markers
+    filteredAssets.forEach(asset => {
+      const assetConfig = ASSET_TYPES.find(config => config.type === asset.type);
+      if (!assetConfig) return;
+
+      const color = isDarkMode ? (assetConfig.darkColor || assetConfig.color) : assetConfig.color;
+
+      // Create custom icon
+      const icon = L.divIcon({
+        html: `
+          <div class="asset-marker" style="background-color: ${color};">
+            <span style="font-size: 12px;">${assetConfig.icon}</span>
+          </div>
+        `,
+        className: 'custom-asset-icon',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
+
+      const marker = L.marker([asset.lat, asset.lng], { icon });
+
+      // Create popup content
+      const popupContent = `
+        <div class="p-3 min-w-[250px] ${isDarkMode ? 'dark' : ''}">
+          <h4 class="font-semibold text-slate-800 dark:text-white mb-2">${asset.name}</h4>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-600 dark:text-slate-400">Type:</span>
+              <span class="font-medium text-slate-800 dark:text-white">${assetConfig.label}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-600 dark:text-slate-400">Status:</span>
+              <span class="px-2 py-1 rounded text-xs font-medium ${
+                asset.status === 'active' ? 'bg-green-100 text-green-800' :
+                asset.status === 'maintenance' ? 'bg-yellow-100 text-yellow-800' :
+                asset.status === 'damaged' ? 'bg-red-100 text-red-800' :
+                'bg-gray-100 text-gray-800'
+              }">${asset.status}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-600 dark:text-slate-400">Condition:</span>
+              <span class="px-2 py-1 rounded text-xs font-medium ${
+                asset.condition === 'excellent' ? 'bg-green-100 text-green-800' :
+                asset.condition === 'good' ? 'bg-blue-100 text-blue-800' :
+                asset.condition === 'fair' ? 'bg-yellow-100 text-yellow-800' :
+                asset.condition === 'poor' ? 'bg-orange-100 text-orange-800' :
+                'bg-red-100 text-red-800'
+              }">${asset.condition}</span>
+            </div>
+            ${asset.address ? `
+            <div class="flex justify-between items-center">
+              <span class="text-slate-600 dark:text-slate-400">Address:</span>
+              <span class="font-medium text-slate-800 dark:text-white text-right">${asset.address}</span>
+            </div>` : ''}
+            ${asset.installDate ? `
+            <div class="flex justify-between items-center">
+              <span class="text-slate-600 dark:text-slate-400">Installed:</span>
+              <span class="font-medium text-slate-800 dark:text-white">${new Date(asset.installDate).toLocaleDateString()}</span>
+            </div>` : ''}
+            ${asset.cost ? `
+            <div class="flex justify-between items-center">
+              <span class="text-slate-600 dark:text-slate-400">Cost:</span>
+              <span class="font-medium text-slate-800 dark:text-white">$${asset.cost.toLocaleString()}</span>
+            </div>` : ''}
+          </div>
+        </div>
+      `;
+
+      marker.bindPopup(popupContent, {
+        className: isDarkMode ? 'dark-popup' : 'light-popup',
+        maxWidth: 300
+      });
+
+      marker.addTo(leafletMapRef.current!);
+      assetLayersRef.current.push(marker);
+    });
+  };
+
+  const handleExportCSV = useCallback((type: 'roads' | 'assets') => {
+    try {
+      let csvContent: string;
+      let filename: string;
+
+      if (type === 'roads') {
+        const filteredRoads = roadSegments.filter(road => road.pci >= pciFilter);
+        csvContent = overpassService.exportRoadsToCSV(filteredRoads);
+        filename = `springfield-roads-pci-${pciFilter}plus-${new Date().toISOString().split('T')[0]}.csv`;
+      } else {
+        const filteredAssets = selectedAssetTypes.length > 0 
+          ? cityAssets.filter(asset => selectedAssetTypes.includes(asset.type))
+          : cityAssets;
+        csvContent = assetsService.exportAssetsToCSV(filteredAssets);
+        filename = `springfield-assets-${new Date().toISOString().split('T')[0]}.csv`;
+      }
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Export failed:', err);
+    }
+  }, [roadSegments, cityAssets, pciFilter, selectedAssetTypes]);
+
+  const handleExportScreenshot = useCallback(() => {
+    if (!leafletMapRef.current) return;
+
+    // Use leaflet-image or html2canvas for screenshot
+    // For now, we'll use the browser's built-in screenshot capability
+    try {
+      // This is a simplified implementation
+      // In production, you'd want to use a proper screenshot library
+      window.print();
+    } catch (err) {
+      console.error('Screenshot failed:', err);
+    }
+  }, []);
+
+  const handleResetView = useCallback(() => {
+    if (!leafletMapRef.current) return;
+    leafletMapRef.current.setView(SPRINGFIELD_CENTER, DEFAULT_ZOOM);
+  }, []);
+
+  const handleToggleFullscreen = useCallback(() => {
+    setIsFullscreen(!isFullscreen);
+    setTimeout(() => {
+      leafletMapRef.current?.invalidateSize();
+    }, 100);
+  }, [isFullscreen]);
+
+  // Calculate statistics
+  const stats = {
+    totalRoads: roadSegments.length,
+    filteredRoads: roadSegments.filter(road => road.pci >= pciFilter).length,
+    totalAssets: cityAssets.length,
+    filteredAssets: selectedAssetTypes.length > 0 
+      ? cityAssets.filter(asset => selectedAssetTypes.includes(asset.type)).length
+      : cityAssets.length,
+    avgPCI: roadSegments.length > 0 
+      ? Math.round(roadSegments.reduce((sum, road) => sum + road.pci, 0) / roadSegments.length)
+      : 0,
+    pciDistribution: PCI_LEVELS.map(level => ({
+      ...level,
+      count: roadSegments.filter(road => road.pci >= level.min && road.pci <= level.max).length
+    }))
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+              <p className="text-slate-600 dark:text-slate-400">Loading Springfield, OH map data...</p>
+            </div>
+          </div>
         </div>
       </div>
+    );
+  }
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Filters and Task List */}
-        <div className="lg:col-span-1 space-y-4">
-          {/* Filters */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Filters</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="relative">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search tasks..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="new">New</SelectItem>
-                    <SelectItem value="assigned">Assigned</SelectItem>
-                    <SelectItem value="accepted">Accepted</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="verified">Verified</SelectItem>
-                    <SelectItem value="overdue">Overdue</SelectItem>
-                  </SelectContent>
-                </Select>
+  return (
+    <div className={cn(
+      "min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900",
+      isFullscreen && "fixed inset-0 z-50",
+      isDarkMode && "dark"
+    )}>
+      <style>{`
+        .asset-marker {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          border: 2px solid white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .custom-asset-icon {
+          background: none !important;
+          border: none !important;
+        }
+        .dark-popup .leaflet-popup-content-wrapper {
+          background: #1e293b;
+          color: white;
+        }
+        .dark-popup .leaflet-popup-tip {
+          background: #1e293b;
+        }
+        .light-popup .leaflet-popup-content-wrapper {
+          background: white;
+          color: #1e293b;
+        }
+      `}</style>
+
+      <div className="container mx-auto px-4 py-6">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+                <ArrowLeft className="w-4 h-4" />
+                Back to Dashboard
+              </Link>
+              <h1 className="text-3xl font-bold mt-2 text-slate-800 dark:text-white">
+                Springfield, Ohio - Infrastructure Map
+              </h1>
+              <p className="text-muted-foreground">
+                Interactive map showing road conditions and city assets
+              </p>
+            </div>
+            <Badge variant="outline" className="text-lg px-4 py-2">
+              <Navigation className="w-4 h-4 mr-2" />
+              Live Data
+            </Badge>
+          </div>
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <Card className="mb-6 border-red-200 bg-red-50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-red-800">
+                <AlertCircle className="w-5 h-5" />
+                <span>{error}</span>
+                <Button variant="outline" size="sm" onClick={loadMapData} className="ml-auto">
+                  Retry
+                </Button>
               </div>
             </CardContent>
           </Card>
+        )}
 
-          {/* Task List */}
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                Tasks ({filteredTasks.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="space-y-0 max-h-96 overflow-y-auto">
-                {filteredTasks.map((task) => (
-                  <div 
-                    key={task.id}
-                    className={cn(
-                      "p-4 border-b cursor-pointer hover:bg-muted/50 transition-colors",
-                      selectedTask === task.id && "bg-primary/5 border-primary"
-                    )}
-                    onClick={() => setSelectedTask(selectedTask === task.id ? null : task.id)}
-                  >
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <span className="text-sm">{getTaskIcon(task.type)}</span>
-                          <h4 className="font-medium text-sm truncate">{task.title}</h4>
-                        </div>
-                        <Badge className={cn("text-xs flex-shrink-0", getStatusColor(task.status))}>
-                          {task.status.replace('_', ' ')}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <MapPin className="w-3 h-3 flex-shrink-0" />
-                        <span className="truncate">{task.location.address}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-xs">
-                        <div className={cn("flex items-center gap-1", getPriorityColor(task.priority))}>
-                          <AlertTriangle className="w-3 h-3" />
-                          <span className="capitalize">{task.priority}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <Clock className="w-3 h-3" />
-                          <span>{new Date(task.deadline).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {filteredTasks.length === 0 && (
-                  <div className="p-6 text-center">
-                    <MapPin className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">No tasks found</p>
-                  </div>
-                )}
-              </div>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-6">
+          <Card className="glass-card border-white/20">
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-slate-800 dark:text-white">{stats.totalRoads}</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Total Roads</div>
+            </CardContent>
+          </Card>
+          <Card className="glass-card border-white/20">
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-blue-600">{stats.avgPCI}</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Avg PCI</div>
+            </CardContent>
+          </Card>
+          <Card className="glass-card border-white/20">
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-green-600">{stats.pciDistribution.slice(0, 2).reduce((sum, level) => sum + level.count, 0)}</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Good+</div>
+            </CardContent>
+          </Card>
+          <Card className="glass-card border-white/20">
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-yellow-600">{stats.pciDistribution[2]?.count || 0}</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Satisfactory</div>
+            </CardContent>
+          </Card>
+          <Card className="glass-card border-white/20">
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-orange-600">{stats.pciDistribution.slice(3, 5).reduce((sum, level) => sum + level.count, 0)}</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Fair/Poor</div>
+            </CardContent>
+          </Card>
+          <Card className="glass-card border-white/20">
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-red-600">{stats.pciDistribution.slice(5).reduce((sum, level) => sum + level.count, 0)}</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Critical</div>
+            </CardContent>
+          </Card>
+          <Card className="glass-card border-white/20">
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-purple-600">{stats.totalAssets}</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">City Assets</div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Map Area */}
-        <div className="lg:col-span-2">
-          <Card className="h-[600px]">
-            <CardHeader>
-              <CardTitle>Task Locations</CardTitle>
-              <CardDescription>
-                Interactive map showing all task locations. Click on a task in the list to highlight it on the map.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="h-full">
-              {/* Placeholder for map */}
-              <div className="w-full h-full bg-muted rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
-                {/* Mock map background */}
-                <div className="absolute inset-0 opacity-20">
-                  <div className="grid grid-cols-8 h-full">
-                    {Array.from({ length: 64 }).map((_, i) => (
-                      <div key={i} className="border border-gray-300 dark:border-gray-700" />
-                    ))}
-                  </div>
-                </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Left Sidebar - Controls */}
+          <div className="space-y-4">
+            {/* Map Toolbar */}
+            <MapToolbar
+              isDarkMode={isDarkMode}
+              isFullscreen={isFullscreen}
+              showPCILayer={showPCILayer}
+              showAssetLayer={showAssetLayer}
+              pciFilter={pciFilter}
+              onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+              onToggleFullscreen={handleToggleFullscreen}
+              onTogglePCILayer={() => setShowPCILayer(!showPCILayer)}
+              onToggleAssetLayer={() => setShowAssetLayer(!showAssetLayer)}
+              onPCIFilterChange={setPciFilter}
+              onExportCSV={handleExportCSV}
+              onExportScreenshot={handleExportScreenshot}
+              onResetView={handleResetView}
+            />
 
-                {/* Mock task pins */}
-                <div className="absolute inset-0">
-                  {filteredTasks.slice(0, 5).map((task, index) => (
-                    <div 
-                      key={task.id}
-                      className={cn(
-                        "absolute flex items-center justify-center w-8 h-8 rounded-full border-2 cursor-pointer transition-all",
-                        selectedTask === task.id 
-                          ? "bg-primary border-primary-foreground scale-125 z-10" 
-                          : "bg-background border-primary hover:scale-110",
-                        task.priority === 'urgent' && "ring-2 ring-red-400",
-                        task.priority === 'high' && "ring-2 ring-orange-400"
-                      )}
-                      style={{
-                        left: `${20 + (index * 15)}%`,
-                        top: `${30 + (index * 10)}%`
-                      }}
-                      onClick={() => setSelectedTask(selectedTask === task.id ? null : task.id)}
-                    >
-                      <span className="text-xs">{getTaskIcon(task.type)}</span>
-                    </div>
-                  ))}
-                </div>
+            {/* Map Legend */}
+            <MapLegend
+              showPCILegend={showPCILayer}
+              showAssetLegend={showAssetLayer}
+              onTogglePCI={() => setShowPCILayer(!showPCILayer)}
+              onToggleAssets={() => setShowAssetLayer(!showAssetLayer)}
+              isDarkMode={isDarkMode}
+            />
+          </div>
 
-                <div className="text-center z-20 bg-background/80 backdrop-blur-sm rounded-lg p-6">
-                  <MapPin className="w-16 h-16 text-primary mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Interactive Map</h3>
-                  <p className="text-muted-foreground mb-4 max-w-md">
-                    This would display a real map (Google Maps, Mapbox, etc.) showing task locations with interactive pins.
-                  </p>
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                    <Navigation className="w-4 h-4" />
-                    <span>Click tasks in the sidebar to highlight them on the map</span>
+          {/* Main Map */}
+          <div className="lg:col-span-3">
+            <Card className="glass-card border-white/20 h-[600px] lg:h-[700px]">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center justify-between text-slate-800 dark:text-white">
+                  <div className="flex items-center">
+                    <MapPin className="w-5 h-5 mr-2" />
+                    Springfield, Ohio Infrastructure Map
                   </div>
-                </div>
-
-                {/* Selected task popup */}
-                {selectedTask && (
-                  <div className="absolute bottom-4 left-4 right-4 z-30">
-                    {(() => {
-                      const task = filteredTasks.find(t => t.id === selectedTask);
-                      if (!task) return null;
-                      
-                      return (
-                        <Card className="shadow-lg">
-                          <CardContent className="p-4">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <span>{getTaskIcon(task.type)}</span>
-                                  <h4 className="font-semibold truncate">{task.title}</h4>
-                                  <Badge className={cn("text-xs", getStatusColor(task.status))}>
-                                    {task.status.replace('_', ' ')}
-                                  </Badge>
-                                </div>
-                                <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                                  {task.description}
-                                </p>
-                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                  <div className="flex items-center gap-1">
-                                    <MapPin className="w-3 h-3" />
-                                    <span className="truncate">{task.location.address}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
-                                    <span>{new Date(task.deadline).toLocaleDateString()}</span>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex flex-col gap-2">
-                                <Button size="sm" asChild>
-                                  <Link to={`/task/${task.id}`}>
-                                    View Details
-                                  </Link>
-                                </Button>
-                                <Button variant="outline" size="sm">
-                                  <Navigation className="w-4 h-4 mr-2" />
-                                  Directions
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })()}
+                  <div className="flex items-center space-x-2">
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Live Data
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {userPlan.charAt(0).toUpperCase() + userPlan.slice(1)} Plan
+                    </Badge>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0 h-[calc(100%-80px)]">
+                <div 
+                  ref={mapRef} 
+                  className="w-full h-full rounded-b-lg"
+                  style={{ minHeight: '500px' }}
+                />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
