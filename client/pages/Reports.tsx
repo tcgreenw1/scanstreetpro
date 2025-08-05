@@ -207,19 +207,22 @@ export default function Reports() {
             Export Reports
           </CardTitle>
           <CardDescription>
-            Download reports in various formats for sharing with stakeholders
+            {exportLimits.canExport
+              ? `Download reports in various formats for sharing with stakeholders. ${exportLimits.isUnlimited ? 'Unlimited' : exportLimits.exportsRemaining} exports remaining this month.`
+              : "Export limit reached this month. Upgrade for unlimited exports."
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => handleExport('PDF')}
               className={cn(
                 "flex flex-col items-center py-6 h-auto space-y-2",
-                currentPlan === 'free' && "opacity-60"
+                !exportLimits.canExport && "opacity-60"
               )}
-              disabled={currentPlan === 'free'}
+              disabled={!exportLimits.canExport}
             >
               <FileText className="w-8 h-8 text-red-500" />
               <span className="font-medium">PDF Report</span>
