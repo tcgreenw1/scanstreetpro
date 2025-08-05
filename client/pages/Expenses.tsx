@@ -44,6 +44,7 @@ import { usePlanBasedUI, useFeatureAccess, useDataVisibility } from "@/hooks/use
 import { PlanGuard, PlanRestrictedButton, FeatureBadge, UpgradeBanner } from "@/components/PlanGuard";
 import { Crown } from "lucide-react";
 import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 export default function Expenses() {
   const { organization, planFeatures } = useOrganization();
