@@ -265,7 +265,7 @@ export function Layout({ children }: LayoutProps) {
                         <NavItemWrapper
                           key={item.href}
                           state={featureState}
-                          href={featureState === 'paywall' ? '/pricing' : item.href}
+                          href={item.href}
                           className={cn(
                             "transition-all duration-200 group relative animate-pulse-glow rounded-xl",
                             isCollapsed ? "px-2 py-3 justify-center" : "space-x-3 px-3 py-2.5",
