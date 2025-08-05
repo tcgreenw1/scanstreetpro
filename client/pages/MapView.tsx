@@ -609,10 +609,11 @@ export default function MapView() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0 h-[calc(100%-80px)]">
-                <div 
-                  ref={mapRef} 
+                <div
+                  id="map"
+                  ref={mapRef}
                   className="w-full h-full rounded-b-lg"
-                  style={{ minHeight: '500px' }}
+                  style={{ height: '600px', minHeight: '500px', width: '100%' }}
                 />
               </CardContent>
             </Card>
