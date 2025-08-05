@@ -205,7 +205,7 @@ export function Layout({ children }: LayoutProps) {
               {!isCollapsed && (
                 <div className="animate-slide-in">
                   <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    InfrastructureOS
+                    Scan Street Pro
                   </h1>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     {organization?.name || 'Default Organization'} • {userPlan.charAt(0).toUpperCase() + userPlan.slice(1)} Plan
