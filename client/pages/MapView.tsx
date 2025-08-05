@@ -143,12 +143,12 @@ export default function MapView() {
 
     try {
       // Load sample data immediately to show something
-      const fallbackRoads = [
+      const fallbackRoads: SimpleRoadSegment[] = [
         {
           id: 1,
           name: 'Main Street',
           highway: 'primary',
-          coordinates: [[39.9243, -83.8090], [39.9256, -83.8045]] as [number, number][],
+          coordinates: [[39.9243, -83.8090], [39.9256, -83.8045]],
           centerLat: 39.9250,
           centerLng: -83.8067,
           pci: 78,
@@ -160,7 +160,7 @@ export default function MapView() {
           id: 2,
           name: 'High Street',
           highway: 'secondary',
-          coordinates: [[39.9290, -83.8100], [39.9290, -83.8030]] as [number, number][],
+          coordinates: [[39.9290, -83.8100], [39.9290, -83.8030]],
           centerLat: 39.9290,
           centerLng: -83.8065,
           pci: 65,
@@ -172,7 +172,7 @@ export default function MapView() {
           id: 3,
           name: 'Limestone Street',
           highway: 'secondary',
-          coordinates: [[39.9200, -83.8120], [39.9300, -83.8120]] as [number, number][],
+          coordinates: [[39.9200, -83.8120], [39.9300, -83.8120]],
           centerLat: 39.9250,
           centerLng: -83.8120,
           pci: 42,
