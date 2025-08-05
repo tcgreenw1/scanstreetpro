@@ -1,4 +1,4 @@
-import { neonAuth } from '../lib/neonAuth';
+import neonAuth from '../lib/neonAuth';
 
 // Types for database entities
 export interface Asset {
