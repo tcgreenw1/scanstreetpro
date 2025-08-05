@@ -54,6 +54,7 @@ export function createServer() {
   app.use("/api/migrate", migrateRoutes);
   app.use("/api/export", exportRoutes);
   app.use("/api/plan-tracking", planTrackingRoutes);
+  app.use("/api/feature-matrix", featureMatrixRoutes);
 
   // Always enable mock routes as fallback
   app.use("/api/mock", mockRoutes);
