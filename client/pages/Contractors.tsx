@@ -65,6 +65,7 @@ import { useOrganization, usePermissions } from "@/contexts/OrganizationContext"
 import { usePlanBasedUI, useFeatureAccess, useDataVisibility } from "@/hooks/usePlanBasedUI";
 import dataService from "@/services/dataService";
 import { ContractorUpgradeCard } from "@/components/PremiumUpgradeCard";
+import { planTrackingApi } from "@/utils/planTrackingApi";
 
 interface Contractor {
   id: string;
