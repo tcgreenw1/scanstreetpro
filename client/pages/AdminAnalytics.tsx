@@ -144,18 +144,18 @@ const AdminAnalytics = () => {
             { period: 'Week 4', organizations: 64, change: 12 }
           ],
           planDistribution: [
-            { plan: 'Free', count: 28, percentage: 45, revenue: 0 },
-            { plan: 'Basic', count: 18, percentage: 29, revenue: 1782 },
-            { plan: 'Pro', count: 12, percentage: 19, revenue: 3588 },
-            { plan: 'Premium', count: 4, percentage: 7, revenue: 3996 }
+            { plan: 'Free', users: 120, percentage: 60, revenue: 0 },
+            { plan: 'Basic', users: 48, percentage: 24, revenue: 4752 },
+            { plan: 'Pro', users: 24, percentage: 12, revenue: 4776 },
+            { plan: 'Premium', users: 8, percentage: 4, revenue: 7992 }
           ],
           conversionRates: {
-            trial_to_paid: 24.5,
-            free_to_basic: 18.2,
-            basic_to_pro: 12.8,
-            pro_to_premium: 8.4
+            trial_to_paid: 18.5,
+            free_to_basic: 24.3,
+            basic_to_pro: 12.7,
+            pro_to_premium: 8.2
           },
-          churnRate: 2.1,
+          churnRate: 3.2,
           averageRevenuePer: {
             user: 147,
             organization: 189
@@ -166,6 +166,9 @@ const AdminAnalytics = () => {
             { plan: 'Basic', revenue: 1782, users: 18, growth: 12.4 }
           ]
         });
+      } else {
+        // Use data from API if available
+        setAnalytics(data.analytics);
       }
     } catch (error) {
       console.error('Failed to load analytics:', error);
