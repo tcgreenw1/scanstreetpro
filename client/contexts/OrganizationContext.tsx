@@ -160,7 +160,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
   // Fetch organization data from database
   const fetchOrganizationData = async (orgId: string): Promise<Organization> => {
     try {
-      const authToken = localStorage.getItem('authToken') || localStorage.getItem('neon_auth_token');
+      const authToken = localStorage.getItem('neon_auth_token') || localStorage.getItem('authToken');
 
       if (authToken) {
         // First try the main organization endpoint
