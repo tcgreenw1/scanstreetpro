@@ -43,6 +43,7 @@ import { GlobalSearch } from './GlobalSearch';
 import { ConnectionStatus } from './ConnectionStatus';
 import { TestPlanSwitcher } from './TestPlanSwitcher';
 import { GlobalPlanIndicator } from './GlobalPlanIndicator';
+import { PlanImplementationStatus } from './PlanImplementationStatus';
 import {
   DropdownMenu,
   DropdownMenuContent,
