@@ -17,10 +17,12 @@ const PAGE_RULES: Record<string, { name: string; freeAccess: boolean; basicAcces
 export function GlobalPlanIndicator() {
   const location = useLocation();
   const planState = usePlanBasedUI();
-  
+  const { organization } = useOrganization();
+  const planOverride = getPlanOverride();
+
   const currentPage = PAGE_RULES[location.pathname];
   if (!currentPage) return null;
-  
+
   const hasAccess = () => {
     switch (planState.userPlan) {
       case 'free': return currentPage.freeAccess;
@@ -33,7 +35,7 @@ export function GlobalPlanIndicator() {
       default: return false;
     }
   };
-  
+
   const shouldHaveAccess = hasAccess();
   
   return (
