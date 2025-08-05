@@ -13,9 +13,26 @@ export const testServerConnectivity = async () => {
     const pingData = await pingResponse.json();
     console.log('✅ Server ping successful:', pingData.message);
     
+    // Test plan tracking health
+    console.log('🔍 Testing plan tracking health...');
+
+    try {
+      const healthResponse = await fetch('/api/plan-tracking/health');
+      if (healthResponse.ok) {
+        const healthData = await healthResponse.json();
+        console.log('✅ Plan tracking health check passed:', healthData);
+      } else {
+        console.error(`❌ Plan tracking health check failed: HTTP ${healthResponse.status} ${healthResponse.statusText}`);
+        const errorText = await healthResponse.text();
+        console.error('Error response:', errorText);
+      }
+    } catch (error) {
+      console.error('❌ Plan tracking health check network error:', error);
+    }
+
     // Test plan tracking endpoints
     console.log('🔍 Testing plan tracking endpoints...');
-    
+
     try {
       const allResponse = await fetch('/api/plan-tracking/all');
       if (allResponse.ok) {
