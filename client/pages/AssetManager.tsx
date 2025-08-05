@@ -155,7 +155,13 @@ export default function AssetManager() {
   ).length;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <PreviewModeWrapper
+      isPreviewMode={isPreviewMode}
+      requiredPlan={requiredPlan}
+      featureName="Asset Management"
+      disableInteractions={shouldDisableInteractions}
+    >
+      <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className={cn(
         "glass-card p-6 rounded-xl",
@@ -596,6 +602,7 @@ export default function AssetManager() {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </PreviewModeWrapper>
   );
 }
