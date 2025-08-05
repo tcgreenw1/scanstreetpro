@@ -156,6 +156,24 @@ export const ensurePlanTrackingReady = async () => {
 
   initPromise = (async () => {
     try {
+      // First check if the service is healthy
+      console.log('🔍 Checking plan tracking service health...');
+
+      try {
+        const healthResponse = await fetch(`${BASE_URL}/health`);
+        if (!healthResponse.ok) {
+          throw new Error(`Health check failed: HTTP ${healthResponse.status}`);
+        }
+        const healthData = await healthResponse.json();
+        if (!healthData.success) {
+          throw new Error(`Health check failed: ${healthData.error}`);
+        }
+        console.log('✅ Plan tracking service is healthy');
+      } catch (healthError) {
+        console.warn('⚠️ Plan tracking health check failed, service may not be ready:', healthError);
+        return { success: false, error: `Service health check failed: ${healthError?.message}` };
+      }
+
       const initResult = await planTrackingApi.init();
       if (initResult.success) {
         console.log('✅ Plan tracking initialized');
