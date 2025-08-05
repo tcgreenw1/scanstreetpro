@@ -123,11 +123,11 @@ class NeonService {
   }
 
   private async makeRequest<T>(
-    endpoint: string, 
+    endpoint: string,
     options: RequestInit & { organizationId?: string } = {}
   ): Promise<T> {
     const { organizationId, ...fetchOptions } = options;
-    
+
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...fetchOptions.headers,
@@ -137,16 +137,28 @@ class NeonService {
       headers['x-organization-id'] = organizationId;
     }
 
+    console.log(`Making request to: ${this.baseUrl}${endpoint}`, {
+      headers,
+      method: fetchOptions.method || 'GET',
+      organizationId
+    });
+
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       ...fetchOptions,
       headers,
     });
 
+    console.log(`Response status: ${response.status} for ${endpoint}`);
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`HTTP error for ${endpoint}:`, response.status, errorText);
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log(`Response data for ${endpoint}:`, data);
+    return data;
   }
 
   // Asset Management
