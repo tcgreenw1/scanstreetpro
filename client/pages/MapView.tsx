@@ -593,37 +593,6 @@ export default function MapView() {
     });
   };
 
-  const handleExportCSV = useCallback((type: 'roads' | 'assets') => {
-    try {
-      let csvContent: string;
-      let filename: string;
-
-      if (type === 'roads') {
-        const filteredRoads = roadSegments.filter(road => road.pci >= pciFilter);
-        csvContent = overpassService.exportRoadsToCSV(filteredRoads);
-        filename = `springfield-roads-pci-${pciFilter}plus-${new Date().toISOString().split('T')[0]}.csv`;
-      } else {
-        const filteredAssets = selectedAssetTypes.length > 0 
-          ? cityAssets.filter(asset => selectedAssetTypes.includes(asset.type))
-          : cityAssets;
-        csvContent = assetsService.exportAssetsToCSV(filteredAssets);
-        filename = `springfield-assets-${new Date().toISOString().split('T')[0]}.csv`;
-      }
-
-      // Create and download file
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', filename);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (err) {
-      console.error('Export failed:', err);
-    }
-  }, [roadSegments, cityAssets, pciFilter, selectedAssetTypes]);
 
   const handleExportScreenshot = useCallback(() => {
     if (!leafletMapRef.current) return;
