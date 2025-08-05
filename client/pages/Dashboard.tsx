@@ -91,6 +91,10 @@ export default function Dashboard() {
   const { organization, planFeatures } = useOrganization();
   const { shouldShowUpgrade, isFeatureUnlocked } = usePermissions();
 
+  // Step 1 & 2: Get plan-based UI state
+  const planState = usePlanBasedUI();
+  const { useSampleData, useRealData, userPlan } = useDataVisibility();
+
   const [dashboardMetrics, setDashboardMetrics] = useState({
     totalAssets: 0,
     avgPCI: 0,
