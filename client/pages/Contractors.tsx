@@ -224,14 +224,17 @@ export default function Contractors() {
   useEffect(() => {
     loadData();
 
-    // Update tracking data for this page
+    // Update tracking data for this page (non-blocking)
     planTrackingApi.markPageCompleted('Contractors', {
       free: 'Hidden/locked page with feature preview',
       basic: 'Hidden/locked page with feature preview',
       pro: 'Full contractor management enabled',
       premium: 'Full contractor management + advanced analytics',
       enterprise: 'Complete contractor management + API access'
-    }, 'Pro+ feature - early return with locked banner for non-Pro users');
+    }, 'Pro+ feature - early return with locked banner for non-Pro users').catch(error => {
+      // Silently handle tracking errors - don't affect user experience
+      console.debug('Plan tracking error (non-critical):', error);
+    });
   }, []);
 
   const loadData = async () => {
