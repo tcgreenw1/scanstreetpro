@@ -183,21 +183,30 @@ const AdminUsers = () => {
     try {
       const response = await fetch(`/api/admin/users/${selectedUser.id}/reset-password`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: userForm.password })
+        headers: { 'Content-Type': 'application/json' }
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
-        toast({ title: "Success", description: "Password reset successfully" });
+        const message = result.tempPassword ?
+          `Password reset successfully! New temporary password: ${result.tempPassword}` :
+          result.message || "Password reset successfully";
+
+        toast({
+          title: "Success",
+          description: message,
+          duration: 10000 // Show for 10 seconds so user can copy password
+        });
+
         setShowPasswordResetModal(false);
         setSelectedUser(null);
         setUserForm({ email: '', name: '', role: 'viewer', organizationId: '', password: '' });
       } else {
-        toast({ title: "Error", description: result.error, variant: "destructive" });
+        toast({ title: "Error", description: result.error || "Failed to reset password", variant: "destructive" });
       }
     } catch (error) {
+      console.error('Password reset error:', error);
       toast({ title: "Error", description: "Failed to reset password", variant: "destructive" });
     }
   };
