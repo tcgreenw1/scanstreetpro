@@ -383,7 +383,7 @@ export default function MapView() {
     });
     roadLayersRef.current = [];
 
-    if (!showPCILayer) return;
+    if (!showPCILayer || !hasPCIAccess) return;
 
     // Filter roads based on PCI threshold
     const filteredRoads = roadSegments.filter(road => road.pci >= pciFilter);
