@@ -245,18 +245,71 @@ export default function MaintenanceScheduler() {
 
   const weekDays = getDaysInWeek('2023-12-15');
 
+  // Early return with access restriction if not Pro+
+  if (!canAccessMaintenance) {
+    return (
+      <div className="space-y-8 max-w-7xl mx-auto">
+        {/* Locked Banner for Maintenance Scheduling */}
+        <div className="glass-card p-8 rounded-xl border-amber-200/50 bg-gradient-to-r from-amber-50/80 to-orange-50/80 dark:from-amber-900/30 dark:to-orange-900/30">
+          <div className="text-center">
+            <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-4">
+              <Crown className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-amber-800 dark:text-amber-200 mb-2">Maintenance Scheduler</h1>
+            <p className="text-amber-700 dark:text-amber-300 mb-6 max-w-2xl mx-auto">
+              Advanced maintenance scheduling with weather-aware planning, contractor management, and automated task assignment is available with Pro plans and higher.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/pricing">
+                <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                  <Crown className="w-4 h-4 mr-2" />
+                  Upgrade to Pro Plan
+                </Button>
+              </Link>
+              <Button variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-50">
+                View Maintenance Features
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Feature Preview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { title: "Weather-Aware Scheduling", icon: Cloud, desc: "Automatic scheduling based on weather conditions" },
+            { title: "Contractor Management", icon: Users, desc: "Assign and track contractor teams" },
+            { title: "Asset Integration", icon: Wrench, desc: "Connect maintenance tasks to asset conditions" }
+          ].map((feature, index) => (
+            <Card key={index} className="glass-card border-amber-200/30 opacity-75">
+              <CardContent className="p-6 text-center">
+                <feature.icon className="w-8 h-8 text-amber-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">{feature.title}</h3>
+                <p className="text-sm text-amber-600 dark:text-amber-400">{feature.desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-white">Maintenance Scheduler</h1>
-          <p className="text-slate-600 dark:text-slate-300 mt-1">
-            Schedule, track, and assign maintenance tasks with weather-aware planning
-          </p>
-          <Badge variant="outline" className="mt-2 bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300">
-            {tasks.length} Active Tasks
-          </Badge>
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+            <CalendarDays className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-800 dark:text-white">Maintenance Scheduler</h1>
+            <p className="text-slate-600 dark:text-slate-300 mt-1">
+              Schedule, track, and assign maintenance tasks with weather-aware planning
+            </p>
+            <Badge variant="outline" className="mt-2 bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300">
+              {tasks.length} Active Tasks
+            </Badge>
+          </div>
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
