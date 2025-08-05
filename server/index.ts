@@ -58,6 +58,9 @@ export function createServer() {
   app.use("/api/export", exportRoutes);
   app.use("/api/plan-tracking", planTrackingRoutes);
   app.use("/api/feature-matrix", featureMatrixRoutes);
+  app.use("/api/assets", assetsRoutes);
+  app.use("/api/road-inspections", roadInspectionsRoutes);
+  app.use("/api/maintenance", maintenanceRoutes);
 
   // Always enable mock routes as fallback
   app.use("/api/mock", mockRoutes);
