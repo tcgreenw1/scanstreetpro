@@ -149,28 +149,50 @@ interface NavItemWrapperProps {
 
 export function NavItemWrapper({ children, state, href, className }: NavItemWrapperProps) {
   const baseClasses = "group relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200";
-  
+
   if (state === 'not_shown') {
     return null; // Don't render at all
   }
-  
+
+  // For paywall items, make them clickable but with visual indicators
   if (state === 'paywall') {
+    const paywallClasses = cn(
+      baseClasses,
+      "bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/30 text-slate-700 dark:text-slate-300",
+      className
+    );
+
+    if (href) {
+      return (
+        <Link to={href} className={paywallClasses}>
+          {children}
+          <div className="ml-auto flex items-center gap-1">
+            <Badge variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-300">
+              <Crown className="w-2.5 h-2.5 mr-1" />
+              Preview
+            </Badge>
+          </div>
+          <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-amber-200/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </Link>
+      );
+    }
+
     return (
-      <div className={cn(baseClasses, "opacity-60 cursor-not-allowed bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800", className)}>
+      <div className={paywallClasses}>
         {children}
         <Crown className="w-4 h-4 text-amber-500 ml-auto" />
         <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-amber-200/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
     );
   }
-  
+
   const linkClasses = cn(
     baseClasses,
     "hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white",
     state === 'sample_data' && "border-l-2 border-blue-400",
     className
   );
-  
+
   if (href) {
     return (
       <Link to={href} className={linkClasses}>
@@ -185,7 +207,7 @@ export function NavItemWrapper({ children, state, href, className }: NavItemWrap
       </Link>
     );
   }
-  
+
   return (
     <div className={linkClasses}>
       {children}
