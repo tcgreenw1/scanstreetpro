@@ -517,6 +517,9 @@ export function Layout({ children }: LayoutProps) {
         isOpen={isGlobalSearchOpen}
         onClose={() => setIsGlobalSearchOpen(false)}
       />
+
+      {/* Test Plan Switcher - for immediate testing */}
+      <TestPlanSwitcher />
     </div>
   );
 }
