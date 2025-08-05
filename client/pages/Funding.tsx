@@ -318,13 +318,17 @@ export default function Funding() {
 
   // Update tracking data for this page
   useEffect(() => {
+    // Update tracking data for this page (non-blocking)
     planTrackingApi.markPageCompleted('Funding Center', {
       free: 'Hidden/locked page with feature preview',
       basic: 'Hidden/locked page with feature preview',
       pro: 'Full funding center with grants and revenue tracking',
       premium: 'Advanced funding analytics + forecasting',
       enterprise: 'Complete funding platform + API integrations'
-    }, 'Pro+ feature - early return with locked banner for non-Pro users');
+    }, 'Pro+ feature - early return with locked banner for non-Pro users').catch(error => {
+      // Silently handle tracking errors - don't affect user experience
+      console.debug('Plan tracking error (non-critical):', error);
+    });
   }, []);
 
   // Early return with access restriction if not Pro+
