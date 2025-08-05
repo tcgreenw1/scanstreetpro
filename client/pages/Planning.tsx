@@ -180,6 +180,16 @@ const materialCostData = [
 ];
 
 export default function Planning() {
+  // Step 1 & 2: Get plan-based UI state
+  const planState = usePlanBasedUI();
+  const budgetAccess = useFeatureAccess('budgetSimulations');
+  const { useSampleData, userPlan } = useDataVisibility();
+
+  // Step 3: Apply hardcoded plan logic for Budget Planning
+  // Free: Locked with crown
+  // Basic+: Fully enabled
+  const canAccessBudgetPlanning = planState.unlockBudgetSimulations;
+
   const [planningHorizon, setPlanningHorizon] = useState<5 | 10>(5);
   const [inflationRate, setInflationRate] = useState<number>(3.2);
   const [targetPCI, setTargetPCI] = useState<number>(75);
