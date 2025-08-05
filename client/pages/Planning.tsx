@@ -316,13 +316,17 @@ export default function Planning() {
 
   // Update tracking data for this page
   useEffect(() => {
+    // Update tracking data for this page (non-blocking)
     planTrackingApi.markPageCompleted('Budget Planning', {
       free: 'Locked with crown banner',
       basic: 'Full budget planning and simulations enabled',
       pro: 'Advanced planning with unlimited scenarios',
       premium: 'Complete planning suite + AI forecasting',
       enterprise: 'Full planning platform + API integrations'
-    }, 'Basic+ feature - budget simulations and planning tools');
+    }, 'Basic+ feature - budget simulations and planning tools').catch(error => {
+      // Silently handle tracking errors - don't affect user experience
+      console.debug('Plan tracking error (non-critical):', error);
+    });
   }, []);
 
   // Early return with access restriction if not Basic+
