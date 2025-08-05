@@ -209,6 +209,17 @@ export default function Inspections() {
   const [gpsEnabled, setGpsEnabled] = useState(true);
   const { currentPlan } = usePricing();
 
+  // Update tracking data for this page
+  useEffect(() => {
+    planTrackingApi.markPageCompleted('Inspections', {
+      free: 'Basic inspection creation with limited features',
+      basic: 'Full inspection workflow with real data',
+      pro: 'Advanced inspection features + offline mode',
+      premium: 'Complete inspection suite + AI analysis',
+      enterprise: 'Full inspection platform + API access'
+    }, 'Available to all plans with different feature levels');
+  }, []);
+
   const filteredInspections = inspections.filter(inspection => {
     const matchesStatus = statusFilter === 'all' || inspection.status === statusFilter;
     const matchesAssetType = assetTypeFilter === 'all' || inspection.assetType === assetTypeFilter;
