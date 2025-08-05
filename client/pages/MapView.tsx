@@ -903,7 +903,7 @@ export default function MapView() {
 
           {/* Main Map */}
           <div className="lg:col-span-3">
-            <Card className="glass-card border-white/20 h-[600px] lg:h-[700px]">
+            <Card className="glass-card border-white/20 h-[700px] lg:h-[800px]">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center justify-between text-slate-800 dark:text-white">
                   <div className="flex items-center">
