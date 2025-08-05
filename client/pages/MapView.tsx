@@ -966,6 +966,27 @@ export default function MapView() {
         </div>
       </div>
 
+      {/* Enhanced Map Toolbar - floating */}
+      <EnhancedMapToolbar
+        isDarkMode={isDarkMode}
+        isFullscreen={isFullscreen}
+        showPCILayer={showPCILayer}
+        showAssetLayer={showAssetLayer}
+        pciFilter={pciFilter}
+        selectedAssetTypes={selectedAssetTypes}
+        hasPCIAccess={hasPCIAccess}
+        hasExportAccess={hasExportAccess}
+        onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+        onToggleFullscreen={handleToggleFullscreen}
+        onTogglePCILayer={() => setShowPCILayer(!showPCILayer)}
+        onToggleAssetLayer={() => setShowAssetLayer(!showAssetLayer)}
+        onPCIFilterChange={setPciFilter}
+        onAssetTypesChange={setSelectedAssetTypes}
+        onExportPDF={handleExportPDF}
+        onExportCSV={handleExportCSV}
+        onResetView={handleResetView}
+      />
+
       {/* Enhanced PCI Legend with glass morphism - only for authorized plans */}
       {hasPCIAccess && (
         <PCILegend
