@@ -152,11 +152,12 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
 
   // Debug logging
   console.log('🔍 OrganizationContext DEBUG:', {
-    authUser,
-    authOrganization,
+    planOverride,
+    authUser: authUser ? { email: authUser.email, role: authUser.role } : null,
+    authOrganization: authOrganization ? { name: authOrganization.name, plan: authOrganization.plan } : null,
     authLoading,
-    finalUser: user,
-    finalOrganization: organization,
+    finalUser: user ? { email: user.email, role: user.role } : null,
+    finalOrganization: organization ? { name: organization.name, plan: organization.plan } : null,
     finalPlan: organization?.plan
   });
 
