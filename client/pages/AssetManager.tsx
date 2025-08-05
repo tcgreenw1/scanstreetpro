@@ -67,9 +67,11 @@ export default function AssetManager() {
 
   // New feature matrix system
   const { userPlan: matrixCurrentPlan } = useFeatureMatrix();
-  const navFeatures = useNavFeatures();
-  const assetManagerState = navFeatures.assetManager?.state || 'shown';
-  const { isPreviewMode, requiredPlan, shouldDisableInteractions } = usePreviewMode(assetManagerState, matrixCurrentPlan);
+  const assetManagerFeatures = useAssetManagerFeatures();
+  const assetInventoryState = assetManagerFeatures.assetInventory.state;
+  const predictiveMaintenanceState = assetManagerFeatures.predictiveMaintenance.state;
+  const { isPreviewMode: assetInventoryPreview, requiredPlan: assetInventoryRequiredPlan, shouldDisableInteractions: assetInventoryShouldDisable } = usePreviewMode(assetInventoryState, matrixCurrentPlan);
+  const { isPreviewMode: predictiveMaintenancePreview, requiredPlan: predictiveMaintenanceRequiredPlan, shouldDisableInteractions: predictiveMaintenanceShouldDisable } = usePreviewMode(predictiveMaintenanceState, matrixCurrentPlan);
 
   const [assets, setAssets] = useState<Asset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
