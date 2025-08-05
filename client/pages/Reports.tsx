@@ -227,37 +227,37 @@ export default function Reports() {
               <FileText className="w-8 h-8 text-red-500" />
               <span className="font-medium">PDF Report</span>
               <span className="text-xs text-slate-500">Council Ready</span>
-              {currentPlan === 'free' && <Crown className="w-4 h-4 text-amber-500" />}
+              {!exportLimits.canExport && <Crown className="w-4 h-4 text-amber-500" />}
             </Button>
-            
-            <Button 
-              variant="outline" 
+
+            <Button
+              variant="outline"
               onClick={() => handleExport('CSV')}
               className={cn(
                 "flex flex-col items-center py-6 h-auto space-y-2",
-                currentPlan === 'free' && "opacity-60"
+                !exportLimits.canExport && "opacity-60"
               )}
-              disabled={currentPlan === 'free'}
+              disabled={!exportLimits.canExport}
             >
               <FileSpreadsheet className="w-8 h-8 text-green-500" />
               <span className="font-medium">CSV Data</span>
               <span className="text-xs text-slate-500">Raw Numbers</span>
-              {currentPlan === 'free' && <Crown className="w-4 h-4 text-amber-500" />}
+              {!exportLimits.canExport && <Crown className="w-4 h-4 text-amber-500" />}
             </Button>
-            
-            <Button 
-              variant="outline" 
+
+            <Button
+              variant="outline"
               onClick={() => handleExport('Excel')}
               className={cn(
                 "flex flex-col items-center py-6 h-auto space-y-2",
-                currentPlan === 'free' && "opacity-60"
+                !exportLimits.canExport && "opacity-60"
               )}
-              disabled={currentPlan === 'free'}
+              disabled={!exportLimits.canExport}
             >
               <FileX className="w-8 h-8 text-blue-500" />
               <span className="font-medium">Excel File</span>
               <span className="text-xs text-slate-500">With Charts</span>
-              {currentPlan === 'free' && <Crown className="w-4 h-4 text-amber-500" />}
+              {!exportLimits.canExport && <Crown className="w-4 h-4 text-amber-500" />}
             </Button>
             
             <Button 
