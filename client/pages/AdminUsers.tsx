@@ -64,6 +64,8 @@ const AdminUsers = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordResetModal, setShowPasswordResetModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [debugEmail, setDebugEmail] = useState('');
+  const [debugResult, setDebugResult] = useState<any>(null);
 
   // Form state
   const [userForm, setUserForm] = useState({ 
