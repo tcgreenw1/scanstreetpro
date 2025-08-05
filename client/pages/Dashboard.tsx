@@ -43,6 +43,7 @@ import { neonService } from '@/services/neonService';
 import { cn } from '@/lib/utils';
 import { usePricing } from '@/contexts/PricingContext';
 import { useOrganization, usePermissions } from '@/contexts/OrganizationContext';
+import { usePlanBasedUI, useDataVisibility } from '@/hooks/usePlanBasedUI';
 import { ModifySampleDataModal } from '@/components/ModifySampleDataModal';
 import { useState, useEffect } from 'react';
 
