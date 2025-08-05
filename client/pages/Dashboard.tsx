@@ -204,7 +204,37 @@ export default function Dashboard() {
         )}
       </div>
 
-
+      {/* Plan Testing Banner - Very Obvious */}
+      <div className={cn(
+        "p-6 rounded-xl border-2 text-center",
+        userPlan === 'free' ? "bg-red-50 border-red-300 text-red-800" :
+        userPlan === 'basic' ? "bg-green-50 border-green-300 text-green-800" :
+        userPlan === 'pro' ? "bg-purple-50 border-purple-300 text-purple-800" :
+        userPlan === 'premium' ? "bg-amber-50 border-amber-300 text-amber-800" :
+        "bg-blue-50 border-blue-300 text-blue-800"
+      )}>
+        <h2 className="text-2xl font-bold mb-2">
+          TESTING: {userPlan.toUpperCase()} PLAN ACTIVE
+        </h2>
+        <p className="text-lg">
+          {userPlan === 'free' && "🔒 Free Plan: Should see sample data, crowns, export limits"}
+          {userPlan === 'basic' && "✅ Basic Plan: Should see real data, unlocked assets/budget/expenses, crowns on advanced features"}
+          {userPlan === 'pro' && "🚀 Pro Plan: Should see all features unlocked except Premium/Enterprise"}
+          {userPlan === 'premium' && "💎 Premium Plan: Should see full access with AI features"}
+          {userPlan.includes('enterprise') && "🏢 Enterprise Plan: Should see complete access with engineering support"}
+        </p>
+        <div className="mt-4 flex justify-center space-x-4">
+          <div className="text-sm">
+            <strong>Sample Data:</strong> {planState.showSampleData ? "YES" : "NO"}
+          </div>
+          <div className="text-sm">
+            <strong>Show Crowns:</strong> {planState.showCrowns ? "YES" : "NO"}
+          </div>
+          <div className="text-sm">
+            <strong>Can Export:</strong> {planState.allowExport ? "YES" : "NO"}
+          </div>
+        </div>
+      </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
