@@ -61,12 +61,11 @@ export default function Expenses() {
   // Free: Locked with crown
   // Basic+: Fully enabled
   const canManageExpenses = planState.unlockExpenseManagement;
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [yearFilter, setYearFilter] = useState<string>("all");
-
-  const canManageExpenses = isFeatureUnlocked('expenseManagement');
 
   // Load transactions from database
   useEffect(() => {
