@@ -126,6 +126,16 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
 
   const isLoading = authLoading;
 
+  // Debug logging
+  console.log('🔍 OrganizationContext DEBUG:', {
+    authUser,
+    authOrganization,
+    authLoading,
+    finalUser: user,
+    finalOrganization: organization,
+    finalPlan: organization?.plan
+  });
+
   // Get plan features based on current organization plan
   const planFeatures = organization ? PLAN_FEATURES[organization.plan] : null;
 
