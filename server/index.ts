@@ -12,6 +12,7 @@ import adminRoutes from "./routes/admin";
 import migrateRoutes from "./routes/migrate";
 import exportRoutes from "./routes/export";
 import mockRoutes from "./routes/mock";
+import planTrackingRoutes from "./routes/plan-tracking";
 
 export function createServer() {
   const app = express();
