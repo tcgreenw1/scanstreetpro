@@ -439,25 +439,32 @@ export function Layout({ children }: LayoutProps) {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={async () => {
-                        try {
-                          // Call the logout API endpoint
-                          await fetch('/api/logout', {
-                            method: 'POST',
-                            credentials: 'include'
-                          });
+                      onClick={() => {
+                        // Use the exact logic specified by the user
+                        fetch('/api/logout', {
+                          method: 'POST',
+                          credentials: 'include'
+                        }).then(() => {
+                          // Clear authentication state using the context
+                          signOut();
 
-                          // Clear authentication state
-                          await signOut();
+                          // Clear global state as specified
+                          localStorage.removeItem('neon_auth_token');
+                          localStorage.removeItem('neon_auth_session');
+                          localStorage.removeItem('admin_impersonating');
+                          localStorage.removeItem('admin_impersonating_user');
 
                           // Redirect to login
                           window.location.href = '/login';
-                        } catch (error) {
-                          console.error('Logout failed:', error);
-                          // Even if API call fails, clear local state and redirect
-                          await signOut();
+                        }).catch(() => {
+                          // Even if API call fails, clear state and redirect
+                          signOut();
+                          localStorage.removeItem('neon_auth_token');
+                          localStorage.removeItem('neon_auth_session');
+                          localStorage.removeItem('admin_impersonating');
+                          localStorage.removeItem('admin_impersonating_user');
                           window.location.href = '/login';
-                        }
+                        });
                       }}
                       className="text-red-600 dark:text-red-400"
                     >
