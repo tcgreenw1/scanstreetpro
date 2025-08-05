@@ -854,6 +854,14 @@ export default function MapView() {
           </div>
         </div>
       </div>
+
+      {/* Enhanced PCI Legend with glass morphism */}
+      <PCILegend
+        showPCILayer={showPCILayer}
+        onTogglePCI={() => setShowPCILayer(!showPCILayer)}
+        isDarkMode={isDarkMode}
+        position="bottom-right"
+      />
     </div>
   );
 }
