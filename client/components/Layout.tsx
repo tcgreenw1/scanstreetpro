@@ -174,7 +174,7 @@ export function Layout({ children }: LayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const { organization } = useOrganization();
   const { userPlan } = useFeatureMatrix();
   const navFeatures = useNavFeatures();
