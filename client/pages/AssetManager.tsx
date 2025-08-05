@@ -64,6 +64,12 @@ export default function AssetManager() {
   const assetAccess = useFeatureAccess('assetManagement');
   const { useSampleData, userPlan } = useDataVisibility();
 
+  // New feature matrix system
+  const { userPlan: currentPlan } = useFeatureMatrix();
+  const navFeatures = useNavFeatures();
+  const assetManagerState = navFeatures.assetManager?.state || 'shown';
+  const { isPreviewMode, requiredPlan, shouldDisableInteractions } = usePreviewMode(assetManagerState, currentPlan);
+
   const [assets, setAssets] = useState<Asset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
