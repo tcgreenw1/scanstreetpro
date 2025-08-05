@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
 import { userDataCircuitBreaker, connectionCircuitBreaker } from '@/utils/circuitBreaker';
 import { testSupabaseConnection } from '@/lib/neonAuth';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ConnectionStatusProps {
   show?: boolean;
