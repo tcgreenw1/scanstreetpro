@@ -73,7 +73,11 @@ const AdminSettings = () => {
 
   useEffect(() => {
     if (user?.role === 'admin') {
-      loadSettings();
+      loadSettings().catch(error => {
+        console.error('Error in loadSettings:', error);
+        // Ensure loading state is reset even if function fails
+        setLoading(false);
+      });
     }
   }, [user]);
 
