@@ -82,34 +82,57 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
     lastLogin: new Date()
   } : null;
 
-  const organization: Organization | null = authOrganization ? {
-    id: authOrganization.id,
-    name: authOrganization.name,
-    plan: authOrganization.plan as PlanType,
-    planExpiry: new Date('2024-12-31'),
-    isActive: true,
-    settings: {
-      timezone: 'America/New_York',
-      currency: 'USD',
-      logoUrl: '/city-logo.png'
-    },
-    usage: {
-      exportsThisMonth: 0,
-      teamMembers: 1,
-      rescansThisYear: 0
-    }
-  } : (() => {
-    // Fallback to test plan for development/testing
-    const testPlan = localStorage.getItem('testPlan') ||
-                     new URLSearchParams(window.location.search).get('plan') ||
-                     'free';
-    const validPlans = ['free', 'basic', 'pro', 'premium', 'satellite_enterprise', 'driving_enterprise'];
-    const planToUse = validPlans.includes(testPlan) ? testPlan : 'free';
+  // Check for plan override first (for testing)
+  const planOverride = getPlanOverride();
 
+  const organization: Organization | null = (() => {
+    // If there's a plan override, use it for testing
+    if (planOverride) {
+      return {
+        id: 'test-org',
+        name: 'Test Organization',
+        plan: planOverride,
+        planExpiry: new Date('2024-12-31'),
+        isActive: true,
+        settings: {
+          timezone: 'America/New_York',
+          currency: 'USD',
+          logoUrl: '/city-logo.png'
+        },
+        usage: {
+          exportsThisMonth: planOverride === 'free' ? 1 : 0,
+          teamMembers: planOverride === 'free' ? 1 : planOverride === 'basic' ? 3 : 10,
+          rescansThisYear: planOverride === 'free' ? 0 : 1
+        }
+      };
+    }
+
+    // Use auth organization if available
+    if (authOrganization) {
+      return {
+        id: authOrganization.id,
+        name: authOrganization.name,
+        plan: authOrganization.plan as PlanType,
+        planExpiry: new Date('2024-12-31'),
+        isActive: true,
+        settings: {
+          timezone: 'America/New_York',
+          currency: 'USD',
+          logoUrl: '/city-logo.png'
+        },
+        usage: {
+          exportsThisMonth: 0,
+          teamMembers: 1,
+          rescansThisYear: 0
+        }
+      };
+    }
+
+    // Default fallback
     return {
-      id: 'test-org',
-      name: 'Test Organization',
-      plan: planToUse as PlanType,
+      id: 'default-org',
+      name: 'Default Organization',
+      plan: 'free' as PlanType,
       planExpiry: new Date('2024-12-31'),
       isActive: true,
       settings: {
@@ -118,9 +141,9 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
         logoUrl: '/city-logo.png'
       },
       usage: {
-        exportsThisMonth: planToUse === 'free' ? 1 : 0,
-        teamMembers: planToUse === 'free' ? 1 : planToUse === 'basic' ? 3 : 10,
-        rescansThisYear: planToUse === 'free' ? 0 : 1
+        exportsThisMonth: 1,
+        teamMembers: 1,
+        rescansThisYear: 0
       }
     };
   })();
