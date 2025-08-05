@@ -19,7 +19,13 @@ export function GlobalPlanIndicator() {
   const location = useLocation();
   const planState = usePlanBasedUI();
   const { organization } = useOrganization();
+  const { user } = useAuth();
   const planOverride = getPlanOverride();
+
+  // Only show to admin users
+  if (!['admin', 'superadmin', 'owner'].includes(user?.role)) {
+    return null;
+  }
 
   const currentPage = PAGE_RULES[location.pathname];
   if (!currentPage) return null;
