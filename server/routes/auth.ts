@@ -75,9 +75,10 @@ export const signIn: RequestHandler = async (req, res) => {
     const userResult = await executeQuery(userQuery, [email]);
 
     if (!userResult.rows || userResult.rows.length === 0) {
-      return res.status(401).json({ 
+      console.log(`Login failed: No user found with email ${email}`);
+      return res.status(401).json({
         success: false,
-        error: 'Invalid credentials' 
+        error: 'Invalid credentials'
       });
     }
 
@@ -85,19 +86,37 @@ export const signIn: RequestHandler = async (req, res) => {
 
     // Verify password
     if (!user.password_hash) {
-      return res.status(401).json({ 
+      console.log(`Login failed: User ${email} has no password hash`);
+      return res.status(401).json({
         success: false,
-        error: 'Account not properly configured. Please contact admin.' 
+        error: 'Account not properly configured. Please contact admin.'
+      });
+    }
+
+    // Check if user is active
+    if (!user.is_active) {
+      console.log(`Login failed: User ${email} is inactive`);
+      return res.status(401).json({
+        success: false,
+        error: 'Account is inactive. Please contact admin.'
       });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
 
     if (!isValidPassword) {
-      return res.status(401).json({ 
+      console.log(`Login failed: Invalid password for user ${email}`);
+      return res.status(401).json({
         success: false,
-        error: 'Invalid credentials' 
+        error: 'Invalid credentials'
       });
+    }
+
+    console.log(`Login successful for user ${email} (${user.name})`);
+
+    // Check if the user's organization exists and is active
+    if (!user.org_name && user.organization_id) {
+      console.warn(`User ${email} has organization_id ${user.organization_id} but no organization name found`);
     }
 
     // Update last login
