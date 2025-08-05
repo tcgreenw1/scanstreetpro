@@ -30,6 +30,18 @@ export interface FeatureMatrix {
     integrations: FeatureState;
     settings: FeatureState;
   };
+  roadInspections: {
+    dataSource: FeatureState;
+    upgradeCard: FeatureState;
+  };
+  assetManager: {
+    assetInventory: FeatureState;
+    predictiveMaintenance: FeatureState;
+  };
+  maintenanceScheduler: {
+    unlockAdvancedSchedulingCard: FeatureState;
+    functionality: FeatureState;
+  };
 }
 
 // Feature matrix based on the provided table
