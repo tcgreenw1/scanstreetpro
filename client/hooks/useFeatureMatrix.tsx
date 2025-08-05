@@ -437,3 +437,56 @@ export const useNavFeatures = () => {
   
   return navFeatures;
 };
+
+// Helper hook for road inspections features
+export const useRoadInspectionsFeatures = () => {
+  const featureMatrix = useFeatureMatrix();
+
+  return {
+    dataSource: {
+      state: featureMatrix.getFeatureState('roadInspections', 'dataSource'),
+      useSampleData: featureMatrix.getFeatureState('roadInspections', 'dataSource') === 'sample_data',
+      useRealData: featureMatrix.getFeatureState('roadInspections', 'dataSource') === 'shown',
+    },
+    upgradeCard: {
+      state: featureMatrix.getFeatureState('roadInspections', 'upgradeCard'),
+      show: featureMatrix.getFeatureState('roadInspections', 'upgradeCard') === 'shown',
+    },
+  };
+};
+
+// Helper hook for asset manager features
+export const useAssetManagerFeatures = () => {
+  const featureMatrix = useFeatureMatrix();
+
+  return {
+    assetInventory: {
+      state: featureMatrix.getFeatureState('assetManager', 'assetInventory'),
+      isPaywall: featureMatrix.getFeatureState('assetManager', 'assetInventory') === 'paywall',
+      useRealData: featureMatrix.getFeatureState('assetManager', 'assetInventory') === 'shown',
+    },
+    predictiveMaintenance: {
+      state: featureMatrix.getFeatureState('assetManager', 'predictiveMaintenance'),
+      isPaywall: featureMatrix.getFeatureState('assetManager', 'predictiveMaintenance') === 'paywall',
+      useRealData: featureMatrix.getFeatureState('assetManager', 'predictiveMaintenance') === 'shown',
+      withGraphs: featureMatrix.getFeatureState('assetManager', 'predictiveMaintenance') === 'shown',
+    },
+  };
+};
+
+// Helper hook for maintenance scheduler features
+export const useMaintenanceSchedulerFeatures = () => {
+  const featureMatrix = useFeatureMatrix();
+
+  return {
+    unlockAdvancedSchedulingCard: {
+      state: featureMatrix.getFeatureState('maintenanceScheduler', 'unlockAdvancedSchedulingCard'),
+      show: featureMatrix.getFeatureState('maintenanceScheduler', 'unlockAdvancedSchedulingCard') === 'shown',
+    },
+    functionality: {
+      state: featureMatrix.getFeatureState('maintenanceScheduler', 'functionality'),
+      isPaywall: featureMatrix.getFeatureState('maintenanceScheduler', 'functionality') === 'paywall',
+      useRealData: featureMatrix.getFeatureState('maintenanceScheduler', 'functionality') === 'shown',
+    },
+  };
+};
