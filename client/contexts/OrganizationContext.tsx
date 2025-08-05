@@ -207,11 +207,19 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
       console.error('Failed to fetch organization data:', error);
     }
 
-    // Fallback to mock data if database fails
+    // Fallback to mock data with different plans for testing
+    // Check URL or localStorage for test plan override
+    const testPlan = localStorage.getItem('testPlan') ||
+                     new URLSearchParams(window.location.search).get('plan') ||
+                     'free';
+
+    const validPlans = ['free', 'basic', 'pro', 'premium', 'satellite_enterprise', 'driving_enterprise'];
+    const planToUse = validPlans.includes(testPlan) ? testPlan : 'free';
+
     return {
       id: orgId,
       name: 'City of Springfield',
-      plan: 'free', // Default to free plan
+      plan: planToUse as PlanType,
       planExpiry: new Date('2024-12-31'),
       isActive: true,
       settings: {
@@ -220,9 +228,9 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
         logoUrl: '/city-logo.png'
       },
       usage: {
-        exportsThisMonth: 0,
-        teamMembers: 1,
-        rescansThisYear: 0
+        exportsThisMonth: planToUse === 'free' ? 1 : 0, // Free plan has used 1 export
+        teamMembers: planToUse === 'free' ? 1 : planToUse === 'basic' ? 3 : 10,
+        rescansThisYear: planToUse === 'free' ? 0 : 1
       }
     };
   };
