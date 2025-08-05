@@ -103,8 +103,10 @@ export const testPlanTracking = async () => {
 if (typeof window !== 'undefined') {
   (window as any).initFeatureMatrix = initializeFeatureMatrix;
   (window as any).testFeatureMatrix = testFeatureMatrix;
-  
+  (window as any).testPlanTracking = testPlanTracking;
+
   console.log('🔧 Feature matrix utilities available:');
   console.log('   • initFeatureMatrix() - Initialize the database');
   console.log('   • testFeatureMatrix("plan") - Test feature matrix for a plan');
+  console.log('   • testPlanTracking() - Test plan tracking API');
 }
