@@ -82,7 +82,12 @@ const AdminSettings = () => {
   }, [user]);
 
   const loadSettings = async () => {
-    setLoading(true);
+    try {
+      setLoading(true);
+    } catch (stateError) {
+      console.warn('Failed to set loading state:', stateError);
+    }
+
     try {
       const response = await fetch('/api/admin/settings');
 
