@@ -34,10 +34,31 @@ export const testServerConnectivity = async () => {
     console.log('🔍 Testing plan tracking endpoints...');
 
     try {
+      console.log('📡 Making request to /api/plan-tracking/all...');
       const allResponse = await fetch('/api/plan-tracking/all');
+      console.log('📡 Response received:', {
+        status: allResponse.status,
+        statusText: allResponse.statusText,
+        headers: Object.fromEntries(allResponse.headers.entries()),
+        ok: allResponse.ok,
+        type: allResponse.type,
+        url: allResponse.url
+      });
+
       if (allResponse.ok) {
-        const allData = await allResponse.json();
-        console.log('✅ Plan tracking /all endpoint works:', allData);
+        try {
+          const allData = await allResponse.json();
+          console.log('✅ Plan tracking /all endpoint works:', allData);
+          console.log('📊 Data summary:', {
+            success: allData.success,
+            dataLength: allData.data?.length,
+            message: allData.message
+          });
+        } catch (parseError) {
+          console.error('❌ Failed to parse JSON response:', parseError);
+          const rawText = await allResponse.text();
+          console.error('Raw response text:', rawText);
+        }
       } else {
         console.error(`❌ Plan tracking /all failed: HTTP ${allResponse.status} ${allResponse.statusText}`);
         const errorText = await allResponse.text();
@@ -45,6 +66,11 @@ export const testServerConnectivity = async () => {
       }
     } catch (error) {
       console.error('❌ Plan tracking /all network error:', error);
+      console.error('Error details:', {
+        name: error?.name,
+        message: error?.message,
+        cause: error?.cause
+      });
     }
     
     // Test feature matrix endpoints
