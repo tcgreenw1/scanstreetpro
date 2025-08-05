@@ -139,6 +139,14 @@ export function PlanTrackingTest() {
           >
             Local Matrix
           </Button>
+          <Button
+            size="sm"
+            onClick={testPlanTrackingAPI}
+            disabled={loading}
+            className="col-span-2"
+          >
+            Test Plan API
+          </Button>
         </div>
         {result && (
           <div className="text-xs p-2 bg-slate-100 dark:bg-slate-800 rounded max-h-32 overflow-y-auto">
