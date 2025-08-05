@@ -23,6 +23,7 @@ import { useFeatureMatrix } from '@/hooks/useFeatureMatrix';
 import { MapLegend, getPCIColor, getPCILabel, PCI_LEVELS } from '@/components/map/MapLegend';
 import { PCILegend } from '@/components/map/PCILegend';
 import { MapToolbar } from '@/components/map/MapToolbar';
+import { EnhancedMapToolbar } from '@/components/map/EnhancedMapToolbar';
 import { overpassService, RoadSegment } from '@/services/overpassService';
 import { assetsService, CityAsset, ASSET_TYPES, AssetType } from '@/services/assetsService';
 
