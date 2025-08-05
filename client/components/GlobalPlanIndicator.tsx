@@ -22,8 +22,11 @@ export function GlobalPlanIndicator() {
   const { user } = useAuth();
   const planOverride = getPlanOverride();
 
-  // Only show to admin users
-  if (!['admin', 'superadmin', 'owner'].includes(user?.role)) {
+  // Only show to admin users when they are explicitly impersonating
+  const isAdminImpersonating = ['admin', 'superadmin', 'owner'].includes(user?.role) &&
+                               localStorage.getItem('admin_impersonating');
+
+  if (!isAdminImpersonating) {
     return null;
   }
 
