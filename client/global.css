@@ -1,9 +1,9 @@
+/* Import admin liquid glass styles */
+@import './styles/admin-liquid-glass.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import admin liquid glass styles */
-@import './styles/admin-liquid-glass.css';
 
 /* Login Page Animations and Effects */
 @keyframes gradient-shift {
