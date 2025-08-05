@@ -519,20 +519,8 @@ export default function MapView() {
     }))
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-              <p className="text-slate-600 dark:text-slate-400">Loading Springfield, OH map data...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Show loading overlay instead of blocking entire page
+  const showLoadingOverlay = loading && !isMapLoaded;
 
   return (
     <div className={cn(
