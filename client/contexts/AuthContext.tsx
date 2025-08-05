@@ -12,7 +12,7 @@ interface AuthUser {
 interface Organization {
   id: string;
   name: string;
-  plan: 'free' | 'basic' | 'pro' | 'premium';
+  plan: 'free' | 'basic' | 'pro' | 'premium' | 'satellite_enterprise' | 'driving_enterprise';
   createdAt: string;
 }
 
