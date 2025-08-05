@@ -63,6 +63,8 @@ import { cn } from "@/lib/utils";
 import { usePricing } from "@/contexts/PricingContext";
 import { useOrganization, usePermissions } from "@/contexts/OrganizationContext";
 import { usePlanBasedUI, useFeatureAccess, useDataVisibility } from "@/hooks/usePlanBasedUI";
+import { useFeatureMatrix, useNavFeatures } from '@/hooks/useFeatureMatrix';
+import { PreviewModeWrapper, usePreviewMode } from '@/components/LockedOverlay';
 import dataService from "@/services/dataService";
 import { ContractorUpgradeCard } from "@/components/PremiumUpgradeCard";
 import { planTrackingApi } from "@/utils/planTrackingApi";
