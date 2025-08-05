@@ -127,15 +127,7 @@ export default function AssetManager() {
     }
   };
 
-  const filteredAssets = mockAssets.filter(asset => {
-    const matchesSearch = asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         asset.location.address.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = selectedType === 'All' || asset.type === selectedType;
-    const matchesCondition = selectedCondition === 'All' || asset.condition === selectedCondition;
-    const matchesStatus = selectedStatus === 'All' || asset.status === selectedStatus;
-    
-    return matchesSearch && matchesType && matchesCondition && matchesStatus;
-  });
+
 
   // Calculate statistics from real asset data
   const totalValue = assets.reduce((sum, asset) => sum + (asset.metadata.cost || 0), 0);
