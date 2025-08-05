@@ -129,10 +129,10 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
       };
     }
 
-    // Default fallback
+    // Default fallback for production users
     return {
-      id: 'default-org',
-      name: 'Default Organization',
+      id: user?.organizationId || 'default-org',
+      name: user?.organizationId ? 'Your Organization' : 'Default Organization',
       plan: 'free' as PlanType,
       planExpiry: new Date('2024-12-31'),
       isActive: true,
