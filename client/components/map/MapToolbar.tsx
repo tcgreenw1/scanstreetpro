@@ -116,9 +116,8 @@ export function MapToolbar({
                   id="pci-toggle"
                   checked={showPCILayer}
                   onCheckedChange={onTogglePCILayer}
-                  size="sm"
                 />
-                
+
                 <Label htmlFor="asset-toggle" className="text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
                   Assets
                 </Label>
@@ -126,7 +125,6 @@ export function MapToolbar({
                   id="asset-toggle"
                   checked={showAssetLayer}
                   onCheckedChange={onToggleAssetLayer}
-                  size="sm"
                 />
               </div>
             </div>
