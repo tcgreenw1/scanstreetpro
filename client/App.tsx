@@ -20,6 +20,7 @@ import { PlanProvider } from "./hooks/usePlan";
 import { OrganizationProvider } from "./contexts/OrganizationContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoadInspection from "./pages/RoadInspection";
+import RoadInspections from "./pages/RoadInspections";
 import { Dashboard } from "./pages/Dashboard";
 import AssetManager from "./pages/AssetManager";
 import NewInspection from "./pages/NewInspection";
