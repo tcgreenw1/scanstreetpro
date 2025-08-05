@@ -7,9 +7,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { testPlanTracking } from '@/utils/initFeatureMatrix';
 
 export function PlanTrackingTest() {
+  const { user } = useAuth();
   const [result, setResult] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const { userPlan, matrix } = useFeatureMatrix();
+
+  // Only show to admin users
+  if (!['admin', 'superadmin', 'owner'].includes(user?.role)) {
+    return null;
+  }
 
   const testInit = async () => {
     setLoading(true);
