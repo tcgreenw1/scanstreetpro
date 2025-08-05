@@ -42,7 +42,8 @@ import {
   Navigation,
   Layers,
   Settings,
-  History
+  History,
+  BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { neonService, Asset } from '@/services/neonService';
