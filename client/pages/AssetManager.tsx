@@ -49,8 +49,9 @@ import { cn } from '@/lib/utils';
 import { neonService, Asset } from '@/services/neonService';
 import { useOrganization, usePermissions } from '@/contexts/OrganizationContext';
 import { usePlanBasedUI, useFeatureAccess, useDataVisibility } from '@/hooks/usePlanBasedUI';
-import { useFeatureMatrix, useNavFeatures } from '@/hooks/useFeatureMatrix';
+import { useFeatureMatrix, useAssetManagerFeatures } from '@/hooks/useFeatureMatrix';
 import { PreviewModeWrapper, usePreviewMode } from '@/components/LockedOverlay';
+import { PredictiveMaintenanceChart } from '@/components/charts/PredictiveMaintenanceChart';
 
 const assetTypes = ['All', 'road', 'bridge', 'sidewalk', 'drainage', 'lighting', 'signage'];
 const conditionTypes = ['All', 'excellent', 'good', 'fair', 'poor', 'critical'];
