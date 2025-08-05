@@ -42,6 +42,11 @@ interface ModifySampleDataModalProps {
 
 export function ModifySampleDataModal({ trigger, onDataUpdate }: ModifySampleDataModalProps) {
   const { user } = useAuth();
+
+  // Only show to admin users
+  if (!['admin', 'superadmin', 'owner'].includes(user?.role)) {
+    return null;
+  }
   const [isOpen, setIsOpen] = useState(false);
 
   // Only show to admin users
