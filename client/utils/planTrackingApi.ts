@@ -58,10 +58,15 @@ export const planTrackingApi = {
   async getAll() {
     try {
       const response = await fetch(`${BASE_URL}/all`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       return await response.json();
     } catch (error) {
       console.error('Failed to fetch plan tracking data:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error?.message || 'Network error' };
     }
   },
 
