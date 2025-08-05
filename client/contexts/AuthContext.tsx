@@ -161,8 +161,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await signOutWithTimeout();
       setUser(null);
       setOrganization(null);
+
+      // Clear all authentication and impersonation state
       localStorage.removeItem('neon_auth_token');
       localStorage.removeItem('neon_auth_session');
+      localStorage.removeItem('admin_impersonating');
+      localStorage.removeItem('admin_impersonating_user');
+
       setLoading(false);
       return { error: null };
     } catch (error: any) {
