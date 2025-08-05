@@ -29,28 +29,69 @@ router.get('/', async (req, res) => {
           name: 'Sample Road Asset',
           type: 'road',
           location: { address: 'Sample Street', lat: 40.7589, lng: -73.9851 },
-          condition: { 
-            status: 'good', 
-            pci: 75, 
+          condition: {
+            status: 'good',
+            pci: 75,
             lastInspected: new Date(),
             nextInspection: new Date()
           },
-          metadata: { cost: 50000 },
-          isSampleData: true
+          metadata: {
+            cost: 50000,
+            yearBuilt: 2015,
+            length: 500,
+            width: 8,
+            material: 'asphalt'
+          },
+          organizationId,
+          isSampleData: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
         },
         {
           id: 'SAMPLE-002',
           name: 'Sample Bridge Asset',
           type: 'bridge',
           location: { address: 'Sample Bridge', lat: 40.7614, lng: -73.9776 },
-          condition: { 
-            status: 'fair', 
-            pci: 60, 
+          condition: {
+            status: 'fair',
+            pci: 60,
             lastInspected: new Date(),
             nextInspection: new Date()
           },
-          metadata: { cost: 150000 },
-          isSampleData: true
+          metadata: {
+            cost: 150000,
+            yearBuilt: 1995,
+            length: 120,
+            width: 15,
+            material: 'concrete'
+          },
+          organizationId,
+          isSampleData: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 'SAMPLE-003',
+          name: 'Sample Sidewalk',
+          type: 'sidewalk',
+          location: { address: 'Main Street Sidewalk', lat: 40.7505, lng: -73.9934 },
+          condition: {
+            status: 'excellent',
+            pci: 90,
+            lastInspected: new Date(),
+            nextInspection: new Date()
+          },
+          metadata: {
+            cost: 25000,
+            yearBuilt: 2020,
+            length: 300,
+            width: 4,
+            material: 'concrete'
+          },
+          organizationId,
+          isSampleData: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       ]);
     }
