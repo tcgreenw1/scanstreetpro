@@ -106,7 +106,7 @@ export const planTrackingApi = {
   }
 };
 
-// Initialize tracking on import
+// Initialize tracking on import - with error handling
 planTrackingApi.init().then(result => {
   if (result.success) {
     console.log('✅ Plan tracking initialized');
@@ -114,7 +114,15 @@ planTrackingApi.init().then(result => {
     planTrackingApi.seed().then(seedResult => {
       if (seedResult.success) {
         console.log('✅ Plan tracking data seeded');
+      } else {
+        console.warn('⚠️ Plan tracking seed failed:', seedResult.error);
       }
+    }).catch(error => {
+      console.warn('⚠️ Plan tracking seed error:', error);
     });
+  } else {
+    console.warn('⚠️ Plan tracking init failed:', result.error);
   }
+}).catch(error => {
+  console.warn('⚠️ Plan tracking init error:', error);
 });
