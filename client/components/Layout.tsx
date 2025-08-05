@@ -230,8 +230,8 @@ export function Layout({ children }: LayoutProps) {
             )}
           </div>
 
-          {/* Plan Indicator */}
-          {!isCollapsed && (
+          {/* Plan Indicator - Only show when admin is impersonating */}
+          {!isCollapsed && (['admin', 'superadmin', 'owner'].includes(user?.role) && localStorage.getItem('admin_impersonating')) && (
             <div className="p-4 border-b border-white/10">
               <GlobalPlanIndicator />
               <div className="mt-2">
