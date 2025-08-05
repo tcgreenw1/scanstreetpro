@@ -21,6 +21,7 @@ import { useFeatureMatrix } from '@/hooks/useFeatureMatrix';
 
 // Import our map components and services
 import { MapLegend, getPCIColor, getPCILabel, PCI_LEVELS } from '@/components/map/MapLegend';
+import { PCILegend } from '@/components/map/PCILegend';
 import { MapToolbar } from '@/components/map/MapToolbar';
 import { overpassService, RoadSegment } from '@/services/overpassService';
 import { assetsService, CityAsset, ASSET_TYPES, AssetType } from '@/services/assetsService';
