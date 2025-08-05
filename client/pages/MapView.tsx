@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import L, { Map as LeafletMap, TileLayer, CircleMarker, Marker } from 'leaflet';
+import L, { Map as LeafletMap, TileLayer, CircleMarker, Marker, Polyline } from 'leaflet';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
