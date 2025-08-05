@@ -550,8 +550,8 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Plan Tracking Test Component - Only visible in development */}
-      {process.env.NODE_ENV === 'development' && <PlanTrackingTest />}
+      {/* Plan Tracking Test Component - Only visible to admin users */}
+      <PlanTrackingTest />
     </div>
   );
 }
