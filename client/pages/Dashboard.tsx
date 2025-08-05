@@ -45,6 +45,7 @@ import { usePricing } from '@/contexts/PricingContext';
 import { useOrganization, usePermissions } from '@/contexts/OrganizationContext';
 import { usePlanBasedUI, useDataVisibility } from '@/hooks/usePlanBasedUI';
 import { ModifySampleDataModal } from '@/components/ModifySampleDataModal';
+import { PlanTrackingTest } from '@/components/PlanTrackingTest';
 import { useState, useEffect } from 'react';
 
 const pciMethodComparison = [
