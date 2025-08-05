@@ -257,6 +257,8 @@ export default function MaintenanceScheduler() {
             </div>
             <h1 className="text-3xl font-bold text-amber-800 dark:text-amber-200 mb-2">Maintenance Scheduler</h1>
             <p className="text-amber-700 dark:text-amber-300 mb-6 max-w-2xl mx-auto">
+              <strong>CURRENT PLAN: {userPlan.toUpperCase()}</strong><br/>
+              🔒 MAINTENANCE SCHEDULING LOCKED - This feature requires Pro plan or higher.<br/>
               Advanced maintenance scheduling with weather-aware planning, contractor management, and automated task assignment is available with Pro plans and higher.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
