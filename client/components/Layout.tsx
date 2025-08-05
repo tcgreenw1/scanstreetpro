@@ -41,6 +41,7 @@ import { useOrganization, usePermissions } from '@/contexts/OrganizationContext'
 import { usePlanBasedUI } from '@/hooks/usePlanBasedUI';
 import { GlobalSearch } from './GlobalSearch';
 import { ConnectionStatus } from './ConnectionStatus';
+import { TestPlanSwitcher } from './TestPlanSwitcher';
 import {
   DropdownMenu,
   DropdownMenuContent,
