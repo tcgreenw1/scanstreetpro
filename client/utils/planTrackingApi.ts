@@ -117,23 +117,43 @@ export const planTrackingApi = {
   }
 };
 
-// Initialize tracking on import - with error handling
-planTrackingApi.init().then(result => {
-  if (result.success) {
-    console.log('✅ Plan tracking initialized');
-    // Seed data if needed
-    planTrackingApi.seed().then(seedResult => {
-      if (seedResult.success) {
-        console.log('✅ Plan tracking data seeded');
+// Track initialization state
+let isInitialized = false;
+let initPromise: Promise<any> | null = null;
+
+// Lazy initialization function
+export const ensurePlanTrackingReady = async () => {
+  if (isInitialized) return { success: true };
+
+  if (initPromise) return initPromise;
+
+  initPromise = (async () => {
+    try {
+      const initResult = await planTrackingApi.init();
+      if (initResult.success) {
+        console.log('✅ Plan tracking initialized');
+
+        // Seed data if needed
+        const seedResult = await planTrackingApi.seed();
+        if (seedResult.success) {
+          console.log('✅ Plan tracking data seeded');
+        } else {
+          console.warn('⚠️ Plan tracking seed failed, continuing anyway:', seedResult.error);
+        }
+
+        isInitialized = true;
+        return { success: true };
       } else {
-        console.warn('⚠️ Plan tracking seed failed:', seedResult.error);
+        console.warn('⚠️ Plan tracking init failed, will work offline:', initResult.error);
+        return { success: false, error: initResult.error };
       }
-    }).catch(error => {
-      console.warn('⚠️ Plan tracking seed error:', error);
-    });
-  } else {
-    console.warn('⚠️ Plan tracking init failed:', result.error);
-  }
-}).catch(error => {
-  console.warn('⚠️ Plan tracking init error:', error);
-});
+    } catch (error) {
+      console.warn('⚠️ Plan tracking initialization error, will work offline:', error);
+      return { success: false, error: error?.message || 'Unknown error' };
+    } finally {
+      initPromise = null;
+    }
+  })();
+
+  return initPromise;
+};
