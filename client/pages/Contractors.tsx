@@ -489,8 +489,14 @@ export default function Contractors() {
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Header */}
+    <PreviewModeWrapper
+      isPreviewMode={isPreviewMode}
+      requiredPlan={requiredPlan}
+      featureName="Contractor Management"
+      disableInteractions={shouldDisableInteractions}
+    >
+      <div className="space-y-8 max-w-7xl mx-auto">
+        {/* Header */}
       <div className="text-center py-8">
         <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-4">
           Contractor Management
@@ -1121,8 +1127,9 @@ export default function Contractors() {
         </div>
       </div>
 
-      {/* Premium Features Notice */}
-      <ContractorUpgradeCard />
-    </div>
+        {/* Premium Features Notice */}
+        <ContractorUpgradeCard />
+      </div>
+    </PreviewModeWrapper>
   );
 }
