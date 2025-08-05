@@ -172,10 +172,11 @@ export default function AssetManager() {
             <div>
               <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Asset Manager</h1>
               <p className="text-slate-600 dark:text-slate-300">
+                <strong>CURRENT PLAN: {userPlan.toUpperCase()}</strong><br/>
                 {userPlan === 'free'
-                  ? "Asset management is locked - upgrade to Basic to unlock real asset tracking and editing"
+                  ? "🔒 ASSET MANAGEMENT LOCKED - Upgrade to Basic to unlock real asset tracking and editing"
                   : canManageAssets
-                    ? `Managing ${assets.length} infrastructure assets with live data from Neon`
+                    ? `✅ ASSET MANAGEMENT UNLOCKED - Managing ${assets.length} infrastructure assets with live data from Neon`
                     : "Asset management requires Basic plan or higher"
                 }
               </p>
