@@ -549,6 +549,9 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Plan Tracking Test Component - Only visible in development */}
+      {process.env.NODE_ENV === 'development' && <PlanTrackingTest />}
     </div>
   );
 }
