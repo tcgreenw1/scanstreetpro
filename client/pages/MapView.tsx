@@ -149,7 +149,9 @@ export default function MapView() {
           id: 1,
           name: 'Main Street',
           highway: 'primary',
-          coordinates: [[39.9243, -83.8090], [39.9256, -83.8045]],
+          coordinates: [
+            [39.9243, -83.8090], [39.9248, -83.8075], [39.9252, -83.8060], [39.9256, -83.8045]
+          ],
           centerLat: 39.9250,
           centerLng: -83.8067,
           pci: 78,
@@ -161,8 +163,10 @@ export default function MapView() {
           id: 2,
           name: 'High Street',
           highway: 'secondary',
-          coordinates: [[39.9290, -83.8100], [39.9290, -83.8030]],
-          centerLat: 39.9290,
+          coordinates: [
+            [39.9290, -83.8100], [39.9285, -83.8080], [39.9280, -83.8060], [39.9275, -83.8040], [39.9270, -83.8030]
+          ],
+          centerLat: 39.9280,
           centerLng: -83.8065,
           pci: 65,
           roadType: 'Collector',
@@ -173,13 +177,85 @@ export default function MapView() {
           id: 3,
           name: 'Limestone Street',
           highway: 'secondary',
-          coordinates: [[39.9200, -83.8120], [39.9300, -83.8120]],
+          coordinates: [
+            [39.9200, -83.8120], [39.9220, -83.8118], [39.9240, -83.8116], [39.9260, -83.8114], [39.9280, -83.8112], [39.9300, -83.8110]
+          ],
           centerLat: 39.9250,
-          centerLng: -83.8120,
+          centerLng: -83.8115,
           pci: 42,
           roadType: 'Collector',
           length: 1.8,
           surface: 'asphalt'
+        },
+        {
+          id: 4,
+          name: 'Columbia Street',
+          highway: 'residential',
+          coordinates: [
+            [39.9220, -83.8080], [39.9230, -83.8082], [39.9250, -83.8084], [39.9270, -83.8086], [39.9280, -83.8088]
+          ],
+          centerLat: 39.9250,
+          centerLng: -83.8084,
+          pci: 85,
+          roadType: 'Local',
+          length: 0.9,
+          surface: 'asphalt'
+        },
+        {
+          id: 5,
+          name: 'Fountain Avenue',
+          highway: 'residential',
+          coordinates: [
+            [39.9210, -83.8050], [39.9225, -83.8052], [39.9240, -83.8054], [39.9255, -83.8056], [39.9270, -83.8058]
+          ],
+          centerLat: 39.9240,
+          centerLng: -83.8054,
+          pci: 32,
+          roadType: 'Local',
+          length: 0.7,
+          surface: 'asphalt'
+        },
+        {
+          id: 6,
+          name: 'Yellow Springs Street',
+          highway: 'tertiary',
+          coordinates: [
+            [39.9200, -83.8000], [39.9220, -83.7990], [39.9240, -83.7980], [39.9260, -83.7970], [39.9280, -83.7960], [39.9300, -83.7950]
+          ],
+          centerLat: 39.9250,
+          centerLng: -83.7975,
+          pci: 91,
+          roadType: 'Collector',
+          length: 1.5,
+          surface: 'asphalt'
+        },
+        {
+          id: 7,
+          name: 'Center Street',
+          highway: 'residential',
+          coordinates: [
+            [39.9230, -83.8110], [39.9235, -83.8095], [39.9240, -83.8080], [39.9245, -83.8065], [39.9250, -83.8050], [39.9255, -83.8040]
+          ],
+          centerLat: 39.9240,
+          centerLng: -83.8075,
+          pci: 18,
+          roadType: 'Local',
+          length: 0.8,
+          surface: 'asphalt'
+        },
+        {
+          id: 8,
+          name: 'Clifton Avenue',
+          highway: 'residential',
+          coordinates: [
+            [39.9260, -83.8130], [39.9262, -83.8110], [39.9264, -83.8090], [39.9266, -83.8070], [39.9268, -83.8050], [39.9270, -83.8030], [39.9272, -83.8020]
+          ],
+          centerLat: 39.9266,
+          centerLng: -83.8075,
+          pci: 7,
+          roadType: 'Local',
+          length: 1.1,
+          surface: 'concrete'
         }
       ];
 
