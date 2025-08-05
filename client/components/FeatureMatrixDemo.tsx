@@ -8,9 +8,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 
 export function FeatureMatrixDemo() {
+  const { user } = useAuth();
   const { userPlan } = useFeatureMatrix();
   const navFeatures = useNavFeatures();
   const dashboardFeatures = useDashboardFeatures();
+
+  // Only show to admin users
+  if (!['admin', 'superadmin', 'owner'].includes(user?.role)) {
+    return null;
+  }
 
   const getStateColor = (state: string) => {
     switch (state) {
