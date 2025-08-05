@@ -271,22 +271,28 @@ export default function Reports() {
             </Button>
           </div>
           
-          {currentPlan === 'free' && (
+          {(!exportLimits.canExport || planState.showCrowns) && (
             <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
               <div className="flex items-start space-x-3">
                 <Crown className="w-5 h-5 text-amber-500 mt-0.5" />
                 <div>
-                  <h4 className="font-medium text-amber-800 dark:text-amber-200">Premium Export Features</h4>
+                  <h4 className="font-medium text-amber-800 dark:text-amber-200">
+                    {userPlan === 'free' ? 'Premium Export Features' : 'Export Limit Reached'}
+                  </h4>
                   <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                    Upgrade to access PDF, CSV, and Excel exports with custom branding and detailed analytics.
+                    {userPlan === 'free'
+                      ? 'Upgrade to Basic Plan or higher to access PDF, CSV, and Excel exports with detailed analytics.'
+                      : `You've used all ${exportLimits.exportsRemaining} exports this month. Upgrade to Pro for unlimited exports.`
+                    }
                   </p>
-                  <Button 
-                    size="sm" 
-                    className="mt-2 bg-amber-600 hover:bg-amber-700 text-white"
-                    onClick={handleUpgrade}
-                  >
-                    Upgrade Now
-                  </Button>
+                  <Link to="/pricing">
+                    <Button
+                      size="sm"
+                      className="mt-2 bg-amber-600 hover:bg-amber-700 text-white"
+                    >
+                      {planState.upgradeMessage}
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
