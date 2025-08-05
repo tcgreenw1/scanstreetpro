@@ -157,6 +157,17 @@ const categoryIcons = {
 };
 
 export default function CitizenEngagement() {
+  // Step 1 & 2: Get plan-based UI state
+  const planState = usePlanBasedUI();
+  const citizenAccess = useFeatureAccess('citizenEngagement');
+  const { useSampleData, userPlan } = useDataVisibility();
+
+  // Step 3: Apply hardcoded plan logic for Citizen Engagement + Reports
+  // Pro: Show partial dashboard
+  // Premium/Enterprise: Show full engagement suite + AI data
+  const canAccessCitizen = planState.unlockCitizenEngagement;
+  const hasFullEngagement = userPlan === 'premium' || userPlan.includes('enterprise');
+
   const [formData, setFormData] = useState({
     title: '',
     category: '',
