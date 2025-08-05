@@ -231,6 +231,19 @@ export default function MapView() {
         position: 'bottomleft'
       }).addTo(map);
 
+      // Add some immediate sample data to show the map is working
+      const sampleRoad = L.circleMarker([39.9250, -83.8067], {
+        radius: 8,
+        fillColor: '#16a34a',
+        color: '#ffffff',
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.8
+      });
+
+      sampleRoad.bindPopup('<div class="p-2"><strong>Main Street</strong><br/>PCI: 78 (Good)<br/>Sample data loading...</div>');
+      sampleRoad.addTo(map);
+
       console.log('Map initialized successfully');
     } catch (error) {
       console.error('Error initializing map:', error);
