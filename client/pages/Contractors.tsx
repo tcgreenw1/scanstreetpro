@@ -438,8 +438,8 @@ export default function Contractors() {
 
   const ganttData = generateGanttData();
 
-  // Early return with access restriction if not Pro+
-  if (!canAccessContractors) {
+  // Early return with access restriction if not Pro+ - DISABLED for preview mode
+  if (false && !canAccessContractors) {
     return (
       <div className="space-y-8 max-w-7xl mx-auto">
         {/* Locked Banner for Contractor Management */}
