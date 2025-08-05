@@ -48,6 +48,7 @@ import {
 import { cn } from '@/lib/utils';
 import { neonService, Asset } from '@/services/neonService';
 import { useOrganization, usePermissions } from '@/contexts/OrganizationContext';
+import { usePlanBasedUI, useFeatureAccess, useDataVisibility } from '@/hooks/usePlanBasedUI';
 
 const assetTypes = ['All', 'road', 'bridge', 'sidewalk', 'drainage', 'lighting', 'signage'];
 const conditionTypes = ['All', 'excellent', 'good', 'fair', 'poor', 'critical'];
