@@ -211,13 +211,17 @@ export default function Inspections() {
 
   // Update tracking data for this page
   useEffect(() => {
+    // Update tracking data for this page (non-blocking)
     planTrackingApi.markPageCompleted('Inspections', {
       free: 'Basic inspection creation with limited features',
       basic: 'Full inspection workflow with real data',
       pro: 'Advanced inspection features + offline mode',
       premium: 'Complete inspection suite + AI analysis',
       enterprise: 'Full inspection platform + API access'
-    }, 'Available to all plans with different feature levels');
+    }, 'Available to all plans with different feature levels').catch(error => {
+      // Silently handle tracking errors - don't affect user experience
+      console.debug('Plan tracking error (non-critical):', error);
+    });
   }, []);
 
   const filteredInspections = inspections.filter(inspection => {
