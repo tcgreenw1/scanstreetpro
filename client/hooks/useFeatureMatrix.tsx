@@ -73,6 +73,18 @@ const FEATURE_MATRIX: Record<PlanType, FeatureMatrix> = {
       integrations: 'sample_data',
       settings: 'shown',
     },
+    roadInspections: {
+      dataSource: 'sample_data',
+      upgradeCard: 'shown',
+    },
+    assetManager: {
+      assetInventory: 'paywall',
+      predictiveMaintenance: 'paywall',
+    },
+    maintenanceScheduler: {
+      unlockAdvancedSchedulingCard: 'shown',
+      functionality: 'paywall',
+    },
   },
   basic: {
     dashboard: {
