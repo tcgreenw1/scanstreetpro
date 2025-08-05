@@ -30,7 +30,7 @@ export function PlanTrackingTest() {
   const testGetAll = async () => {
     setLoading(true);
     setResult('Testing data fetch...');
-    
+
     try {
       const result = await planTrackingApi.getAll();
       if (result.success) {
@@ -38,6 +38,46 @@ export function PlanTrackingTest() {
       } else {
         setResult(`❌ Failed to fetch data: ${result.error}`);
       }
+    } catch (error) {
+      setResult(`❌ Error: ${error?.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const testFeatureMatrix = async () => {
+    setLoading(true);
+    setResult('Testing feature matrix...');
+
+    try {
+      const response = await fetch(`/api/feature-matrix/plan/${userPlan}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          const dashboardFeatures = Object.keys(data.data.matrix.dashboard).length;
+          const navFeatures = Object.keys(data.data.matrix.navMenu).length;
+          setResult(`✅ Feature matrix loaded: ${dashboardFeatures} dashboard features, ${navFeatures} nav features`);
+        } else {
+          setResult(`❌ API error: ${data.error}`);
+        }
+      } else {
+        setResult(`❌ HTTP ${response.status}: ${response.statusText}`);
+      }
+    } catch (error) {
+      setResult(`❌ Network error: ${error?.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const testFeatureStates = () => {
+    setLoading(true);
+    setResult('Testing local feature states...');
+
+    try {
+      const dashboardFeatures = Object.keys(matrix.dashboard).length;
+      const navFeatures = Object.keys(matrix.navMenu).length;
+      setResult(`✅ Local matrix: Plan=${userPlan}, Dashboard=${dashboardFeatures}, Nav=${navFeatures}`);
     } catch (error) {
       setResult(`❌ Error: ${error?.message || 'Unknown error'}`);
     } finally {
