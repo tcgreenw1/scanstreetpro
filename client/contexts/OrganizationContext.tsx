@@ -67,47 +67,67 @@ interface OrganizationProviderProps {
 }
 
 export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [organization, setOrganization] = useState<Organization | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user: authUser, organization: authOrganization, loading: authLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
+
+  // Use data from AuthContext, with fallback for testing
+  const user: User | null = authUser ? {
+    id: authUser.id,
+    email: authUser.email,
+    name: authUser.name || authUser.email.split('@')[0],
+    role: authUser.role as 'admin' | 'manager' | 'user',
+    organizationId: authUser.organizationId,
+    isActive: true,
+    lastLogin: new Date()
+  } : null;
+
+  const organization: Organization | null = authOrganization ? {
+    id: authOrganization.id,
+    name: authOrganization.name,
+    plan: authOrganization.plan as PlanType,
+    planExpiry: new Date('2024-12-31'),
+    isActive: true,
+    settings: {
+      timezone: 'America/New_York',
+      currency: 'USD',
+      logoUrl: '/city-logo.png'
+    },
+    usage: {
+      exportsThisMonth: 0,
+      teamMembers: 1,
+      rescansThisYear: 0
+    }
+  } : (() => {
+    // Fallback to test plan for development/testing
+    const testPlan = localStorage.getItem('testPlan') ||
+                     new URLSearchParams(window.location.search).get('plan') ||
+                     'free';
+    const validPlans = ['free', 'basic', 'pro', 'premium', 'satellite_enterprise', 'driving_enterprise'];
+    const planToUse = validPlans.includes(testPlan) ? testPlan : 'free';
+
+    return {
+      id: 'test-org',
+      name: 'Test Organization',
+      plan: planToUse as PlanType,
+      planExpiry: new Date('2024-12-31'),
+      isActive: true,
+      settings: {
+        timezone: 'America/New_York',
+        currency: 'USD',
+        logoUrl: '/city-logo.png'
+      },
+      usage: {
+        exportsThisMonth: planToUse === 'free' ? 1 : 0,
+        teamMembers: planToUse === 'free' ? 1 : planToUse === 'basic' ? 3 : 10,
+        rescansThisYear: planToUse === 'free' ? 0 : 1
+      }
+    };
+  })();
+
+  const isLoading = authLoading;
 
   // Get plan features based on current organization plan
   const planFeatures = organization ? PLAN_FEATURES[organization.plan] : null;
-
-  // Initialize user and organization data
-  useEffect(() => {
-    const initializeData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        // Check if user is logged in
-        const authToken = localStorage.getItem('neon_auth_token') || localStorage.getItem('authToken');
-        if (!authToken) {
-          setIsLoading(false);
-          return;
-        }
-
-        // Fetch user data from API/database
-        const userData = await fetchUserData(authToken);
-        setUser(userData);
-
-        // Fetch organization data
-        if (userData?.organizationId) {
-          const orgData = await fetchOrganizationData(userData.organizationId);
-          setOrganization(orgData);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load user data');
-        console.error('Failed to initialize user data:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initializeData();
-  }, []);
 
   // Fetch user data from database
   const fetchUserData = async (authToken: string): Promise<User> => {
