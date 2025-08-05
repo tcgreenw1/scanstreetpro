@@ -118,7 +118,7 @@ export default function MapView() {
 
   // Update tile layer when theme changes
   useEffect(() => {
-    if (isMapLoaded && leafletMapRef.current) {
+    if (isMapLoaded && leafletMapRef.current && isDarkMode !== undefined) {
       updateTileLayer();
     }
   }, [isDarkMode, isMapLoaded]);
