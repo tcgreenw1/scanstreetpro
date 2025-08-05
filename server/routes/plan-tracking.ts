@@ -45,9 +45,13 @@ router.post('/init', async (req, res) => {
 // Get all tracking data
 router.get('/all', async (req, res) => {
   try {
+    console.log('📊 Plan tracking /all endpoint called');
+
     const pool = getPool();
+    console.log('✅ Database pool obtained');
 
     // Check if table exists first
+    console.log('🔍 Checking if plan_implementation_tracking table exists...');
     const tableExists = await pool.query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables
@@ -56,20 +60,30 @@ router.get('/all', async (req, res) => {
       );
     `);
 
-    if (!tableExists.rows[0].exists) {
+    const exists = tableExists.rows[0].exists;
+    console.log(`📋 Table exists: ${exists}`);
+
+    if (!exists) {
       // Table doesn't exist, return empty result
-      console.log('Plan tracking table does not exist, returning empty data');
+      console.log('⚠️ Plan tracking table does not exist, returning empty data');
       return res.json({ success: true, data: [], message: 'Table not initialized' });
     }
 
+    console.log('📝 Querying plan tracking data...');
     const result = await pool.query(`
       SELECT * FROM plan_implementation_tracking
       ORDER BY implementation_status DESC, page_name ASC
     `);
 
+    console.log(`✅ Found ${result.rows.length} tracking records`);
     res.json({ success: true, data: result.rows });
   } catch (error) {
-    console.error('Error fetching plan tracking data:', error);
+    console.error('❌ Error in plan tracking /all endpoint:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack?.split('\n').slice(0, 3).join('\n')
+    });
     res.status(500).json({ success: false, error: error.message });
   }
 });
