@@ -926,7 +926,7 @@ export default function MapView() {
                   id="map"
                   ref={mapRef}
                   className="w-full h-full rounded-b-lg"
-                  style={{ height: '600px', minHeight: '500px', width: '100%' }}
+                  style={{ height: '750px', minHeight: '600px', width: '100%' }}
                 />
                 {showLoadingOverlay && (
                   <div className="absolute inset-0 bg-white/80 dark:bg-black/80 flex items-center justify-center rounded-b-lg">
