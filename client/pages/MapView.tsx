@@ -384,60 +384,113 @@ export default function MapView() {
     // Filter roads based on PCI threshold
     const filteredRoads = roadSegments.filter(road => road.pci >= pciFilter);
 
-    // Add road segments as circle markers
-    filteredRoads.forEach(road => {
+    // Add road segments as polylines with PCI color coding
+    filteredRoads.forEach((road, index) => {
       const color = getPCIColor(road.pci, isDarkMode);
       const label = getPCILabel(road.pci);
-      
-      const marker = L.circleMarker([road.centerLat, road.centerLng], {
-        radius: Math.max(6, Math.min(road.length * 3, 15)),
-        fillColor: color,
-        color: isDarkMode ? '#ffffff' : '#000000',
-        weight: 1,
-        opacity: 0.8,
-        fillOpacity: 0.7
+
+      // Create polyline with enhanced styling
+      const polyline = L.polyline(road.coordinates, {
+        color: color,
+        weight: 4,
+        opacity: 0.9,
+        smoothFactor: 1,
+        className: 'road-segment'
       });
 
-      // Create popup content
+      // Add subtle glow effect for better visibility
+      const glowPolyline = L.polyline(road.coordinates, {
+        color: color,
+        weight: 8,
+        opacity: 0.3,
+        smoothFactor: 1
+      });
+
+      // Create enhanced popup content
       const popupContent = `
-        <div class="p-3 min-w-[250px] ${isDarkMode ? 'dark' : ''}">
-          <h4 class="font-semibold text-slate-800 dark:text-white mb-2">${road.name}</h4>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between items-center">
-              <span class="text-slate-600 dark:text-slate-400">PCI Score:</span>
-              <span class="font-semibold px-2 py-1 rounded text-white text-xs" style="background-color: ${color}">
-                ${road.pci} (${label})
-              </span>
+        <div class="p-4 min-w-[280px] ${isDarkMode ? 'dark' : ''}" style="font-family: inherit;">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-4 h-4 rounded-full border-2 border-white" style="background-color: ${color}"></div>
+            <h4 class="font-bold text-lg text-slate-800 dark:text-white">${road.name}</h4>
+          </div>
+          <div class="space-y-3 text-sm">
+            <div class="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-slate-600 dark:text-slate-400 font-medium">PCI Score:</span>
+                <span class="font-bold px-3 py-1 rounded-full text-white text-sm" style="background-color: ${color}">
+                  ${road.pci} - ${label}
+                </span>
+              </div>
+              <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                <div class="h-2 rounded-full transition-all duration-300" style="width: ${road.pci}%; background-color: ${color}"></div>
+              </div>
             </div>
-            <div class="flex justify-between items-center">
-              <span class="text-slate-600 dark:text-slate-400">Road Type:</span>
-              <span class="font-medium text-slate-800 dark:text-white">${road.roadType}</span>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <span class="text-slate-500 dark:text-slate-400 block">Road Type</span>
+                <span class="font-semibold text-slate-800 dark:text-white">${road.roadType}</span>
+              </div>
+              <div>
+                <span class="text-slate-500 dark:text-slate-400 block">Length</span>
+                <span class="font-semibold text-slate-800 dark:text-white">${road.length} mi</span>
+              </div>
+              ${road.surface ? `
+              <div>
+                <span class="text-slate-500 dark:text-slate-400 block">Surface</span>
+                <span class="font-semibold text-slate-800 dark:text-white capitalize">${road.surface}</span>
+              </div>` : ''}
+              <div>
+                <span class="text-slate-500 dark:text-slate-400 block">Highway</span>
+                <span class="font-semibold text-slate-800 dark:text-white capitalize">${road.highway}</span>
+              </div>
             </div>
-            <div class="flex justify-between items-center">
-              <span class="text-slate-600 dark:text-slate-400">Length:</span>
-              <span class="font-medium text-slate-800 dark:text-white">${road.length} miles</span>
-            </div>
-            ${road.surface ? `
-            <div class="flex justify-between items-center">
-              <span class="text-slate-600 dark:text-slate-400">Surface:</span>
-              <span class="font-medium text-slate-800 dark:text-white">${road.surface}</span>
-            </div>` : ''}
-            ${road.maxspeed ? `
-            <div class="flex justify-between items-center">
-              <span class="text-slate-600 dark:text-slate-400">Speed Limit:</span>
-              <span class="font-medium text-slate-800 dark:text-white">${road.maxspeed}</span>
-            </div>` : ''}
           </div>
         </div>
       `;
 
-      marker.bindPopup(popupContent, {
+      // Add glow layer first (behind main polyline)
+      glowPolyline.addTo(leafletMapRef.current!);
+
+      // Add main polyline
+      polyline.addTo(leafletMapRef.current!);
+
+      // Bind popup to main polyline
+      polyline.bindPopup(popupContent, {
         className: isDarkMode ? 'dark-popup' : 'light-popup',
-        maxWidth: 300
+        maxWidth: 320,
+        offset: [0, -10]
       });
 
-      marker.addTo(leafletMapRef.current!);
-      roadLayersRef.current.push(marker);
+      // Add hover effects
+      polyline.on('mouseover', function() {
+        this.setStyle({
+          weight: 6,
+          opacity: 1
+        });
+      });
+
+      polyline.on('mouseout', function() {
+        this.setStyle({
+          weight: 4,
+          opacity: 0.9
+        });
+      });
+
+      // Store both polylines for cleanup
+      roadLayersRef.current.push(glowPolyline);
+      roadLayersRef.current.push(polyline);
+
+      // Add fade-in animation
+      setTimeout(() => {
+        if (polyline._path) {
+          polyline._path.style.transition = 'opacity 0.5s ease-in-out';
+          polyline._path.style.opacity = '0.9';
+        }
+        if (glowPolyline._path) {
+          glowPolyline._path.style.transition = 'opacity 0.5s ease-in-out';
+          glowPolyline._path.style.opacity = '0.3';
+        }
+      }, index * 100); // Stagger animations
     });
   };
 
