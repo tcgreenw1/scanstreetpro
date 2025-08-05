@@ -651,6 +651,88 @@ export default function MapView() {
     }, 100);
   }, [isFullscreen]);
 
+  const handleExportPDF = useCallback(() => {
+    if (!hasExportAccess) return;
+
+    try {
+      // Use browser's print function for PDF export
+      const originalTitle = document.title;
+      document.title = `Springfield OH Infrastructure Map - ${new Date().toLocaleDateString()}`;
+      window.print();
+      document.title = originalTitle;
+    } catch (err) {
+      console.error('PDF export failed:', err);
+    }
+  }, [hasExportAccess]);
+
+  const handleExportCSV = useCallback((type: 'roads' | 'assets') => {
+    if (!hasExportAccess) return;
+
+    try {
+      let csvContent: string;
+      let filename: string;
+
+      if (type === 'roads') {
+        if (!hasPCIAccess) return;
+
+        const filteredRoads = roadSegments.filter(road => road.pci >= pciFilter);
+        const headers = ['ID', 'Name', 'Highway Type', 'Road Type', 'PCI Score', 'Length (miles)', 'Center Lat', 'Center Lng', 'Surface'];
+
+        const rows = filteredRoads.map(road => [
+          road.id,
+          `"${road.name}"`,
+          road.highway,
+          road.roadType,
+          road.pci,
+          road.length,
+          road.centerLat.toFixed(6),
+          road.centerLng.toFixed(6),
+          road.surface || ''
+        ]);
+
+        csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+        filename = `springfield-roads-pci-${pciFilter}plus-${new Date().toISOString().split('T')[0]}.csv`;
+      } else {
+        const filteredAssets = selectedAssetTypes.length > 0
+          ? cityAssets.filter(asset => selectedAssetTypes.includes(asset.type))
+          : cityAssets;
+
+        const headers = ['ID', 'Name', 'Type', 'Status', 'Condition', 'Latitude', 'Longitude', 'Install Date', 'Last Inspection', 'Cost', 'Address'];
+
+        const rows = filteredAssets.map(asset => [
+          asset.id,
+          `"${asset.name}"`,
+          asset.type,
+          asset.status,
+          asset.condition,
+          asset.lat.toFixed(6),
+          asset.lng.toFixed(6),
+          asset.installDate || '',
+          asset.lastInspection || '',
+          asset.cost || '',
+          `"${asset.address || ''}"`
+        ]);
+
+        csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+        filename = `springfield-assets-${new Date().toISOString().split('T')[0]}.csv`;
+      }
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('CSV export failed:', err);
+    }
+  }, [roadSegments, cityAssets, pciFilter, selectedAssetTypes, hasExportAccess, hasPCIAccess]);
+
   // Calculate statistics
   const stats = {
     totalRoads: roadSegments.length,
