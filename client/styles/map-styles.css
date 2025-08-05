@@ -301,13 +301,41 @@
 
 /* Enhanced road segment styles */
 .road-segment {
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   cursor: pointer;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .road-segment:hover {
-  transform: scale(1.05);
-  filter: brightness(1.1);
+  filter: brightness(1.2) drop-shadow(0 0 8px currentColor);
+}
+
+/* PCI Road Polylines Animation */
+@keyframes roadFadeIn {
+  from {
+    opacity: 0;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+  }
+  to {
+    opacity: 1;
+    stroke-dasharray: 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+.leaflet-interactive {
+  animation: roadFadeIn 1s ease-in-out;
+}
+
+/* Glow effect for high-priority roads */
+.road-critical {
+  filter: drop-shadow(0 0 6px #c92a2a);
+}
+
+.road-excellent {
+  filter: drop-shadow(0 0 4px #2f9e44);
 }
 
 /* Stats cards hover effects */
