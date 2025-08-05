@@ -35,14 +35,16 @@ interface SystemSettings {
     site_description: string;
     support_email: string;
     admin_email: string;
-    maintenance_mode: boolean;
-    registration_enabled: boolean;
+    timezone: string;
+    currency: string;
+    language: string;
+    max_file_size: number;
   };
   security: {
+    require_2fa: boolean;
     session_timeout: number;
     password_min_length: number;
-    require_2fa: boolean;
-    max_login_attempts: number;
+    login_attempts: number;
     login_lockout_duration: number;
   };
   notifications: {
@@ -58,8 +60,10 @@ interface SystemSettings {
   };
   database: {
     backup_frequency: string;
-    retention_period_days: number;
-    auto_vacuum: boolean;
+    backup_retention_days: number;
+    maintenance_window: string;
+    connection_pool_size: number;
+    query_timeout: number;
   };
 }
 
