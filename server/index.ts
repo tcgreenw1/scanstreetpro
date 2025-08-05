@@ -43,6 +43,12 @@ export function createServer() {
   app.post("/api/login", signIn);
   app.post("/api/signup", signUp);
   app.get("/api/me", verifyToken);
+  app.post("/api/logout", (req, res) => {
+    // Clear any server-side session data
+    res.clearCookie('session_token', { httpOnly: true, secure: true });
+    res.clearCookie('auth_token', { httpOnly: true, secure: true });
+    res.json({ success: true, message: 'Logged out successfully' });
+  });
 
   // Debug route (admin only)
   app.get("/api/debug/user-status", checkUserStatus);
