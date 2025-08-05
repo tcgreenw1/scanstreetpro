@@ -393,6 +393,57 @@ class NeonService {
         isSampleData: true,
         createdAt: new Date(),
         updatedAt: new Date()
+      },
+      {
+        id: 'asset-2',
+        name: 'Oak Avenue Road',
+        type: 'road',
+        location: { lat: 40.7589, lng: -73.9851, address: 'Oak Avenue' },
+        condition: {
+          pci: 65,
+          lastInspected: new Date('2024-01-10'),
+          nextInspection: new Date('2024-07-10'),
+          status: 'fair'
+        },
+        metadata: { yearBuilt: 1992, length: 800, width: 8, material: 'asphalt', cost: 120000 },
+        organizationId,
+        isSampleData: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 'asset-3',
+        name: 'Park Avenue Sidewalk',
+        type: 'sidewalk',
+        location: { lat: 40.7614, lng: -73.9776, address: 'Park Avenue' },
+        condition: {
+          pci: 85,
+          lastInspected: new Date('2024-01-20'),
+          nextInspection: new Date('2024-07-20'),
+          status: 'excellent'
+        },
+        metadata: { yearBuilt: 2010, length: 400, width: 4, material: 'concrete', cost: 50000 },
+        organizationId,
+        isSampleData: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 'asset-4',
+        name: 'Storm Drain System',
+        type: 'drainage',
+        location: { lat: 40.7505, lng: -73.9934, address: 'Industrial District' },
+        condition: {
+          pci: 58,
+          lastInspected: new Date('2024-01-05'),
+          nextInspection: new Date('2024-06-05'),
+          status: 'fair'
+        },
+        metadata: { yearBuilt: 1975, length: 2000, width: 3, material: 'concrete pipe', cost: 180000 },
+        organizationId,
+        isSampleData: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     ];
   }
