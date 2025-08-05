@@ -18,6 +18,15 @@ export function PlanImplementationStatus() {
 
   const loadTrackingData = async () => {
     setLoading(true);
+
+    // Ensure tracking system is ready first
+    const readyResult = await ensurePlanTrackingReady();
+    if (!readyResult.success) {
+      console.warn('Plan tracking system not available');
+      setLoading(false);
+      return;
+    }
+
     const result = await planTrackingApi.getAll();
     if (result.success) {
       setTrackingData(result.data);
