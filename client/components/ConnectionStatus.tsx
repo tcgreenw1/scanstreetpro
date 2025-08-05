@@ -11,9 +11,12 @@ interface ConnectionStatusProps {
 }
 
 export function ConnectionStatus({ show = true }: ConnectionStatusProps) {
+  const { user } = useAuth();
   const [status, setStatus] = useState<'checking' | 'connected' | 'degraded' | 'offline'>('checking');
   const [lastCheck, setLastCheck] = useState<Date>(new Date());
   const [retrying, setRetrying] = useState(false);
+
+  const isAdmin = ['admin', 'superadmin', 'owner'].includes(user?.role);
 
   useEffect(() => {
     checkConnectionStatus();
