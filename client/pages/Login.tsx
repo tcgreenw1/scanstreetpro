@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Mail, Lock, Building2, ArrowRight } from 'lucide-react';
+import { DarkModeToggle } from '@/components/DarkModeToggle';
 
 const Login = () => {
   const [email, setEmail] = useState('');
