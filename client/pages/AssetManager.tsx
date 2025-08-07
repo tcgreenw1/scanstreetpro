@@ -297,15 +297,31 @@ export default function AssetManager() {
                 </CardDescription>
               </div>
               <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={assetInventoryPreview}
-                  className={assetInventoryPreview ? "opacity-50" : ""}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Asset
-                </Button>
+                {!assetInventoryPreview ? (
+                  <AddAssetForm
+                    onAssetAdded={loadAssets}
+                    trigger={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-300 dark:hover:bg-blue-900/20"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Asset
+                      </Button>
+                    }
+                  />
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled
+                    className="opacity-50"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Asset
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
