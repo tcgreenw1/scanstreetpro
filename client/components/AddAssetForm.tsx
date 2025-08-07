@@ -120,35 +120,32 @@ export function AddAssetForm({ onAssetAdded, trigger }: AddAssetFormProps) {
     try {
       const assetData = {
         name: formData.name.trim(),
-        type: formData.type,
-        description: formData.description.trim() || null,
+        type: formData.type as any, // Type assertion for compatibility
         location: {
-          address: formData.address.trim() || null,
-          lat: formData.latitude ? parseFloat(formData.latitude) : null,
-          lng: formData.longitude ? parseFloat(formData.longitude) : null
+          address: formData.address.trim() || undefined,
+          lat: formData.latitude ? parseFloat(formData.latitude) : 0,
+          lng: formData.longitude ? parseFloat(formData.longitude) : 0
         },
         condition: {
-          status: formData.condition,
+          status: formData.condition as any, // Type assertion for compatibility
           pci: parseInt(formData.pci),
           lastInspected: formData.lastInspected ? new Date(formData.lastInspected) : new Date(),
           nextInspection: formData.nextInspection ? new Date(formData.nextInspection) : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
         },
         metadata: {
-          installDate: formData.installDate ? new Date(formData.installDate) : null,
-          cost: formData.cost ? parseFloat(formData.cost) : null,
-          maintenanceCost: formData.maintenanceCost ? parseFloat(formData.maintenanceCost) : null,
-          warrantyExpiry: formData.warrantyExpiry ? new Date(formData.warrantyExpiry) : null,
-          contractor: formData.contractor.trim() || null,
-          notes: formData.notes.trim() || null
-        }
+          cost: formData.cost ? parseFloat(formData.cost) : undefined,
+          yearBuilt: formData.installDate ? new Date(formData.installDate).getFullYear() : undefined,
+          material: formData.notes.trim() || undefined,
+          length: undefined,
+          width: undefined
+        },
+        organizationId: organization?.id || 'demo-org',
+        isSampleData: false
       };
 
       console.log('Creating asset:', assetData);
 
-      await neonService.createAsset(
-        organization?.id || 'demo-org',
-        assetData
-      );
+      await neonService.createAsset(assetData);
 
       setSuccess(true);
       setTimeout(() => {
