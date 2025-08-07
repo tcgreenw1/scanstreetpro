@@ -83,15 +83,15 @@ const Login = () => {
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl">
               <Building2 className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
               Scan Street Pro
             </h1>
           </div>
-          <p className="text-slate-600 text-lg">Municipal Infrastructure Management</p>
+          <p className="text-slate-600 dark:text-slate-300 text-lg">Municipal Infrastructure Management</p>
         </div>
 
         {/* Login Form */}
-        <div className="glass-card p-8 rounded-3xl border border-white/20 shadow-xl backdrop-blur-xl">
+        <div className="glass-card p-8 rounded-3xl border border-white/20 dark:border-white/10 shadow-xl backdrop-blur-xl">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-slate-800 mb-2">Welcome Back</h2>
             <p className="text-slate-600">Sign in to your infrastructure dashboard</p>
