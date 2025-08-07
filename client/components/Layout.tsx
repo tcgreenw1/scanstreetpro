@@ -38,6 +38,7 @@ import { Input } from '@/components/ui/input';
 import { usePricing } from '@/contexts/PricingContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrganization, usePermissions } from '@/contexts/OrganizationContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useFeatureMatrix, useNavFeatures } from '@/hooks/useFeatureMatrix';
 import { NavItemWrapper } from '@/components/FeatureStateComponents';
 import { GlobalSearch } from './GlobalSearch';
