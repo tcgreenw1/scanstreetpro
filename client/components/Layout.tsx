@@ -173,15 +173,14 @@ const NAV_SECTIONS: NavSection[] = [
 
 export function Layout({ children }: LayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { organization } = useOrganization();
   const { userPlan } = useFeatureMatrix();
   const navFeatures = useNavFeatures();
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
-  const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   const isActive = (path: string) => {
     if (path === '/dashboard') {
