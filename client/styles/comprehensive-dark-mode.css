@@ -1,0 +1,450 @@
+/* Comprehensive Dark Mode Implementation */
+
+/* Root Variables for Dark Mode */
+.dark {
+  /* Enhanced background colors */
+  --background: 218 23% 6%;
+  --foreground: 210 40% 98%;
+  
+  /* Card and container styling */
+  --card: 218 23% 8%;
+  --card-foreground: 210 40% 96%;
+  
+  /* Primary brand colors */
+  --primary: 217 91% 65%;
+  --primary-foreground: 218 23% 6%;
+  
+  /* Secondary colors */
+  --secondary: 217 32% 18%;
+  --secondary-foreground: 210 40% 96%;
+  
+  /* Muted colors for less important text */
+  --muted: 217 32% 15%;
+  --muted-foreground: 215 20% 70%;
+  
+  /* Accent colors */
+  --accent: 217 91% 65%;
+  --accent-foreground: 218 23% 6%;
+  
+  /* Destructive/error colors */
+  --destructive: 0 75% 60%;
+  --destructive-foreground: 210 40% 98%;
+  
+  /* Border and input styling */
+  --border: 217 32% 22%;
+  --input: 217 32% 18%;
+  --ring: 217 91% 65%;
+  
+  /* Popover and dialog styling */
+  --popover: 218 23% 8%;
+  --popover-foreground: 210 40% 96%;
+}
+
+/* Global Dark Mode Styling */
+.dark {
+  /* Background gradients */
+  background: linear-gradient(135deg, hsl(218 23% 6%) 0%, hsl(217 32% 8%) 50%, hsl(218 23% 10%) 100%);
+}
+
+/* Enhanced Card Styling */
+.dark .glass-card {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+.dark .card {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+
+/* Enhanced Text Styling */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: hsl(210 40% 98%) !important;
+  font-weight: 600;
+}
+
+.dark p, .dark span, .dark div {
+  color: hsl(210 40% 90%) !important;
+}
+
+.dark .text-slate-500 {
+  color: hsl(215 20% 70%) !important;
+}
+
+.dark .text-slate-600 {
+  color: hsl(215 20% 75%) !important;
+}
+
+.dark .text-slate-700 {
+  color: hsl(215 20% 80%) !important;
+}
+
+.dark .text-slate-800 {
+  color: hsl(210 40% 95%) !important;
+}
+
+.dark .text-slate-900 {
+  color: hsl(210 40% 98%) !important;
+}
+
+.dark .text-muted-foreground {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Enhanced Button Styling */
+.dark button {
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark button:hover {
+  background: hsl(217 32% 20%) !important;
+}
+
+.dark .btn-primary, .dark .bg-primary {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+.dark .btn-secondary, .dark .bg-secondary {
+  background: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+/* Enhanced Input and Form Styling */
+.dark input, .dark textarea, .dark select {
+  background: hsl(var(--input)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark input:focus, .dark textarea:focus, .dark select:focus {
+  border-color: hsl(var(--ring)) !important;
+  box-shadow: 0 0 0 3px hsla(var(--ring) / 0.1) !important;
+}
+
+.dark input::placeholder, .dark textarea::placeholder {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Enhanced Label Styling */
+.dark label {
+  color: hsl(var(--foreground)) !important;
+  font-weight: 500;
+}
+
+/* Enhanced Table Styling */
+.dark table {
+  border-color: hsl(var(--border)) !important;
+  background: hsl(var(--card)) !important;
+}
+
+.dark th {
+  background: hsl(217 32% 12%) !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark td {
+  border-color: hsl(217 32% 18%) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+
+.dark tr:hover {
+  background: hsl(217 32% 15%) !important;
+}
+
+/* Enhanced Badge Styling */
+.dark .badge {
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+.dark .bg-blue-100 {
+  background: hsl(217 91% 25%) !important;
+  color: hsl(217 91% 85%) !important;
+}
+
+.dark .bg-green-100 {
+  background: hsl(142 76% 25%) !important;
+  color: hsl(142 76% 85%) !important;
+}
+
+.dark .bg-yellow-100 {
+  background: hsl(45 93% 25%) !important;
+  color: hsl(45 93% 85%) !important;
+}
+
+.dark .bg-orange-100 {
+  background: hsl(25 95% 25%) !important;
+  color: hsl(25 95% 85%) !important;
+}
+
+.dark .bg-red-100 {
+  background: hsl(0 84% 25%) !important;
+  color: hsl(0 84% 85%) !important;
+}
+
+.dark .bg-gray-100, .dark .bg-slate-100 {
+  background: hsl(217 32% 15%) !important;
+  color: hsl(210 40% 90%) !important;
+}
+
+.dark .bg-slate-50 {
+  background: hsl(217 32% 12%) !important;
+}
+
+/* Enhanced Border Styling */
+.dark .border-slate-200 {
+  border-color: hsl(217 32% 25%) !important;
+}
+
+.dark .border-slate-300 {
+  border-color: hsl(217 32% 30%) !important;
+}
+
+.dark .border {
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Enhanced Navigation Styling */
+.dark .nav-item {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .nav-item:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: hsl(210 40% 98%) !important;
+}
+
+.dark .nav-item.active {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+/* Enhanced Modal/Dialog Styling */
+.dark .dialog-content, .dark [role="dialog"] {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
+}
+
+.dark .dialog-header {
+  border-bottom-color: hsl(var(--border)) !important;
+}
+
+.dark .dialog-footer {
+  border-top-color: hsl(var(--border)) !important;
+}
+
+/* Enhanced Dropdown/Select Styling */
+.dark .select-content, .dark [role="listbox"] {
+  background: hsl(var(--popover)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  box-shadow: 0 10px 38px -10px rgba(0, 0, 0, 0.8) !important;
+}
+
+.dark .select-item, .dark [role="option"] {
+  color: hsl(var(--popover-foreground)) !important;
+}
+
+.dark .select-item:hover, .dark [role="option"]:hover {
+  background: hsl(217 32% 15%) !important;
+  color: hsl(210 40% 98%) !important;
+}
+
+.dark .select-item[data-state="checked"] {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+/* Enhanced Tooltip Styling */
+.dark .tooltip, .dark [role="tooltip"] {
+  background: hsl(var(--popover)) !important;
+  color: hsl(var(--popover-foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  box-shadow: 0 10px 38px -10px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Enhanced Alert/Notification Styling */
+.dark .alert {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+
+.dark .alert-destructive {
+  background: hsl(0 84% 15%) !important;
+  border-color: hsl(0 84% 30%) !important;
+  color: hsl(0 84% 80%) !important;
+}
+
+.dark .alert-warning {
+  background: hsl(45 93% 15%) !important;
+  border-color: hsl(45 93% 30%) !important;
+  color: hsl(45 93% 80%) !important;
+}
+
+.dark .alert-success {
+  background: hsl(142 76% 15%) !important;
+  border-color: hsl(142 76% 30%) !important;
+  color: hsl(142 76% 80%) !important;
+}
+
+.dark .alert-info {
+  background: hsl(217 91% 15%) !important;
+  border-color: hsl(217 91% 30%) !important;
+  color: hsl(217 91% 80%) !important;
+}
+
+/* Enhanced Chart Styling */
+.dark .recharts-text {
+  fill: hsl(var(--foreground)) !important;
+}
+
+.dark .recharts-cartesian-axis-line,
+.dark .recharts-cartesian-axis-tick-line {
+  stroke: hsl(var(--border)) !important;
+}
+
+.dark .recharts-cartesian-grid-horizontal,
+.dark .recharts-cartesian-grid-vertical {
+  stroke: hsl(217 32% 20%) !important;
+}
+
+.dark .recharts-legend-item-text {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Enhanced Scrollbar Styling */
+.dark ::-webkit-scrollbar-track {
+  background: hsl(217 32% 12%) !important;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: hsl(217 32% 25%) !important;
+  border-radius: 6px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: hsl(217 32% 35%) !important;
+}
+
+/* Enhanced Focus Indicators */
+.dark *:focus-visible {
+  outline: 2px solid hsl(var(--ring)) !important;
+  outline-offset: 2px !important;
+}
+
+/* Loading State Styling */
+.dark .animate-spin {
+  color: hsl(var(--primary)) !important;
+}
+
+/* Enhanced Sidebar Styling */
+.dark aside {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Enhanced Header Styling */
+.dark header {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Enhanced Main Content Styling */
+.dark main {
+  background: transparent !important;
+}
+
+/* Dashboard-specific styling */
+.dark .dashboard-card {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+.dark .stat-card {
+  background: linear-gradient(135deg, hsl(217 32% 15%) 0%, hsl(217 32% 18%) 100%) !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+/* Map-specific styling */
+.dark .leaflet-popup-content-wrapper {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+
+.dark .leaflet-popup-tip {
+  background: hsl(var(--card)) !important;
+}
+
+.dark .leaflet-control {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+/* Pricing page styling */
+.dark .pricing-card {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+.dark .pricing-card.featured {
+  border: 2px solid hsl(var(--primary)) !important;
+  box-shadow: 0 0 20px hsla(var(--primary) / 0.3) !important;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .dark .glass-card {
+    background: rgba(15, 23, 42, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+  
+  .dark button, .dark [role="button"] {
+    min-height: 48px !important;
+    min-width: 48px !important;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --border: 0 0% 30%;
+    --input: 0 0% 10%;
+  }
+  
+  .dark .glass-card {
+    background: rgba(0, 0, 0, 0.98) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .dark * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .dark {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+  }
+  
+  .dark .glass-card {
+    background: white !important;
+    border: 1px solid black !important;
+    box-shadow: none !important;
+  }
+}
