@@ -93,8 +93,8 @@ const Login = () => {
         {/* Login Form */}
         <div className="glass-card p-8 rounded-3xl border border-white/20 dark:border-white/10 shadow-xl backdrop-blur-xl">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-slate-800 mb-2">Welcome Back</h2>
-            <p className="text-slate-600">Sign in to your infrastructure dashboard</p>
+            <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">Welcome Back</h2>
+            <p className="text-slate-600 dark:text-slate-300">Sign in to your infrastructure dashboard</p>
           </div>
 
           {error && (
@@ -108,7 +108,7 @@ const Login = () => {
           <form onSubmit={handleLogin} className="space-y-6">
             {/* Email */}
             <div className="space-y-3">
-              <Label htmlFor="email" className="text-slate-700 font-medium">
+              <Label htmlFor="email" className="text-slate-700 dark:text-slate-300 font-medium">
                 Email Address
               </Label>
               <div className="relative">
@@ -119,7 +119,7 @@ const Login = () => {
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-12 h-14 glass-card border-slate-200/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 bg-white/60 backdrop-blur-sm rounded-xl text-slate-800 placeholder:text-slate-400"
+                  className="pl-12 h-14 glass-card border-slate-200/50 dark:border-slate-600/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   required
                 />
               </div>
@@ -127,7 +127,7 @@ const Login = () => {
 
             {/* Password */}
             <div className="space-y-3">
-              <Label htmlFor="password" className="text-slate-700 font-medium">
+              <Label htmlFor="password" className="text-slate-700 dark:text-slate-300 font-medium">
                 Password
               </Label>
               <div className="relative">
