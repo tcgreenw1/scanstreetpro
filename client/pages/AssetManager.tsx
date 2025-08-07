@@ -86,28 +86,28 @@ export default function AssetManager() {
   const canManageAssets = assetManagerFeatures.assetInventory.useRealData;
 
   // Load assets from database with plan-based logic
+  const loadAssets = async () => {
+    try {
+      setIsLoading(true);
+      const orgId = organization?.id || 'demo-org';
+      console.log('Loading assets for organization:', orgId);
+
+      const assetData = await neonService.getAssets(
+        orgId,
+        !assetManagerFeatures.assetInventory.useRealData // Use sample data if not real data plan
+      );
+      setAssets(assetData);
+      console.log('Assets loaded successfully:', assetData.length, 'assets');
+    } catch (error) {
+      console.error('Failed to load assets:', error);
+      // Ensure we have some fallback data even if everything fails
+      setAssets([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadAssets = async () => {
-      try {
-        setIsLoading(true);
-        const orgId = organization?.id || 'demo-org';
-        console.log('Loading assets for organization:', orgId);
-
-        const assetData = await neonService.getAssets(
-          orgId,
-          !assetManagerFeatures.assetInventory.useRealData // Use sample data if not real data plan
-        );
-        setAssets(assetData);
-        console.log('Assets loaded successfully:', assetData.length, 'assets');
-      } catch (error) {
-        console.error('Failed to load assets:', error);
-        // Ensure we have some fallback data even if everything fails
-        setAssets([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadAssets();
   }, [organization, assetManagerFeatures.assetInventory.useRealData]);
 
