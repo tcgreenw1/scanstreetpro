@@ -115,14 +115,7 @@ const SignUp = () => {
         </div>
 
         {/* Dark Mode Toggle */}
-        <Button
-          onClick={toggleTheme}
-          variant="outline"
-          size="sm"
-          className="absolute top-6 right-6 w-12 h-12 rounded-full glass-card border-white/20 dark:border-white/10 hover:border-white/40 dark:hover:border-white/20 transition-all duration-300"
-        >
-          {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-        </Button>
+        <DarkModeToggle variant="floating" />
 
         <div className="w-full max-w-md space-y-8 relative z-10">
           {/* Logo/Brand */}
