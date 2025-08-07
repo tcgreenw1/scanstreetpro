@@ -83,12 +83,13 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => (
   <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <OrganizationProvider>
-        <PlanProvider>
-        <PricingProvider>
-          <TooltipProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <OrganizationProvider>
+          <PlanProvider>
+          <PricingProvider>
+            <TooltipProvider>
         <AppInitializer>
         <Toaster />
         <Sonner />
@@ -174,12 +175,13 @@ const App = () => (
           </Routes>
         </BrowserRouter>
         </AppInitializer>
-          </TooltipProvider>
-        </PricingProvider>
-        </PlanProvider>
-      </OrganizationProvider>
-    </AuthProvider>
-    </QueryClientProvider>
+            </TooltipProvider>
+          </PricingProvider>
+          </PlanProvider>
+        </OrganizationProvider>
+      </AuthProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   </ErrorBoundary>
 );
 
