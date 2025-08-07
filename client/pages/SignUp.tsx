@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Mail, Lock, User, Building2, ArrowRight, CheckCircle, Moon, Sun } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Building2, ArrowRight, CheckCircle } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { DarkModeToggle } from '@/components/DarkModeToggle';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
