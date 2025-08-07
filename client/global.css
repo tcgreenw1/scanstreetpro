@@ -1,6 +1,9 @@
 /* Import admin liquid glass styles */
 @import './styles/admin-liquid-glass.css';
 
+/* Import enhanced dark mode styles */
+@import './styles/enhanced-dark-mode.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
