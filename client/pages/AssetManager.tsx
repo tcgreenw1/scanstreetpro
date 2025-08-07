@@ -52,6 +52,7 @@ import { usePlanBasedUI, useFeatureAccess, useDataVisibility } from '@/hooks/use
 import { useAssetManagerFeatures } from '@/hooks/useFeatureMatrix';
 import { PreviewModeWrapper, usePreviewMode } from '@/components/LockedOverlay';
 import { PredictiveMaintenanceChart } from '@/components/charts/PredictiveMaintenanceChart';
+import { AddAssetForm } from '@/components/AddAssetForm';
 
 const assetTypes = ['All', 'road', 'bridge', 'sidewalk', 'drainage', 'lighting', 'signage'];
 const conditionTypes = ['All', 'excellent', 'good', 'fair', 'poor', 'critical'];
