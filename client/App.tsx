@@ -18,6 +18,7 @@ import { PricingProvider } from "./contexts/PricingContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { PlanProvider } from "./hooks/usePlan";
 import { OrganizationProvider } from "./contexts/OrganizationContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoadInspection from "./pages/RoadInspection";
 import RoadInspections from "./pages/RoadInspections";
