@@ -205,12 +205,21 @@ router.put('/:id', async (req, res) => {
       return res.status(400).json({ error: 'Organization ID required' });
     }
 
-    const result = await pool.query(`
-      UPDATE assets 
-      SET name = $1, type = $2, location = $3, condition = $4, metadata = $5, updated_at = NOW()
-      WHERE id = $6 AND organization_id = $7
-      RETURNING *
-    `, [name, type, JSON.stringify(location), JSON.stringify(condition), JSON.stringify(metadata), id, organizationId]);
+    let result;
+    try {
+      result = await pool.query(`
+        UPDATE assets
+        SET name = $1, type = $2, location = $3, condition = $4, metadata = $5, updated_at = NOW()
+        WHERE id = $6 AND organization_id = $7
+        RETURNING *
+      `, [name, type, JSON.stringify(location), JSON.stringify(condition), JSON.stringify(metadata), id, organizationId]);
+    } catch (error: any) {
+      if (error.code === '22P02') {
+        return res.status(404).json({ error: 'Asset not found or invalid organization ID format' });
+      } else {
+        throw error;
+      }
+    }
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Asset not found' });
@@ -234,11 +243,20 @@ router.delete('/:id', async (req, res) => {
       return res.status(400).json({ error: 'Organization ID required' });
     }
 
-    const result = await pool.query(`
-      DELETE FROM assets 
-      WHERE id = $1 AND organization_id = $2
-      RETURNING id
-    `, [id, organizationId]);
+    let result;
+    try {
+      result = await pool.query(`
+        DELETE FROM assets
+        WHERE id = $1 AND organization_id = $2
+        RETURNING id
+      `, [id, organizationId]);
+    } catch (error: any) {
+      if (error.code === '22P02') {
+        return res.status(404).json({ error: 'Asset not found or invalid organization ID format' });
+      } else {
+        throw error;
+      }
+    }
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Asset not found' });
