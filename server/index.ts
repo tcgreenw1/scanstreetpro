@@ -1,4 +1,5 @@
 import "dotenv/config";
+<<<<<<< HEAD
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
@@ -17,10 +18,14 @@ import featureMatrixRoutes from "./routes/feature-matrix";
 import assetsRoutes from "./routes/assets";
 import roadInspectionsRoutes from "./routes/road-inspections";
 import maintenanceRoutes from "./routes/maintenance";
+=======
+import { createServer } from "./createServer.js";
+>>>>>>> origin/main
 
-export function createServer() {
-  const app = express();
+const port = process.env.PORT || 8080;
+const app = createServer();
 
+<<<<<<< HEAD
   // Middleware
   app.use(cors());
   app.use(express.json());
@@ -77,3 +82,8 @@ export function createServer() {
 
   return app;
 }
+=======
+app.listen(port, () => {
+  console.log(`🚀 Server running at http://localhost:${port}`);
+});
+>>>>>>> origin/main
