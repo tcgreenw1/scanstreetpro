@@ -126,15 +126,40 @@ class NeonService {
   private async testApiConnection() {
     try {
       console.log('Testing API connection...');
-      const response = await fetch('/api/ping');
+
+      // Add timeout and better error handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      const response = await fetch('/api/ping', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
       if (response.ok) {
         const data = await response.json();
         console.log('API connection successful:', data);
+        return true;
       } else {
         console.error('API ping failed:', response.status, response.statusText);
+        return false;
       }
     } catch (error) {
-      console.error('API connection test failed:', error);
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          console.error('API connection test failed: Request timeout');
+        } else {
+          console.error('API connection test failed:', error.message);
+        }
+      } else {
+        console.error('API connection test failed: Unknown error', error);
+      }
+      return false;
     }
   }
 
@@ -159,22 +184,41 @@ class NeonService {
       organizationId
     });
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      ...fetchOptions,
-      headers,
-    });
+    try {
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-    console.log(`Response status: ${response.status} for ${endpoint}`);
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        ...fetchOptions,
+        headers,
+        signal: controller.signal,
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`HTTP error for ${endpoint}:`, response.status, errorText);
-      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      clearTimeout(timeoutId);
+      console.log(`Response status: ${response.status} for ${endpoint}`);
+
+      if (!response.ok) {
+        let errorText;
+        try {
+          errorText = await response.text();
+        } catch (textError) {
+          errorText = `Failed to read error response: ${textError}`;
+        }
+        console.error(`HTTP error for ${endpoint}:`, response.status, errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log(`Response data for ${endpoint}:`, data);
+      return data;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error(`Request timeout for ${endpoint}`);
+        throw new Error(`Request timeout for ${endpoint}`);
+      }
+      throw error;
     }
-
-    const data = await response.json();
-    console.log(`Response data for ${endpoint}:`, data);
-    return data;
   }
 
   // Asset Management
