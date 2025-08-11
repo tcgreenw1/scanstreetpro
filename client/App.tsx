@@ -18,6 +18,7 @@ import { PricingProvider } from "./contexts/PricingContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { PlanProvider } from "./hooks/usePlan";
 import { OrganizationProvider } from "./contexts/OrganizationContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoadInspection from "./pages/RoadInspection";
 import RoadInspections from "./pages/RoadInspections";
@@ -82,12 +83,13 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => (
   <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <OrganizationProvider>
-        <PlanProvider>
-        <PricingProvider>
-          <TooltipProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <OrganizationProvider>
+          <PlanProvider>
+          <PricingProvider>
+            <TooltipProvider>
         <AppInitializer>
         <Toaster />
         <Sonner />
@@ -173,12 +175,13 @@ const App = () => (
           </Routes>
         </BrowserRouter>
         </AppInitializer>
-          </TooltipProvider>
-        </PricingProvider>
-        </PlanProvider>
-      </OrganizationProvider>
-    </AuthProvider>
-    </QueryClientProvider>
+            </TooltipProvider>
+          </PricingProvider>
+          </PlanProvider>
+        </OrganizationProvider>
+      </AuthProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   </ErrorBoundary>
 );
 

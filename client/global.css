@@ -4,6 +4,9 @@
 /* Import enhanced dark mode styles */
 @import './styles/enhanced-dark-mode.css';
 
+/* Import comprehensive dark mode styles */
+@import './styles/comprehensive-dark-mode.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

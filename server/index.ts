@@ -18,7 +18,9 @@ import assetsRoutes from "./routes/assets";
 import roadInspectionsRoutes from "./routes/road-inspections";
 import maintenanceRoutes from "./routes/maintenance";
 
-export function createServer() {
+const port = process.env.PORT || 8080;
+
+function createServer() {
   const app = express();
 
   // Middleware
@@ -77,3 +79,9 @@ export function createServer() {
 
   return app;
 }
+
+const app = createServer();
+
+app.listen(port, () => {
+  console.log(`🚀 Server running at http://localhost:${port}`);
+});

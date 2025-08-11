@@ -38,6 +38,7 @@ import { Input } from '@/components/ui/input';
 import { usePricing } from '@/contexts/PricingContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrganization, usePermissions } from '@/contexts/OrganizationContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useFeatureMatrix, useNavFeatures } from '@/hooks/useFeatureMatrix';
 import { NavItemWrapper } from '@/components/FeatureStateComponents';
 import { GlobalSearch } from './GlobalSearch';
@@ -172,15 +173,14 @@ const NAV_SECTIONS: NavSection[] = [
 
 export function Layout({ children }: LayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { organization } = useOrganization();
   const { userPlan } = useFeatureMatrix();
   const navFeatures = useNavFeatures();
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
-  const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   const isActive = (path: string) => {
     if (path === '/dashboard') {
@@ -192,7 +192,7 @@ export function Layout({ children }: LayoutProps) {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <div className={cn("min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900", isDarkMode && "dark")}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <div className="flex h-screen">
         {/* Sidebar */}
         <aside className={cn(

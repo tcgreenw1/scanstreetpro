@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Mail, Lock, User, Building2, ArrowRight, CheckCircle, Moon, Sun } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Building2, ArrowRight, CheckCircle } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { DarkModeToggle } from '@/components/DarkModeToggle';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -20,8 +22,8 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
+  const { isDarkMode, toggleTheme } = useTheme();
 
   useEffect(() => {
     // Check for existing session
@@ -33,24 +35,9 @@ const SignUp = () => {
     };
     checkSession();
 
-    // Check for dark mode preference
-    const isDarkMode = localStorage.getItem('darkMode') === 'true';
-    setDarkMode(isDarkMode);
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    }
+    // Dark mode is now handled by ThemeContext
   }, [navigate]);
 
-  const toggleDarkMode = () => {
-    const newDarkMode = !darkMode;
-    setDarkMode(newDarkMode);
-    localStorage.setItem('darkMode', newDarkMode.toString());
-    if (newDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -117,7 +104,7 @@ const SignUp = () => {
   };
 
   return (
-    <div className={`min-h-screen transition-all duration-500 ${darkMode ? 'dark' : ''}`}>
+    <div className="min-h-screen transition-all duration-500">
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900 flex items-center justify-center p-4 relative overflow-hidden">
         
         {/* Animated Background Elements */}
@@ -128,14 +115,7 @@ const SignUp = () => {
         </div>
 
         {/* Dark Mode Toggle */}
-        <Button
-          onClick={toggleDarkMode}
-          variant="outline"
-          size="sm"
-          className="absolute top-6 right-6 w-12 h-12 rounded-full glass-card border-white/20 hover:border-white/40 transition-all duration-300"
-        >
-          {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-        </Button>
+        <DarkModeToggle variant="floating" />
 
         <div className="w-full max-w-md space-y-8 relative z-10">
           {/* Logo/Brand */}

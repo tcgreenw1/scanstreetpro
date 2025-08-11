@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Mail, Lock, Building2, ArrowRight } from 'lucide-react';
+import { DarkModeToggle } from '@/components/DarkModeToggle';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -68,8 +69,11 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4 relative">
+
+      {/* Dark Mode Toggle */}
+      <DarkModeToggle variant="floating" />
+
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
@@ -83,18 +87,18 @@ const Login = () => {
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl">
               <Building2 className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
               Scan Street Pro
             </h1>
           </div>
-          <p className="text-slate-600 text-lg">Municipal Infrastructure Management</p>
+          <p className="text-slate-600 dark:text-slate-300 text-lg">Municipal Infrastructure Management</p>
         </div>
 
         {/* Login Form */}
-        <div className="glass-card p-8 rounded-3xl border border-white/20 shadow-xl backdrop-blur-xl">
+        <div className="glass-card p-8 rounded-3xl border border-white/20 dark:border-white/10 shadow-xl backdrop-blur-xl">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-slate-800 mb-2">Welcome Back</h2>
-            <p className="text-slate-600">Sign in to your infrastructure dashboard</p>
+            <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">Welcome Back</h2>
+            <p className="text-slate-600 dark:text-slate-300">Sign in to your infrastructure dashboard</p>
           </div>
 
           {error && (
@@ -108,7 +112,7 @@ const Login = () => {
           <form onSubmit={handleLogin} className="space-y-6">
             {/* Email */}
             <div className="space-y-3">
-              <Label htmlFor="email" className="text-slate-700 font-medium">
+              <Label htmlFor="email" className="text-slate-700 dark:text-slate-300 font-medium">
                 Email Address
               </Label>
               <div className="relative">
@@ -119,7 +123,7 @@ const Login = () => {
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-12 h-14 glass-card border-slate-200/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 bg-white/60 backdrop-blur-sm rounded-xl text-slate-800 placeholder:text-slate-400"
+                  className="pl-12 h-14 glass-card border-slate-200/50 dark:border-slate-600/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   required
                 />
               </div>
@@ -127,7 +131,7 @@ const Login = () => {
 
             {/* Password */}
             <div className="space-y-3">
-              <Label htmlFor="password" className="text-slate-700 font-medium">
+              <Label htmlFor="password" className="text-slate-700 dark:text-slate-300 font-medium">
                 Password
               </Label>
               <div className="relative">
@@ -138,13 +142,13 @@ const Login = () => {
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-12 pr-12 h-14 glass-card border-slate-200/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 bg-white/60 backdrop-blur-sm rounded-xl text-slate-800 placeholder:text-slate-400"
+                  className="pl-12 pr-12 h-14 glass-card border-slate-200/50 dark:border-slate-600/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -175,7 +179,7 @@ const Login = () => {
           <div className="text-center mt-8">
             <Link
               to="/signup"
-              className="text-slate-600 hover:text-slate-800 font-medium transition-colors hover:underline"
+              className="text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 font-medium transition-colors hover:underline"
             >
               Don't have an account? Sign up
             </Link>
@@ -184,7 +188,7 @@ const Login = () => {
 
         {/* Help */}
         <div className="text-center">
-          <p className="text-slate-500 text-sm">
+          <p className="text-slate-500 dark:text-slate-400 text-sm">
             Need help? Contact your system administrator
           </p>
         </div>
