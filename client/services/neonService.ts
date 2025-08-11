@@ -120,7 +120,10 @@ class NeonService {
   constructor() {
     // Use the current domain for API requests
     this.baseUrl = '/api';
-    this.testApiConnection();
+    // Run API connection test asynchronously, don't block initialization
+    this.testApiConnection().catch(error => {
+      console.warn('Initial API connection test failed, but service will continue with fallback data:', error);
+    });
   }
 
   private async testApiConnection() {
